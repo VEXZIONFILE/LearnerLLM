@@ -1,363 +1,202 @@
-<a id="readme-top"></a>
+# Learner LM 🎓
 
-<!-- [![Contributors][contributors-shield]][contributors-url] -->
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-<!-- [![LinkedIn][linkedin-shield]][linkedin-url] -->
+An AI-powered learning companion for students in grades 6–12.
 
+Learner LM is an intelligent tutoring assistant inspired by NotebookLM, designed to guide students through problem-solving and concept learning using a Socratic method. It helps students learn how to think through problems, not just get answers.
 
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
-  <a href="https://github.com/lfnovo/open-notebook">
-    <img src="docs/assets/hero.svg" alt="Logo">
-  </a>
+## Core Philosophy
 
-  <h3 align="center">Open Notebook</h3>
+Learner LM is **NOT** a homework solver.
 
-  <p align="center">
-    An open source, privacy-focused alternative to Google's Notebook LM!
-    <br /><strong>Join our <a href="https://discord.gg/37XJPXfz2w">Discord server</a> for help, to share workflow ideas, and suggest features!</strong>
-    <br />
-    <a href="https://www.open-notebook.ai"><strong>Checkout our website »</strong></a>
-    <br />
-    <br />
-    <a href="docs/0-START-HERE/index.md">📚 Get Started</a>
-    ·
-    <a href="docs/3-USER-GUIDE/index.md">📖 User Guide</a>
-    ·
-    <a href="docs/2-CORE-CONCEPTS/index.md">✨ Features</a>
-    ·
-    <a href="docs/1-INSTALLATION/index.md">🚀 Deploy</a>
-  </p>
-</div>
+It is: *"A thinking partner that helps students learn how to solve problems, not just get answers."*
 
-<p align="center">
-<a href="https://trendshift.io/repositories/14536" target="_blank"><img src="https://trendshift.io/api/badge/repositories/14536" alt="lfnovo%2Fopen-notebook | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-</p>
+### Key Principles
 
-<div align="center">
-  <!-- Keep these links. Translations will automatically update with the README. -->
-  <a href="https://zdoc.app/de/lfnovo/open-notebook">Deutsch</a> | 
-  <a href="https://zdoc.app/es/lfnovo/open-notebook">Español</a> | 
-  <a href="https://zdoc.app/fr/lfnovo/open-notebook">français</a> | 
-  <a href="https://zdoc.app/ja/lfnovo/open-notebook">日本語</a> | 
-  <a href="https://zdoc.app/ko/lfnovo/open-notebook">한국어</a> | 
-  <a href="https://zdoc.app/pt/lfnovo/open-notebook">Português</a> | 
-  <a href="https://zdoc.app/ru/lfnovo/open-notebook">Русский</a> | 
-  <a href="https://zdoc.app/zh/lfnovo/open-notebook">中文</a>
-</div>
+- ❌ Never provides final answers
+- ✅ Always uses hints, questions, and step-by-step guidance
+- 📚 Adapts to grade level (6–12)
+- 🧠 Uses Socratic method for active learning
+- 🔐 Enforces educational integrity
 
-## A private, multi-model, 100% local, full-featured alternative to Notebook LM
+## Features
 
-![New Notebook](docs/assets/asset_list.png)
+### Core Features
 
-In a world dominated by Artificial Intelligence, having the ability to think 🧠 and acquire new knowledge 💡, is a skill that should not be a privilege for a few, nor restricted to a single provider.
-
-**Open Notebook empowers you to:**
-- 🔒 **Control your data** - Keep your research private and secure
-- 🤖 **Choose your AI models** - Support for 18+ providers including OpenAI, Anthropic, Ollama, LM Studio, and more
-- 📚 **Organize multi-modal content** - PDFs, videos, audio, web pages, and more
-- 🎙️ **Generate professional podcasts** - Advanced multi-speaker podcast generation
-- 🔍 **Search intelligently** - Full-text and vector search across all your content
-- 💬 **Chat with context** - AI conversations powered by your research
-- 🌐 **Multi-language UI** - English, Portuguese, Chinese (Simplified & Traditional), Japanese, Russian, and Bengali support
-
-Learn more about our project at [https://www.open-notebook.ai](https://www.open-notebook.ai)
-
----
-
-## 🆚 Open Notebook vs Google Notebook LM
-
-| Feature | Open Notebook | Google Notebook LM | Advantage |
-|---------|---------------|--------------------|-----------|
-| **Privacy & Control** | Self-hosted, your data | Google cloud only | Complete data sovereignty |
-| **AI Provider Choice** | 18+ providers (OpenAI, Anthropic, Ollama, LM Studio, etc.) | Google models only | Flexibility and cost optimization |
-| **Podcast Speakers** | 1-4 speakers with custom profiles | 2 speakers only | Extreme flexibility |
-| **Content Transformations** | Custom and built-in | Limited options | Unlimited processing power |
-| **API Access** | Full REST API | No API | Complete automation |
-| **Deployment** | Docker, cloud, or local | Google hosted only | Deploy anywhere |
-| **Citations** | Basic references (will improve) | Comprehensive with sources | Research integrity |
-| **Customization** | Open source, fully customizable | Closed system | Unlimited extensibility |
-| **Cost** | Pay only for AI usage | Free tier + Monthly subscription | Transparent and controllable |
-
-**Why Choose Open Notebook?**
-- 🔒 **Privacy First**: Your sensitive research stays completely private
-- 💰 **Cost Control**: Choose cheaper AI providers or run locally with Ollama
-- 🎙️ **Better Podcasts**: Full script control and multi-speaker flexibility vs limited 2-speaker deep-dive format
-- 🔧 **Unlimited Customization**: Modify, extend, and integrate as needed
-- 🌐 **No Vendor Lock-in**: Switch providers, deploy anywhere, own your data
-
-### Built With
-
-[![Python][Python]][Python-url] [![Next.js][Next.js]][Next-url] [![React][React]][React-url] [![SurrealDB][SurrealDB]][SurrealDB-url] [![LangChain][LangChain]][LangChain-url]
-
-## 🚀 Quick Start (2 Minutes)
-
-### Prerequisites
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed
-- That's it! (API keys configured later in the UI)
-
-### Step 1: Get docker-compose.yml
-
-**Option A:** Download directly
-```bash
-curl -o docker-compose.yml https://raw.githubusercontent.com/lfnovo/open-notebook/main/docker-compose.yml
-```
-
-**Option B:** Create the file manually
-Copy this into a new file called `docker-compose.yml`:
-
-```yaml
-services:
-  surrealdb:
-    image: surrealdb/surrealdb:v2
-    command: start --log info --user root --pass root rocksdb:/mydata/mydatabase.db
-    user: root
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./surreal_data:/mydata
-    restart: always
-
-  open_notebook:
-    image: lfnovo/open_notebook:v1-latest
-    ports:
-      - "8502:8502"
-      - "5055:5055"
-    environment:
-      - OPEN_NOTEBOOK_ENCRYPTION_KEY=change-me-to-a-secret-string
-      - SURREAL_URL=ws://surrealdb:8000/rpc
-      - SURREAL_USER=root
-      - SURREAL_PASSWORD=root
-      - SURREAL_NAMESPACE=open_notebook
-      - SURREAL_DATABASE=open_notebook
-    volumes:
-      - ./notebook_data:/app/data
-    depends_on:
-      - surrealdb
-    restart: always
-```
-
-### Step 2: Set Your Encryption Key
-Edit `docker-compose.yml` and change this line:
-```yaml
-- OPEN_NOTEBOOK_ENCRYPTION_KEY=change-me-to-a-secret-string
-```
-to any secret value (e.g., `my-super-secret-key-123`)
-
-### Step 3: Start Services
-```bash
-docker compose up -d
-```
-
-Wait 15-20 seconds, then open: **http://localhost:8502**
-
-### Step 4: Configure AI Provider
-1. Go to **Models** and choose your provider (OpenAI, Anthropic, Google, etc.)
-2. Click **+ Add Configuration**
-3. Paste your API key and other info as needed and click **Add Configuration**
-4. Click **Test** to test connection
-5. Click **Sync Models** and check models to include
-6. Under **Default Model Assignments**, click **Auto-Assign Defaults** or manually specify which models to use for what 
-
-Done! You're ready to create your first notebook.
-
-> **Need an API key?** Get one from:
-> [OpenAI](https://platform.openai.com/api-keys) · [Anthropic](https://console.anthropic.com/) · [Google](https://aistudio.google.com/) · [Groq](https://console.groq.com/) (free tier)
-
-> **Want free local AI?** See [examples/docker-compose-ollama.yml](examples/) for Ollama setup
-
----
-
-### 📚 More Installation Options
-
-- **[With Ollama (Free Local AI)](examples/docker-compose-ollama.yml)** - Run models locally without API costs
-- **[From Source (Developers)](docs/1-INSTALLATION/from-source.md)** - For development and contributions
-- **[Complete Installation Guide](docs/1-INSTALLATION/index.md)** - All deployment scenarios
-
----
-
-### 📖 Need Help?
-
-- **🤖 AI Installation Assistant**: [CustomGPT to help you install](https://chatgpt.com/g/g-68776e2765b48191bd1bae3f30212631-open-notebook-installation-assistant)
-- **🆘 Troubleshooting**: [5-minute troubleshooting guide](docs/6-TROUBLESHOOTING/quick-fixes.md)
-- **💬 Community Support**: [Discord Server](https://discord.gg/37XJPXfz2w)
-- **🐛 Report Issues**: [GitHub Issues](https://github.com/lfnovo/open-notebook/issues)
-
----
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=lfnovo/open-notebook&type=date&legend=top-left)](https://www.star-history.com/#lfnovo/open-notebook&type=date&legend=top-left)
-
-
-## Provider Support Matrix
-
-Thanks to the [Esperanto](https://github.com/lfnovo/esperanto) library, we support this providers out of the box!
-
-| Provider     | LLM Support | Embedding Support | Speech-to-Text | Text-to-Speech |
-|--------------|-------------|------------------|----------------|----------------|
-| OpenAI       | ✅          | ✅               | ✅             | ✅             |
-| Anthropic    | ✅          | ❌               | ❌             | ❌             |
-| Groq         | ✅          | ❌               | ✅             | ❌             |
-| Google (GenAI) | ✅          | ✅               | ✅             | ✅             |
-| Vertex AI    | ✅          | ✅               | ❌             | ✅             |
-| Ollama       | ✅          | ✅               | ❌             | ❌             |
-| Perplexity   | ✅          | ❌               | ❌             | ❌             |
-| ElevenLabs   | ❌          | ❌               | ✅             | ✅             |
-| Deepgram     | ❌          | ❌               | ❌             | ✅             |
-| Azure OpenAI | ✅          | ✅               | ✅             | ✅             |
-| Mistral      | ✅          | ✅               | ✅             | ✅             |
-| DeepSeek     | ✅          | ❌               | ❌             | ❌             |
-| Voyage       | ❌          | ✅               | ❌             | ❌             |
-| xAI          | ✅          | ❌               | ❌             | ✅             |
-| OpenRouter   | ✅          | ✅               | ❌             | ❌             |
-| DashScope (Qwen) | ✅          | ❌               | ❌             | ❌             |
-| MiniMax      | ✅          | ❌               | ❌             | ❌             |
-| OpenAI Compatible* | ✅          | ✅               | ✅             | ✅             |
-
-*Supports LM Studio and any OpenAI-compatible endpoint
-
-## ✨ Key Features
-
-### Core Capabilities
-- **🔒 Privacy-First**: Your data stays under your control - no cloud dependencies
-- **🎯 Multi-Notebook Organization**: Manage multiple research projects seamlessly
-- **📚 Universal Content Support**: PDFs, videos, audio, web pages, Office docs, and more
-- **🤖 Multi-Model AI Support**: 18+ providers including OpenAI, Anthropic, Ollama, Google, LM Studio, and more
-- **🎙️ Professional Podcast Generation**: Advanced multi-speaker podcasts with Episode Profiles
-- **🔍 Intelligent Search**: Full-text and vector search across all your content
-- **💬 Context-Aware Chat**: AI conversations powered by your research materials
-- **📝 AI-Assisted Notes**: Generate insights or write notes manually
+- **AI Study Chat** — ChatGPT-style interface with image + text support
+- **Homework Scanner** — Capture and analyze worksheet/textbook pages (ML Kit OCR)
+- **Step-by-Step Learning** — Break problems into manageable components
+- **Concept Explainer** — Progressive explanation (simple → intermediate → advanced)
+- **Mistake Detection** — Identify and guide correction of reasoning errors
+- **Practice Generator** — Create similar problems for reinforcement
+- **Progress Tracker** — Monitor learning topics and identify weaknesses
 
 ### Advanced Features
-- **⚡ Reasoning Model Support**: Full support for thinking models like DeepSeek-R1 and Qwen3
-- **🔧 Content Transformations**: Powerful customizable actions to summarize and extract insights
-- **🌐 Comprehensive REST API**: Full programmatic access for custom integrations [![API Docs](https://img.shields.io/badge/API-Documentation-blue?style=flat-square)](http://localhost:5055/docs)
-- **🔐 Optional Password Protection**: Secure public deployments with authentication
-- **📊 Fine-Grained Context Control**: Choose exactly what to share with AI models
-- **📎 Citations**: Get answers with proper source citations
 
+- 🎙️ Voice Tutor Mode — Voice input and output (planned)
+- 🔥 Streak System — Daily learning motivation
+- 🧠 Weakness Detection — AI-powered learning gap identification
+- 📴 Offline Mode — Cached explanations and study guides
 
-## Podcast Feature
+## Tech Stack
 
-[![Check out our podcast sample](https://img.youtube.com/vi/D-760MlGwaI/0.jpg)](https://www.youtube.com/watch?v=D-760MlGwaI)
+| Layer | Technology |
+|-------|------------|
+| Language | Kotlin |
+| UI Framework | Jetpack Compose |
+| Architecture | MVVM |
+| Database | Room (SQLite) |
+| Image Processing | ML Kit OCR |
+| Networking | Retrofit |
+| Authentication | Firebase Auth (optional) |
+| Sync | Firebase Firestore (optional) |
 
-## 📚 Documentation
+## Project Structure
 
-### Getting Started
-- **[📖 Introduction](docs/0-START-HERE/index.md)** - Learn what Open Notebook offers
-- **[⚡ Quick Start](docs/0-START-HERE/quick-start.md)** - Get up and running in 5 minutes
-- **[🔧 Installation](docs/1-INSTALLATION/index.md)** - Comprehensive setup guide
-- **[🎯 Your First Notebook](docs/0-START-HERE/first-notebook.md)** - Step-by-step tutorial
+```
+LearnerLM/
+├── app/
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── kotlin/com/learner/lm/
+│   │   │   │   ├── ui/
+│   │   │   │   │   ├── screens/
+│   │   │   │   │   ├── components/
+│   │   │   │   │   └── theme/
+│   │   │   │   ├── viewmodel/
+│   │   │   │   ├── repository/
+│   │   │   │   ├── database/
+│   │   │   │   ├── ai/
+│   │   │   │   │   ├── TutorEngine.kt
+│   │   │   │   │   ├── PromptBuilder.kt
+│   │   │   │   │   └── SubjectClassifier.kt
+│   │   │   │   ├── ocr/
+│   │   │   │   ├── utils/
+│   │   │   │   └── MainActivity.kt
+│   │   │   ├── res/
+│   │   │   └── AndroidManifest.xml
+│   │   └── test/
+│   └── build.gradle.kts
+├── build.gradle.kts
+├── settings.gradle.kts
+└── README.md
+```
 
-### User Guide
-- **[📱 Interface Overview](docs/3-USER-GUIDE/interface-overview.md)** - Understanding the layout
-- **[📚 Notebooks](docs/3-USER-GUIDE/notebooks.md)** - Organizing your research
-- **[📄 Sources](docs/3-USER-GUIDE/sources.md)** - Managing content types
-- **[📝 Notes](docs/3-USER-GUIDE/notes.md)** - Creating and managing notes
-- **[💬 Chat](docs/3-USER-GUIDE/chat.md)** - AI conversations
-- **[🔍 Search](docs/3-USER-GUIDE/search.md)** - Finding information
+## Getting Started
 
-### Advanced Topics
-- **[🎙️ Podcast Generation](docs/2-CORE-CONCEPTS/podcasts.md)** - Create professional podcasts
-- **[🔧 Content Transformations](docs/2-CORE-CONCEPTS/transformations.md)** - Customize content processing
-- **[🤖 AI Models](docs/4-AI-PROVIDERS/index.md)** - AI model configuration
-- **[🔌 MCP Integration](docs/5-CONFIGURATION/mcp-integration.md)** - Connect with Claude Desktop, VS Code and other MCP clients
-- **[🔧 REST API Reference](docs/7-DEVELOPMENT/api-reference.md)** - Complete API documentation
-- **[🔐 Security](docs/5-CONFIGURATION/security.md)** - Password protection and privacy
-- **[🚀 Deployment](docs/1-INSTALLATION/index.md)** - Complete deployment guides for all scenarios
+### Prerequisites
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+- Android Studio Koala or later
+- Kotlin 1.9+
+- Gradle 8.0+
+- Java 11+
 
-## 🗺️ Roadmap
+### Clone & Setup
 
-### Upcoming Features
-- **Live Front-End Updates**: Real-time UI updates for smoother experience
-- **Async Processing**: Faster UI through asynchronous content processing
-- **Cross-Notebook Sources**: Reuse research materials across projects
-- **Bookmark Integration**: Connect with your favorite bookmarking apps
+```bash
+git clone https://github.com/VEXZIONFILE/LearnerLM.git
+cd LearnerLM
+```
 
-### Recently Completed ✅
-- **Next.js Frontend**: Modern React-based frontend with improved performance
-- **Comprehensive REST API**: Full programmatic access to all functionality
-- **Multi-Model Support**: 18+ AI providers including OpenAI, Anthropic, Ollama, LM Studio
-- **Advanced Podcast Generator**: Professional multi-speaker podcasts with Episode Profiles
-- **Content Transformations**: Powerful customizable actions for content processing
-- **Enhanced Citations**: Improved layout and finer control for source citations
-- **Multiple Chat Sessions**: Manage different conversations within notebooks
+### Build & Run
 
-See the [open issues](https://github.com/lfnovo/open-notebook/issues) for a full list of proposed features and known issues.
+```bash
+# Build debug APK
+./gradlew build
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+# Run on emulator/device
+./gradlew installDebug
 
+# Run tests
+./gradlew test
+```
 
-## 📖 Need Help?
-- **🤖 AI Installation Assistant**: We have a [CustomGPT built to help you install Open Notebook](https://chatgpt.com/g/g-68776e2765b48191bd1bae3f30212631-open-notebook-installation-assistant) - it will guide you through each step!
-- **New to Open Notebook?** Start with our [Getting Started Guide](docs/0-START-HERE/index.md)
-- **Need installation help?** Check our [Installation Guide](docs/1-INSTALLATION/index.md)
-- **Want to see it in action?** Try our [Quick Start Tutorial](docs/0-START-HERE/quick-start.md)
+### AI API Configuration
 
-## 🤝 Community & Contributing
+Set your OpenAI-compatible API key in `local.properties`:
 
-### Join the Community
-- 💬 **[Discord Server](https://discord.gg/37XJPXfz2w)** - Get help, share ideas, and connect with other users
-- 🐛 **[GitHub Issues](https://github.com/lfnovo/open-notebook/issues)** - Report bugs and request features
-- ⭐ **Star this repo** - Show your support and help others discover Open Notebook
+```properties
+AI_API_KEY=sk-your-key-here
+```
 
-### Contributing
-We welcome contributions! We're especially looking for help with:
-- **Frontend Development**: Help improve our modern Next.js/React UI
-- **Testing & Bug Fixes**: Make Open Notebook more robust
-- **Feature Development**: Build the coolest research tool together
-- **Documentation**: Improve guides and tutorials
+The app includes an offline fallback tutor mode when no API key is configured.
 
-**Current Tech Stack**: Python, FastAPI, Next.js, React, SurrealDB
-**Future Roadmap**: Real-time updates, enhanced async processing
+## AI Tutor Engine
 
-See our [Contributing Guide](CONTRIBUTING.md) for detailed information on how to get started.
+The core AI behavior follows the **Socratic Method** with a **Hint Ladder System**:
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+| Level | Description |
+|-------|-------------|
+| Hint 1 | Gentle directional nudge |
+| Hint 2 | Deeper explanation |
+| Hint 3 | Near-solution guidance (incomplete) |
+| Final | Student attempt required |
 
+### Subject-Specific Tutoring Logic
 
-## 📄 License
+| Subject | Approach |
+|---------|----------|
+| Math | Focus on reasoning, formula discovery, no computation answers |
+| Science | Process explanation, cause-effect, analogies |
+| English | Grammar hints, writing structure, no essay solutions |
+| History | Timeline reasoning, context explanation |
+| Geography | Spatial reasoning, location analysis |
 
-Open Notebook is MIT licensed. See the [LICENSE](LICENSE) file for details.
+## Safety Guarantees
 
+The AI system enforces:
 
-**Community Support**:
-- 💬 [Discord Server](https://discord.gg/37XJPXfz2w) - Get help, share ideas, and connect with users
-- 🐛 [GitHub Issues](https://github.com/lfnovo/open-notebook/issues) - Report bugs and request features
-- 🌐 [Website](https://www.open-notebook.ai) - Learn more about the project
+- No direct answers to homework
+- Grade-level adaptation (6–12)
+- Subject classification for appropriate tutoring
+- Anti-gaming safeguards against answer-seeking
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+## Critical Educational Rules (NON-NEGOTIABLE)
 
+The AI **MUST NEVER**:
 
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/lfnovo/open-notebook.svg?style=for-the-badge
-[contributors-url]: https://github.com/lfnovo/open-notebook/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/lfnovo/open-notebook.svg?style=for-the-badge
-[forks-url]: https://github.com/lfnovo/open-notebook/network/members
-[stars-shield]: https://img.shields.io/github/stars/lfnovo/open-notebook.svg?style=for-the-badge
-[stars-url]: https://github.com/lfnovo/open-notebook/stargazers
-[issues-shield]: https://img.shields.io/github/issues/lfnovo/open-notebook.svg?style=for-the-badge
-[issues-url]: https://github.com/lfnovo/open-notebook/issues
-[license-shield]: https://img.shields.io/github/license/lfnovo/open-notebook.svg?style=for-the-badge
-[license-url]: https://github.com/lfnovo/open-notebook/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/lfnovo
-[product-screenshot]: images/screenshot.png
-[Next.js]: https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white
-[Next-url]: https://nextjs.org/
-[React]: https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black
-[React-url]: https://reactjs.org/
-[Python]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
-[Python-url]: https://www.python.org/
-[LangChain]: https://img.shields.io/badge/LangChain-3A3A3A?style=for-the-badge&logo=chainlink&logoColor=white
-[LangChain-url]: https://www.langchain.com/
-[SurrealDB]: https://img.shields.io/badge/SurrealDB-FF5E00?style=for-the-badge&logo=databricks&logoColor=white
-[SurrealDB-url]: https://surrealdb.com/
+- ❌ Solve math problems directly
+- ❌ Provide final essay answers
+- ❌ Output completed homework solutions
+- ❌ Say "the answer is…"
+
+The AI **MUST**:
+
+- ✅ Teach step-by-step thinking
+- ✅ Provide hints only
+- ✅ Ask guiding questions
+- ✅ Break problems into smaller parts
+- ✅ Help students discover answers themselves
+
+## Example Conversation
+
+**Student:** "What is 2 + 2?"
+
+**Learner LM:**
+
+> Let me understand your question first. You're asking me to add 2 and 2.
+>
+> Here's a hint to get you started: Imagine you have 2 apples in one hand and 2 apples in your other hand. How many apples do you have in total?
+>
+> Try counting them out, and then tell me: What number did you get?
+
+**Student:** "I think it's 4?"
+
+**Learner LM:**
+
+> Excellent! You discovered that 2 + 2 = 4. 🎉
+>
+> You used counting to solve the problem. This is the foundation of addition. Now, think about this: What if you had 3 apples in one hand and 4 in the other—how would you find the total?
+>
+> Try using the same method!
+
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+
+---
+
+Built with ❤️ to empower student learning

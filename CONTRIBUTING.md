@@ -1,29 +1,26 @@
-# Contributing to Open Notebook
+# Contributing to Learner LM
 
-**📍 This file has moved!**
+Thank you for your interest in contributing to Learner LM!
 
-All contribution guidelines have been consolidated into the new development documentation structure.
+## Development Setup
 
-👉 **[Read the Contributing Guide](docs/7-DEVELOPMENT/contributing.md)**
+1. Clone the repository
+2. Open in Android Studio Koala or later
+3. Sync Gradle and run on an emulator or device
 
----
+## Code Standards
 
-## Quick Links
+- Follow Kotlin coding conventions
+- Use MVVM architecture: UI → ViewModel → Repository
+- All AI interactions must go through `TutorEngine` and `PromptBuilder`
+- Never bypass the no-answer educational policy in AI prompts
 
-- **Want to contribute code?** → [Contributing Guide](docs/7-DEVELOPMENT/contributing.md)
-- **Want to understand the architecture?** → [Architecture Overview](docs/7-DEVELOPMENT/architecture.md)
-- **Want to understand our design philosophy?** → [Design Principles](docs/7-DEVELOPMENT/design-principles.md)
-- **Are you a maintainer?** → [Maintainer Guide](docs/7-DEVELOPMENT/maintainer-guide.md)
-- **New developer?** → [Quick Start](docs/7-DEVELOPMENT/quick-start.md)
+## Pull Request Guidelines
 
----
+- Keep changes focused and well-described
+- Add unit tests for AI logic changes (`SubjectClassifier`, `PromptBuilder`, `TutorEngine`)
+- Ensure `./gradlew test` passes before submitting
 
-## The Issue-First Workflow
+## Educational Integrity
 
-**TL;DR**: Create an issue first, get it assigned, THEN code.
-
-This prevents wasted effort and ensures your work aligns with the project. [See details →](docs/7-DEVELOPMENT/contributing.md)
-
----
-
-For all contribution details, see **[docs/7-DEVELOPMENT/contributing.md](docs/7-DEVELOPMENT/contributing.md)**.
+Any contribution that weakens the Socratic tutoring safeguards will not be accepted. The AI must never provide direct homework answers.
