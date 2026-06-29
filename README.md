@@ -2,6 +2,8 @@
 
 An AI-powered learning companion for students in grades 6–12.
 
+> **Download for Android Studio:** [Download ZIP](https://github.com/VEXZIONFILE/LearnerLLM/archive/refs/heads/cursor/learner-lm-android-scaffold-6bf2.zip) · See [ANDROID_STUDIO_SETUP.md](ANDROID_STUDIO_SETUP.md) for step-by-step instructions.
+
 Learner LM is an intelligent tutoring assistant inspired by NotebookLM, designed to guide students through problem-solving and concept learning using a Socratic method. It helps students learn how to think through problems, not just get answers.
 
 ## Core Philosophy

@@ -25,6 +25,10 @@ release/
 captures/
 output.json
 
+# Keep shared run configurations for ZIP downloads
+!.run/
+!.run/**
+
 # Gradle
 .gradle/
 build/
