@@ -10,9 +10,10 @@ import androidx.room.RoomDatabase
         ChatMessageEntity::class,
         StudyTopicEntity::class,
         LearningStreakEntity::class,
-        PracticeProblemEntity::class
+        PracticeProblemEntity::class,
+        CustomSubjectEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class LearnerDatabase : RoomDatabase() {
@@ -20,6 +21,7 @@ abstract class LearnerDatabase : RoomDatabase() {
     abstract fun studyTopicDao(): StudyTopicDao
     abstract fun learningStreakDao(): LearningStreakDao
     abstract fun practiceProblemDao(): PracticeProblemDao
+    abstract fun customSubjectDao(): CustomSubjectDao
 
     companion object {
         @Volatile
@@ -31,7 +33,10 @@ abstract class LearnerDatabase : RoomDatabase() {
                     context.applicationContext,
                     LearnerDatabase::class.java,
                     "learner_lm.db"
-                ).build().also { instance = it }
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
+                    .also { instance = it }
             }
     }
 }

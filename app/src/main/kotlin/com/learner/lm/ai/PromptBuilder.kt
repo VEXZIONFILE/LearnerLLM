@@ -2,7 +2,7 @@ package com.learner.lm.ai
 
 class PromptBuilder {
 
-    fun buildSystemPrompt(gradeLevel: Int, subject: Subject): String {
+    fun buildSystemPrompt(gradeLevel: Int, subject: StudySubject): String {
         val gradeGuidance = gradeGuidanceFor(gradeLevel)
         val subjectGuidance = subjectGuidanceFor(subject)
 
@@ -41,10 +41,14 @@ class PromptBuilder {
             "$role: $content"
         }
         val scanned = context.scannedText?.let { "\n\nScanned homework text:\n$it" }.orEmpty()
+        val subjectLine = when (val subject = context.subject) {
+            is StudySubject.Builtin -> "Subject: ${subject.displayName}"
+            is StudySubject.Custom -> "Subject: ${subject.displayName} (${subject.category.label})"
+        }
 
         return """
             Grade level: ${context.gradeLevel}
-            Subject: ${context.subject.name}
+            $subjectLine
             Current hint level: ${context.hintLevel.level} (${context.hintLevel.name})
             $scanned
 
@@ -65,12 +69,20 @@ class PromptBuilder {
         else -> "Adapt explanations to an appropriate middle or high school level."
     }
 
-    private fun subjectGuidanceFor(subject: Subject): String = when (subject) {
-        Subject.MATH -> "Focus on reasoning and formula discovery. Never compute final answers."
-        Subject.SCIENCE -> "Explain processes, cause-effect relationships, and use analogies."
-        Subject.ENGLISH -> "Give grammar and structure hints. Never write complete essays."
-        Subject.HISTORY -> "Guide timeline reasoning and contextual analysis."
-        Subject.GEOGRAPHY -> "Encourage spatial reasoning and location analysis."
-        Subject.GENERAL -> "Break problems into smaller parts and ask guiding questions."
+    private fun subjectGuidanceFor(subject: StudySubject): String = when (subject) {
+        is StudySubject.Builtin -> when (subject.subject) {
+            Subject.MATH -> "Focus on reasoning and formula discovery. Never compute final answers."
+            Subject.SCIENCE -> "Explain processes, cause-effect relationships, and use analogies."
+            Subject.ENGLISH -> "Give grammar and structure hints. Never write complete essays."
+            Subject.HISTORY -> "Guide timeline reasoning and contextual analysis."
+            Subject.GEOGRAPHY -> "Encourage spatial reasoning and location analysis."
+            Subject.GENERAL -> "Break problems into smaller parts and ask guiding questions."
+        }
+        is StudySubject.Custom -> """
+            The student created a custom subject: "${subject.displayName}" (${subject.category.label}).
+            Tailor your tutoring to this context — e.g. after-school projects need planning help,
+            club activities need collaborative thinking, and class subjects need concept reinforcement.
+            Never do the work for them; guide their thinking with questions and hints.
+        """.trimIndent()
     }
 }

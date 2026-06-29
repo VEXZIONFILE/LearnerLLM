@@ -5,13 +5,16 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.learner.lm.LearnerLMApplication
 import com.learner.lm.ai.HintLevel
+import com.learner.lm.ai.StudySubject
 import com.learner.lm.ai.Subject
+import com.learner.lm.ai.SubjectCategory
 import com.learner.lm.ai.TutorContext
 import com.learner.lm.ai.TutorEngine
 import com.learner.lm.database.ChatMessageEntity
 import com.learner.lm.repository.AiRepository
 import com.learner.lm.repository.ChatMessage
 import com.learner.lm.repository.NetworkModule
+import com.learner.lm.repository.SubjectRepository
 import com.learner.lm.repository.TutorRepository
 import com.learner.lm.utils.GradeLevelValidator
 import com.learner.lm.utils.SessionUtils
@@ -25,10 +28,12 @@ data class ChatUiState(
     val messages: List<ChatMessageEntity> = emptyList(),
     val isLoading: Boolean = false,
     val gradeLevel: Int = 8,
-    val subject: Subject = Subject.GENERAL,
+    val selectedSubject: StudySubject = StudySubject.Builtin(Subject.GENERAL),
+    val customSubjects: List<StudySubject.Custom> = emptyList(),
     val hintLevel: HintLevel = HintLevel.GENTLE_NUDGE,
     val scannedText: String? = null,
-    val error: String? = null
+    val error: String? = null,
+    val showAddSubjectDialog: Boolean = false
 )
 
 class ChatViewModel(application: Application) : AndroidViewModel(application) {
@@ -40,6 +45,10 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         chatMessageDao = database.chatMessageDao(),
         studyTopicDao = database.studyTopicDao(),
         learningStreakDao = database.learningStreakDao()
+    )
+
+    private val subjectRepository = SubjectRepository(
+        customSubjectDao = database.customSubjectDao()
     )
 
     private val tutorEngine = TutorEngine(
@@ -55,18 +64,72 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                 _uiState.update { it.copy(messages = messages) }
             }
         }
+        viewModelScope.launch {
+            subjectRepository.observeCustomSubjects().collect { customSubjects ->
+                _uiState.update { state ->
+                    val selected = when (val current = state.selectedSubject) {
+                        is StudySubject.Custom ->
+                            customSubjects.find { it.id == current.id } ?: current
+                        else -> state.selectedSubject
+                    }
+                    state.copy(customSubjects = customSubjects, selectedSubject = selected)
+                }
+            }
+        }
     }
 
     fun setGradeLevel(grade: Int) {
         _uiState.update { it.copy(gradeLevel = GradeLevelValidator.clamp(grade)) }
     }
 
-    fun setSubject(subject: Subject) {
-        _uiState.update { it.copy(subject = subject) }
+    fun selectSubject(subject: StudySubject) {
+        _uiState.update { it.copy(selectedSubject = subject, error = null) }
     }
 
     fun setScannedText(text: String?) {
         _uiState.update { it.copy(scannedText = text) }
+    }
+
+    fun showAddSubjectDialog() {
+        _uiState.update { it.copy(showAddSubjectDialog = true) }
+    }
+
+    fun dismissAddSubjectDialog() {
+        _uiState.update { it.copy(showAddSubjectDialog = false, error = null) }
+    }
+
+    fun addCustomSubject(name: String, category: SubjectCategory) {
+        viewModelScope.launch {
+            try {
+                val subject = subjectRepository.addCustomSubject(name, category)
+                _uiState.update {
+                    it.copy(
+                        selectedSubject = subject,
+                        showAddSubjectDialog = false,
+                        error = null
+                    )
+                }
+            } catch (e: IllegalArgumentException) {
+                _uiState.update { it.copy(error = e.message) }
+            }
+        }
+    }
+
+    fun deleteCustomSubject(id: Long) {
+        viewModelScope.launch {
+            subjectRepository.deleteCustomSubject(id)
+            _uiState.update { state ->
+                val resetSelection = if (
+                    state.selectedSubject is StudySubject.Custom &&
+                    state.selectedSubject.id == id
+                ) {
+                    StudySubject.Builtin(Subject.GENERAL)
+                } else {
+                    state.selectedSubject
+                }
+                state.copy(selectedSubject = resetSelection)
+            }
+        }
     }
 
     fun sendMessage(content: String) {
@@ -78,7 +141,12 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
             val state = _uiState.value
             tutorRepository.saveMessage(
                 sessionId,
-                ChatMessage(role = "student", content = content, subject = state.subject, hintLevel = state.hintLevel)
+                ChatMessage(
+                    role = "student",
+                    content = content,
+                    subject = state.selectedSubject,
+                    hintLevel = state.hintLevel
+                )
             )
 
             try {
@@ -88,7 +156,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                 val response = tutorEngine.respond(
                     TutorContext(
                         gradeLevel = state.gradeLevel,
-                        subject = state.subject,
+                        subject = state.selectedSubject,
                         hintLevel = state.hintLevel,
                         studentMessage = content,
                         conversationHistory = history,
@@ -110,7 +178,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     it.copy(
                         isLoading = false,
                         hintLevel = response.hintLevel,
-                        subject = response.subject
+                        selectedSubject = response.subject
                     )
                 }
             } catch (e: Exception) {

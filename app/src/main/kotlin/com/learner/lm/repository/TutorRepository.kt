@@ -1,6 +1,7 @@
 package com.learner.lm.repository
 
 import com.learner.lm.ai.HintLevel
+import com.learner.lm.ai.StudySubject
 import com.learner.lm.ai.Subject
 import com.learner.lm.database.ChatMessageDao
 import com.learner.lm.database.ChatMessageEntity
@@ -17,7 +18,7 @@ data class ChatMessage(
     val id: Long = 0,
     val role: String,
     val content: String,
-    val subject: Subject = Subject.GENERAL,
+    val subject: StudySubject = StudySubject.Builtin(Subject.GENERAL),
     val hintLevel: HintLevel = HintLevel.GENTLE_NUDGE,
     val timestamp: Long = System.currentTimeMillis()
 )
@@ -36,7 +37,7 @@ class TutorRepository(
                 sessionId = sessionId,
                 role = message.role,
                 content = message.content,
-                subject = message.subject.name,
+                subject = message.subject.storageKey,
                 hintLevel = message.hintLevel.level
             )
         )
@@ -50,11 +51,11 @@ class TutorRepository(
 
     suspend fun getWeakTopics(): List<StudyTopicEntity> = studyTopicDao.getWeakTopics()
 
-    private suspend fun recordStudyActivity(subject: Subject) {
+    private suspend fun recordStudyActivity(subject: StudySubject) {
         studyTopicDao.upsert(
             StudyTopicEntity(
-                name = subject.name.lowercase().replaceFirstChar { it.uppercase() },
-                subject = subject.name,
+                name = subject.displayName,
+                subject = subject.storageKey,
                 strengthScore = 0.4f
             )
         )

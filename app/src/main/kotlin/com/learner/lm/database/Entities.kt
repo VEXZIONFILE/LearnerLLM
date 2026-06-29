@@ -40,3 +40,12 @@ data class PracticeProblemEntity(
     val difficulty: Int,
     val createdAt: Long = System.currentTimeMillis()
 )
+
+@Entity(tableName = "custom_subjects")
+data class CustomSubjectEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val category: String,
+    val emoji: String,
+    val createdAt: Long = System.currentTimeMillis()
+)

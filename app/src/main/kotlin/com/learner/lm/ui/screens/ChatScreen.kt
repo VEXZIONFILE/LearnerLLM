@@ -39,8 +39,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.learner.lm.ai.AiConfig
+import com.learner.lm.ui.components.AddCustomSubjectDialog
 import com.learner.lm.ui.components.ChatBubble
 import com.learner.lm.ui.components.HintLevelIndicator
+import com.learner.lm.ui.components.SubjectPicker
 import com.learner.lm.viewmodel.ChatViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,7 +69,7 @@ fun ChatScreen(
                     Column {
                         Text("Learner LM 🎓", fontWeight = FontWeight.Bold)
                         Text(
-                            "Grade ${uiState.gradeLevel} · ${AiConfig.MODEL_DISPLAY_NAME}",
+                            "Grade ${uiState.gradeLevel} · ${uiState.selectedSubject.displayName} · ${AiConfig.MODEL_DISPLAY_NAME}",
                             style = MaterialTheme.typography.labelMedium
                         )
                     }
@@ -98,6 +100,13 @@ fun ChatScreen(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
+
+            SubjectPicker(
+                selectedSubject = uiState.selectedSubject,
+                customSubjects = uiState.customSubjects,
+                onSubjectSelected = viewModel::selectSubject,
+                onAddCustomSubject = viewModel::showAddSubjectDialog
+            )
 
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 Text("Grade Level: ${uiState.gradeLevel}")
@@ -179,6 +188,14 @@ fun ChatScreen(
                 }
             }
         }
+    }
+
+    if (uiState.showAddSubjectDialog) {
+        AddCustomSubjectDialog(
+            onDismiss = viewModel::dismissAddSubjectDialog,
+            onConfirm = viewModel::addCustomSubject,
+            error = uiState.error
+        )
     }
 }
 

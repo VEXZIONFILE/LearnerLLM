@@ -9,13 +9,7 @@ class TutorEngine(
 ) {
 
     suspend fun respond(context: TutorContext): TutorResponse {
-        val subject = if (context.subject == Subject.GENERAL) {
-            subjectClassifier.classify(
-                listOfNotNull(context.studentMessage, context.scannedText).joinToString(" ")
-            )
-        } else {
-            context.subject
-        }
+        val subject = resolveSubject(context)
 
         val enrichedContext = context.copy(subject = subject)
         val systemPrompt = promptBuilder.buildSystemPrompt(enrichedContext.gradeLevel, subject)
@@ -32,6 +26,20 @@ class TutorEngine(
             detectedMistake = detectMistakeSeeking(enrichedContext.studentMessage),
             encouragesAttempt = !containsDirectAnswer(sanitized)
         )
+    }
+
+    private fun resolveSubject(context: TutorContext): StudySubject {
+        if (context.subject is StudySubject.Custom) {
+            return context.subject
+        }
+        val builtin = context.subject as? StudySubject.Builtin ?: return StudySubject.Builtin(Subject.GENERAL)
+        if (builtin.subject != Subject.GENERAL) {
+            return builtin
+        }
+        val classified = subjectClassifier.classify(
+            listOfNotNull(context.studentMessage, context.scannedText).joinToString(" ")
+        )
+        return StudySubject.Builtin(classified)
     }
 
     private fun determineNextHintLevel(context: TutorContext, response: String): HintLevel {

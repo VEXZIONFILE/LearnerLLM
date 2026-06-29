@@ -44,3 +44,15 @@ interface PracticeProblemDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(problem: PracticeProblemEntity)
 }
+
+@Dao
+interface CustomSubjectDao {
+    @Query("SELECT * FROM custom_subjects ORDER BY createdAt ASC")
+    fun observeAll(): Flow<List<CustomSubjectEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(subject: CustomSubjectEntity): Long
+
+    @Query("DELETE FROM custom_subjects WHERE id = :id")
+    suspend fun delete(id: Long)
+}

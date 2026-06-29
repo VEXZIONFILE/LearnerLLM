@@ -29,6 +29,7 @@ It is: *"A thinking partner that helps students learn how to solve problems, not
 - **Mistake Detection** — Identify and guide correction of reasoning errors
 - **Practice Generator** — Create similar problems for reinforcement
 - **Progress Tracker** — Monitor learning topics and identify weaknesses
+- **Custom Subjects** — Kids and teens can add their own subjects (class, after-school, projects, clubs, etc.)
 
 ### Advanced Features
 
@@ -130,6 +131,19 @@ OPENROUTER_API_KEY=sk-or-v1-your-key-here
 Get an API key at https://openrouter.ai/settings/keys
 
 The app includes an offline fallback tutor mode when no API key is configured.
+
+### Custom Subjects
+
+Students can tap **"Add yours"** on the chat screen to create personal subjects like:
+
+- 🏫 Class (e.g. "AP Biology")
+- 🎨 After School (e.g. "Drama Club")
+- 📋 Project (e.g. "Science Fair")
+- ⚽ Club / Activity
+- 📝 Exam Prep
+- ✨ Other
+
+Custom subjects are saved locally and tailor the AI tutor's guidance to that context.
 
 ## AI Tutor Engine
 
