@@ -1,8 +1,22 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
 }
+
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) {
+        load(file.inputStream())
+    }
+}
+
+fun localProperty(name: String, default: String = ""): String =
+    localProperties.getProperty(name, default)
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
 
 android {
     namespace = "com.learner.lm"
@@ -20,7 +34,9 @@ android {
             useSupportLibrary = true
         }
 
-        buildConfigField("String", "AI_API_BASE_URL", "\"https://api.openai.com/v1/\"")
+        buildConfigField("String", "OPENROUTER_BASE_URL", "\"https://openrouter.ai/api/v1/\"")
+        buildConfigField("String", "OPENROUTER_API_KEY", "\"${localProperty("OPENROUTER_API_KEY")}\"")
+        buildConfigField("String", "APP_REFERER", "\"https://github.com/VEXZIONFILE/LearnerLM\"")
     }
 
     buildTypes {

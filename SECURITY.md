@@ -8,11 +8,11 @@ If you discover a security issue in Learner LM, please open a private security a
 
 ## Scope
 
-Learner LM handles student learning data locally on-device. When using cloud AI APIs:
+Learner LM handles student learning data locally on-device. When using OpenRouter:
 
-- API keys should be stored securely (never committed to the repository)
-- Student conversations may be sent to third-party AI providers — review your provider's data policies
-- Firebase Auth/Firestore (optional) should use proper security rules
+- `OPENROUTER_API_KEY` should be stored in `local.properties` (never committed to the repository)
+- Student conversations are sent to OpenRouter using the `openai/gpt-oss-120b` model
+- Review OpenRouter's privacy policy before deploying to students
 
 ## Best Practices
 

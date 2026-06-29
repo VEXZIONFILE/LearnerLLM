@@ -46,7 +46,8 @@ It is: *"A thinking partner that helps students learn how to solve problems, not
 | Architecture | MVVM |
 | Database | Room (SQLite) |
 | Image Processing | ML Kit OCR |
-| Networking | Retrofit |
+| Networking | Retrofit + OpenRouter API |
+| AI Model | `openai/gpt-oss-120b` (displayed as **LearnerLM**) |
 | Authentication | Firebase Auth (optional) |
 | Sync | Firebase Firestore (optional) |
 
@@ -110,13 +111,23 @@ cd LearnerLM
 ./gradlew test
 ```
 
-### AI API Configuration
+### AI API Configuration (OpenRouter)
 
-Set your OpenAI-compatible API key in `local.properties`:
+Learner LM uses [OpenRouter](https://openrouter.ai) with the **OpenAI gpt-oss-120b** model, branded in-app as **LearnerLM**.
+
+Set your OpenRouter API key in `local.properties`:
 
 ```properties
-AI_API_KEY=sk-your-key-here
+OPENROUTER_API_KEY=sk-or-v1-your-key-here
 ```
+
+| Setting | Value |
+|---------|-------|
+| API Base URL | `https://openrouter.ai/api/v1/` |
+| Model ID | `openai/gpt-oss-120b` |
+| Display Name | LearnerLM |
+
+Get an API key at https://openrouter.ai/settings/keys
 
 The app includes an offline fallback tutor mode when no API key is configured.
 

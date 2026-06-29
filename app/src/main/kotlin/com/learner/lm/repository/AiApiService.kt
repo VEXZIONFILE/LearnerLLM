@@ -1,12 +1,12 @@
 package com.learner.lm.repository
 
-import com.google.gson.annotations.SerializedName
+import com.learner.lm.ai.AiConfig
 import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.POST
 
 data class ChatCompletionRequest(
-    val model: String = "gpt-4o-mini",
+    val model: String = AiConfig.MODEL_ID,
     val messages: List<ChatMessageDto>,
     val temperature: Double = 0.7
 )
@@ -28,6 +28,8 @@ interface AiApiService {
     @POST("chat/completions")
     suspend fun createChatCompletion(
         @Header("Authorization") authorization: String,
+        @Header("HTTP-Referer") referer: String,
+        @Header("X-Title") title: String,
         @Body request: ChatCompletionRequest
     ): ChatCompletionResponse
 }

@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.learner.lm.ai.AiConfig
 import com.learner.lm.ui.components.ChatBubble
 import com.learner.lm.ui.components.HintLevelIndicator
 import com.learner.lm.viewmodel.ChatViewModel
@@ -66,7 +67,7 @@ fun ChatScreen(
                     Column {
                         Text("Learner LM 🎓", fontWeight = FontWeight.Bold)
                         Text(
-                            "Grade ${uiState.gradeLevel} · ${uiState.subject.name.lowercase().replaceFirstChar { it.uppercase() }}",
+                            "Grade ${uiState.gradeLevel} · ${AiConfig.MODEL_DISPLAY_NAME}",
                             style = MaterialTheme.typography.labelMedium
                         )
                     }

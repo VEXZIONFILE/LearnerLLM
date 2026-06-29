@@ -1,8 +1,19 @@
 package com.learner.lm.ai
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
+
+class AiConfigTest {
+    @Test
+    fun `uses openrouter gpt-oss-120b model id`() {
+        assertEquals("openai/gpt-oss-120b", AiConfig.MODEL_ID)
+    }
+
+    @Test
+    fun `model is displayed as LearnerLM`() {
+        assertEquals("LearnerLM", AiConfig.MODEL_DISPLAY_NAME)
+    }
+}
 
 class SubjectClassifierTest {
 
