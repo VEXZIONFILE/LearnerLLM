@@ -9,7 +9,7 @@ object SubscriptionProducts {
 }
 
 enum class SubscriptionTier(val displayName: String) {
-    FREE("Free"),
+    FREE("Standard"),
     BASIC("Premium"),
     PRO("Premium Pro")
 }

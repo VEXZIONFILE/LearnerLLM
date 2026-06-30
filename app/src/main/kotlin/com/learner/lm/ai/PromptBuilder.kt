@@ -21,7 +21,7 @@ class PromptBuilder {
         val tierNote = if (capabilities.isPremium) {
             "Subscription: Premium — provide richer examples and more detail."
         } else {
-            "Subscription: Free — keep responses concise but correct."
+            "Subscription: Standard — keep responses concise but correct."
         }
 
         return when (context.appMode) {

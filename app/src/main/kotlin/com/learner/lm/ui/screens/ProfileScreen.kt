@@ -78,10 +78,12 @@ fun ProfileScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    NotebookBadge(
-                        text = tierLabel(profile.subscriptionTier),
-                        highlighted = profile.subscriptionTier != SubscriptionTier.FREE.name
-                    )
+                    if (isPremiumTier(profile.subscriptionTier)) {
+                        NotebookBadge(
+                            text = "Premium",
+                            highlighted = true
+                        )
+                    }
                 }
             }
         }
@@ -95,11 +97,13 @@ fun ProfileScreen(
                 value = "${profile.gradeLevel}",
                 modifier = Modifier.weight(1f)
             )
-            ProfileStatCard(
-                label = "Plan",
-                value = planShortLabel(profile.subscriptionTier),
-                modifier = Modifier.weight(1f)
-            )
+            if (isPremiumTier(profile.subscriptionTier)) {
+                ProfileStatCard(
+                    label = "Plan",
+                    value = "Premium",
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
 
         SectionHeader(title = "Learning")
@@ -175,20 +179,11 @@ fun ProfileScreen(
     }
 }
 
-private fun tierLabel(tier: String): String = when (tier) {
-    SubscriptionTier.BASIC.name,
-    SubscriptionTier.PRO.name -> "Premium"
-    else -> "Free plan"
-}
-
-private fun planShortLabel(tier: String): String = when (tier) {
-    SubscriptionTier.BASIC.name,
-    SubscriptionTier.PRO.name -> "Premium"
-    else -> "Free"
-}
+private fun isPremiumTier(tier: String): Boolean =
+    tier == SubscriptionTier.BASIC.name || tier == SubscriptionTier.PRO.name
 
 private fun subscriptionDescription(tier: String): String = when (tier) {
     SubscriptionTier.BASIC.name,
     SubscriptionTier.PRO.name -> "Premium AI — deeper tutoring, full study packs, better code help"
-    else -> "Free tier — standard tutoring, limited study packs, basic code help"
+    else -> "Standard tutoring, study packs, and code help"
 }
