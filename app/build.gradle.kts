@@ -106,12 +106,20 @@ dependencies {
 
     implementation("com.google.mlkit:text-recognition:16.0.1")
 
-    // Import the Firebase BoM
+    // -------------------------------------------------------------------------
+    // Firebase — requires app/google-services.json from Firebase Console
+    // https://firebase.google.com/docs/android/setup
+    // -------------------------------------------------------------------------
+
+    // Import the Firebase BoM (manages Firebase library versions)
     implementation(platform("com.google.firebase:firebase-bom:34.15.0"))
 
-    // Firebase products (versions managed by BoM — do not specify versions)
+    // Firebase products — do not specify versions when using the BoM
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
+
+    // Add more Firebase SDKs here if needed:
+    // implementation("com.google.firebase:firebase-firestore")
     // https://firebase.google.com/docs/android/setup#available-libraries
 
     implementation("com.android.billingclient:billing-ktx:7.0.0")
