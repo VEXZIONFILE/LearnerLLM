@@ -49,22 +49,13 @@ cp .env.example .env
 docker compose up --build
 ```
 
-## Fly.io (recommended for production)
+## Fly.io (optional cloud hosting)
 
-See **[FLY_DEPLOY.md](FLY_DEPLOY.md)** for the full guide.
+See **[FLY_DEPLOY.md](FLY_DEPLOY.md)** if you want a public cloud URL.
 
-```bash
-brew install flyctl          # Mac
-fly auth login
-cd backend
-fly launch --no-deploy
-fly volumes create learnerlm_data --region iad --size 1
-fly secrets set OPENROUTER_API_KEY="..." FIREBASE_PROJECT_ID="..." \
-  FIREBASE_CREDENTIALS_JSON="$(cat firebase-service-account.json)"
-fly deploy
-```
+## Self-host at home (no public port, no monthly VPS)
 
-API URL: `https://<your-app>.fly.dev/`
+See **[SELF_HOST.md](SELF_HOST.md)** — run on your dad's server with Docker + **Tailscale** (free private VPN, no router port forwarding).
 
 ## Android app configuration
 
