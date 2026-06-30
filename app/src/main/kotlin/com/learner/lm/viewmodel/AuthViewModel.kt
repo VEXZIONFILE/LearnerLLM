@@ -1,7 +1,6 @@
 package com.learner.lm.viewmodel
 
 import android.app.Application
-import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.learner.lm.LearnerLMApplication
@@ -23,19 +22,35 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     )
 
     val authState: StateFlow<AuthState> = authRepository.authState
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AuthState.Loading)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, AuthState.Loading)
 
-    private val _isSigningIn = MutableStateFlow(false)
-    val isSigningIn: StateFlow<Boolean> = _isSigningIn.asStateFlow()
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    suspend fun createGoogleSignInIntent(activity: android.app.Activity): Intent =
-        authRepository.getGoogleSignInIntent(activity)
+    private val _authError = MutableStateFlow<String?>(null)
+    val authError: StateFlow<String?> = _authError.asStateFlow()
 
-    fun handleSignInResult(data: Intent?) {
+    fun clearError() {
+        _authError.value = null
+    }
+
+    fun signIn(email: String, password: String) {
         viewModelScope.launch {
-            _isSigningIn.value = true
-            authRepository.handleGoogleSignInResult(data)
-            _isSigningIn.value = false
+            _isLoading.value = true
+            _authError.value = null
+            authRepository.signIn(email, password)
+                .onFailure { _authError.value = it.message }
+            _isLoading.value = false
+        }
+    }
+
+    fun signUp(email: String, password: String, displayName: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _authError.value = null
+            authRepository.signUp(email, password, displayName)
+                .onFailure { _authError.value = it.message }
+            _isLoading.value = false
         }
     }
 

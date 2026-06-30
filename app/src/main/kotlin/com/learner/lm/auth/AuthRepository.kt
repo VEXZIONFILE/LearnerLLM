@@ -1,20 +1,17 @@
 package com.learner.lm.auth
 
-import android.app.Activity
 import android.content.Context
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
-import com.learner.lm.BuildConfig
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.learner.lm.database.UserProfileDao
 import com.learner.lm.database.UserProfileEntity
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 
 class AuthRepository(
@@ -34,27 +31,29 @@ class AuthRepository(
     }
 
     val authState: Flow<AuthState> = callbackFlow {
-        val listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
-            val user = firebaseAuth.currentUser
+        val firebaseAuth = auth
+        if (firebaseAuth == null) {
+            trySend(AuthState.Error("Firebase not configured. Add google-services.json."))
+            awaitClose { }
+            return@callbackFlow
+        }
+
+        val listener = FirebaseAuth.AuthStateListener { authInstance ->
+            val user = authInstance.currentUser
             if (user == null) {
                 trySend(AuthState.SignedOut)
             } else {
-                val profile = UserProfile(
-                    uid = user.uid,
-                    displayName = user.displayName.orEmpty().ifBlank { "Student" },
-                    email = user.email.orEmpty(),
-                    photoUrl = user.photoUrl?.toString()
-                )
+                val profile = runBlocking { buildProfile(user) }
                 trySend(AuthState.SignedIn(profile))
             }
         }
-        if (auth != null) {
-            auth?.addAuthStateListener(listener)
-            awaitClose { auth?.removeAuthStateListener(listener) }
-        } else {
-            trySend(AuthState.SignedOut)
-            awaitClose { }
-        }
+
+        firebaseAuth.currentUser?.let { user ->
+            trySend(AuthState.SignedIn(runBlocking { buildProfile(user) }))
+        } ?: trySend(AuthState.SignedOut)
+
+        firebaseAuth.addAuthStateListener(listener)
+        awaitClose { firebaseAuth.removeAuthStateListener(listener) }
     }
 
     fun observeLocalProfile(uid: String): Flow<UserProfile?> =
@@ -62,43 +61,53 @@ class AuthRepository(
             entity?.toUserProfile()
         }
 
-    suspend fun getGoogleSignInIntent(activity: Activity): android.content.Intent = run {
-        val webClientId = BuildConfig.GOOGLE_WEB_CLIENT_ID
-        require(webClientId.isNotBlank()) {
-            "Add GOOGLE_WEB_CLIENT_ID to local.properties. See google-services.json.example."
-        }
-        val options = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(webClientId)
-            .requestEmail()
-            .requestProfile()
-            .build()
-        GoogleSignIn.getClient(activity, options).signInIntent
-    }
-
-    suspend fun handleGoogleSignInResult(data: android.content.Intent?): Result<UserProfile> {
+    suspend fun signUp(email: String, password: String, displayName: String): Result<UserProfile> {
         return try {
-            val account = GoogleSignIn.getSignedInAccountFromIntent(data)
-                .getResult(ApiException::class.java)
-            val idToken = account.idToken
-                ?: return Result.failure(IllegalStateException("Google sign-in failed: no ID token"))
-
             val firebaseAuth = auth
                 ?: return Result.failure(IllegalStateException("Firebase not configured. Add google-services.json."))
 
-            val credential = GoogleAuthProvider.getCredential(idToken, null)
-            val result = firebaseAuth.signInWithCredential(credential).await()
-            val user = result.user ?: return Result.failure(IllegalStateException("Sign-in failed"))
+            val trimmedEmail = email.trim()
+            val trimmedName = displayName.trim()
+            require(trimmedEmail.contains("@")) { "Enter a valid email address" }
+            require(password.length >= 6) { "Password must be at least 6 characters" }
+            require(trimmedName.isNotBlank()) { "Enter your name" }
 
-            val profile = UserProfile(
-                uid = user.uid,
-                displayName = user.displayName ?: account.displayName ?: "Student",
-                email = user.email ?: account.email ?: "",
-                photoUrl = user.photoUrl?.toString() ?: account.photoUrl?.toString()
-            )
+            val result = firebaseAuth.createUserWithEmailAndPassword(trimmedEmail, password).await()
+            val user = result.user
+                ?: return Result.failure(IllegalStateException("Account creation failed"))
+
+            user.updateProfile(
+                UserProfileChangeRequest.Builder()
+                    .setDisplayName(trimmedName)
+                    .build()
+            ).await()
+
+            val profile = buildProfile(user, trimmedName)
             saveProfileLocally(profile)
             Result.success(profile)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception(friendlyAuthMessage(e)))
+        }
+    }
+
+    suspend fun signIn(email: String, password: String): Result<UserProfile> {
+        return try {
+            val firebaseAuth = auth
+                ?: return Result.failure(IllegalStateException("Firebase not configured. Add google-services.json."))
+
+            val trimmedEmail = email.trim()
+            require(trimmedEmail.contains("@")) { "Enter a valid email address" }
+            require(password.isNotBlank()) { "Enter your password" }
+
+            val result = firebaseAuth.signInWithEmailAndPassword(trimmedEmail, password).await()
+            val user = result.user
+                ?: return Result.failure(IllegalStateException("Sign-in failed"))
+
+            val profile = buildProfile(user)
+            saveProfileLocally(profile)
+            Result.success(profile)
+        } catch (e: Exception) {
+            Result.failure(Exception(friendlyAuthMessage(e)))
         }
     }
 
@@ -130,10 +139,45 @@ class AuthRepository(
 
     suspend fun signOut() {
         auth?.signOut()
-        GoogleSignIn.getClient(
-            context,
-            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
-        ).signOut().await()
+    }
+
+    private suspend fun buildProfile(user: FirebaseUser, overrideName: String? = null): UserProfile {
+        val local = userProfileDao.getProfile(user.uid)
+        val name = overrideName
+            ?: local?.displayName
+            ?: user.displayName
+            ?: user.email?.substringBefore("@")
+            ?: "Student"
+        return UserProfile(
+            uid = user.uid,
+            displayName = name,
+            email = user.email.orEmpty(),
+            photoUrl = user.photoUrl?.toString(),
+            gradeLevel = local?.gradeLevel ?: 8,
+            subscriptionTier = local?.subscriptionTier ?: "FREE",
+            createdAt = local?.createdAt ?: System.currentTimeMillis()
+        )
+    }
+
+    private fun friendlyAuthMessage(error: Exception): String {
+        val message = error.message.orEmpty()
+        return when {
+            message.contains("email address is badly formatted", ignoreCase = true) ->
+                "Please enter a valid email address."
+            message.contains("password is invalid", ignoreCase = true) ||
+                message.contains("wrong-password", ignoreCase = true) ->
+                "Incorrect email or password."
+            message.contains("no user record", ignoreCase = true) ||
+                message.contains("user-not-found", ignoreCase = true) ->
+                "No account found with this email. Try signing up."
+            message.contains("email address is already in use", ignoreCase = true) ->
+                "An account with this email already exists. Try signing in."
+            message.contains("weak password", ignoreCase = true) ->
+                "Password must be at least 6 characters."
+            message.contains("network", ignoreCase = true) ->
+                "Network error. Check your connection and try again."
+            else -> message.ifBlank { "Authentication failed. Please try again." }
+        }
     }
 
     private fun UserProfileEntity.toUserProfile() = UserProfile(

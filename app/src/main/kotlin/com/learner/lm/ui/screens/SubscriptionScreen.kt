@@ -177,7 +177,7 @@ fun SubscriptionScreen(
                                 when (plan.productId) {
                                     SubscriptionProducts.BASIC_MONTHLY -> "Subscribe — $9.99/mo"
                                     SubscriptionProducts.PRO_MONTHLY -> "Subscribe — $19.99/mo"
-                                    SubscriptionProducts.PRO_YEARLY -> "Subscribe — $239.88/yr"
+                                    SubscriptionProducts.PRO_YEARLY -> "Subscribe — $199.90/yr"
                                     else -> "Subscribe"
                                 }
                             )

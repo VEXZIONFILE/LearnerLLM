@@ -13,22 +13,18 @@ Create these subscription products in [Google Play Console](https://play.google.
 - Pro monthly × 12: $19.99 × 12 = **$239.88/year**
 - Pro yearly: $19.99 × 10 = **$199.90/year** (2 months free — save **$39.98**)
 
-## Firebase + Google Sign-In
+## Firebase Email & Password Auth
 
 1. Create a Firebase project at https://console.firebase.google.com
 2. Add Android app with package `com.learner.lm`
 3. Download `google-services.json` → place in `app/google-services.json`
-4. Enable **Google** sign-in in Firebase Authentication
-5. Copy the **Web client ID** to `local.properties`:
+4. In Firebase Console → **Authentication** → **Sign-in method** → enable **Email/Password**
 
-```properties
-GOOGLE_WEB_CLIENT_ID=YOUR_WEB_CLIENT_ID.apps.googleusercontent.com
-```
+Users stay signed in automatically after closing the app (Firebase persists the session on device).
 
 ## local.properties example
 
 ```properties
 sdk.dir=/path/to/Android/Sdk
 OPENROUTER_API_KEY=sk-or-v1-your-key
-GOOGLE_WEB_CLIENT_ID=your-web-client-id.apps.googleusercontent.com
 ```

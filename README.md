@@ -147,9 +147,9 @@ Students can tap **"Add yours"** on the chat screen to create personal subjects 
 
 Custom subjects are saved locally and tailor the AI tutor's guidance to that context.
 
-### Google Sign-In & Subscriptions
+### Email Sign-In & Subscriptions
 
-- **Google Sign-In** via Firebase Auth (see `PLAY_STORE_SETUP.md`)
+- **Email & password** via Firebase Auth — stays signed in after closing the app
 - **Subscriptions** via Google Play Billing:
   - Learner Basic — **$9.99/month**
   - Learner Pro — **$19.99/month**

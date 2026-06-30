@@ -1,7 +1,7 @@
 package com.learner.lm.ui.navigation
 
 enum class AppDestination(val title: String, val route: String) {
-    Login("Sign in", "login"),
+    Login("Account", "login"),
     Chat("Study Chat", "chat"),
     Scanner("Homework Scanner", "scanner"),
     Progress("Progress", "progress"),
