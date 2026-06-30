@@ -1,7 +1,5 @@
 package com.learner.lm.ai
 
-import com.learner.lm.billing.SubscriptionTier
-
 data class ModelRoute(
     val modelId: String,
     val displayName: String,
