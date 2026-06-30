@@ -44,7 +44,8 @@ mkdir -p data
 FIREBASE_AUTH_DISABLED=true uvicorn learner_api.main:app --host 0.0.0.0 --port 8080
 ```
 
-See [backend/README.md](backend/README.md) for production Firebase and billing setup.
+See [backend/README.md](backend/README.md) for production Firebase and billing setup.  
+**Production hosting:** [backend/FLY_DEPLOY.md](backend/FLY_DEPLOY.md) (Fly.io).
 
 ## 5. Configure the Android app
 
