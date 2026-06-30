@@ -79,10 +79,16 @@ fun LearnerApp() {
                     AppDestination.Chat -> ChatScreen(
                         gradeLevel = profile.gradeLevel,
                         subscriptionTier = profile.subscriptionTier,
+                        onNavigateToUpgrade = { currentDestination = AppDestination.Subscription },
                         viewModel = chatViewModel
                     )
                     AppDestination.Scanner -> ScannerScreen(
-                        onTextScanned = { chatViewModel.setScannedText(it) }
+                        subscriptionTier = profile.subscriptionTier,
+                        onTextScanned = { text ->
+                            chatViewModel.setScannedText(text)
+                            currentDestination = AppDestination.Chat
+                        },
+                        onNavigateToUpgrade = { currentDestination = AppDestination.Subscription }
                     )
                     AppDestination.Progress -> ProgressScreen()
                     AppDestination.Profile -> ProfileScreen(

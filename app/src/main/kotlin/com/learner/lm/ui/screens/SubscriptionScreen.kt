@@ -35,8 +35,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.learner.lm.auth.UserProfile
 import com.learner.lm.billing.SubscriptionCatalog
 import com.learner.lm.billing.SubscriptionProducts
+import com.learner.lm.billing.SubscriptionTier
 import com.learner.lm.ui.components.NotebookBadge
 import com.learner.lm.ui.components.NotebookCard
+import com.learner.lm.ui.components.PlanComparisonTable
+import com.learner.lm.ui.components.PremiumValueProposition
 import com.learner.lm.ui.theme.AppColors
 import com.learner.lm.ui.theme.AppRadii
 import com.learner.lm.ui.theme.AppSpacing
@@ -52,6 +55,8 @@ fun SubscriptionScreen(
     val context = LocalContext.current
     val activity = context as Activity
     val billingState by billingViewModel.billingState.collectAsStateWithLifecycle()
+    val isPremium = userProfile?.subscriptionTier == SubscriptionTier.BASIC.name ||
+        userProfile?.subscriptionTier == SubscriptionTier.PRO.name
 
     LaunchedEffect(billingState.activeProductId, userProfile?.uid) {
         val uid = userProfile?.uid ?: return@LaunchedEffect
@@ -66,9 +71,9 @@ fun SubscriptionScreen(
         verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
     ) {
         Text(
-            text = "Upgrade to Premium",
+            text = if (isPremium) "Your Premium plan" else "Upgrade to Premium",
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.Bold
         )
         onBack?.let { back ->
             androidx.compose.material3.TextButton(onClick = back) {
@@ -76,10 +81,14 @@ fun SubscriptionScreen(
             }
         }
         Text(
-            text = "Unlock deeper AI tutoring, full study packs, and better code help.",
+            text = "Get unlimited homework scans, deeper AI tutoring, and full study packs.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
+        PremiumValueProposition()
+
+        PlanComparisonTable()
 
         if (billingState.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -103,6 +112,13 @@ fun SubscriptionScreen(
             }
         }
 
+        Text(
+            text = "Choose a plan",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(top = 4.dp)
+        )
+
         SubscriptionCatalog.plans.forEach { plan ->
             val livePrice = billingViewModel.formattedPrice(plan.productId, plan.price)
             val isActive = billingState.activeProductId == plan.productId
@@ -119,7 +135,7 @@ fun SubscriptionScreen(
                             Text(
                                 text = plan.title,
                                 style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.Bold
                             )
                             Text(
                                 text = plan.description,
@@ -200,6 +216,21 @@ fun SubscriptionScreen(
                         }
                     }
                 }
+            }
+        }
+
+        NotebookCard(elevated = false) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    text = "Standard plan includes",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = "• 3 homework scans per day\n• All 3 AI models\n• Standard-depth responses",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
 

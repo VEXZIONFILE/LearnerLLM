@@ -1,5 +1,6 @@
 package com.learner.lm.ai
 
+import com.learner.lm.billing.ScanQuotaPolicy
 import com.learner.lm.billing.SubscriptionTier
 
 /**
@@ -13,7 +14,8 @@ data class SubscriptionCapabilities(
     val codeMaxTokens: Int,
     val studySections: StudySectionDepth,
     val tutorExampleCount: Int,
-    val codeMaxSuggestedLines: Int
+    val codeMaxSuggestedLines: Int,
+    val dailyHomeworkScans: Int?
 ) {
     enum class StudySectionDepth {
         BASIC,
@@ -32,7 +34,8 @@ data class SubscriptionCapabilities(
                     codeMaxTokens = 2_048,
                     studySections = StudySectionDepth.FULL,
                     tutorExampleCount = 3,
-                    codeMaxSuggestedLines = 40
+                    codeMaxSuggestedLines = 40,
+                    dailyHomeworkScans = null
                 )
             } else {
                 SubscriptionCapabilities(
@@ -42,7 +45,8 @@ data class SubscriptionCapabilities(
                     codeMaxTokens = 1_024,
                     studySections = StudySectionDepth.BASIC,
                     tutorExampleCount = 1,
-                    codeMaxSuggestedLines = 20
+                    codeMaxSuggestedLines = 20,
+                    dailyHomeworkScans = ScanQuotaPolicy.FREE_DAILY_LIMIT
                 )
             }
         }

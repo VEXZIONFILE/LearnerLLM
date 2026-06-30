@@ -103,6 +103,11 @@ dependencies {
 
     implementation("com.google.mlkit:text-recognition:16.0.1")
 
+    val cameraX = "1.3.4"
+    implementation("androidx.camera:camera-camera2:$cameraX")
+    implementation("androidx.camera:camera-lifecycle:$cameraX")
+    implementation("androidx.camera:camera-view:$cameraX")
+
     // -------------------------------------------------------------------------
     // Firebase — requires app/google-services.json from Firebase Console
     // https://firebase.google.com/docs/android/setup

@@ -1,5 +1,6 @@
 package com.learner.lm.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -23,7 +24,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.HorizontalDivider
@@ -49,12 +49,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.learner.lm.ai.AppMode
+import com.learner.lm.billing.SubscriptionTier
 import com.learner.lm.ui.components.AddCustomSubjectDialog
 import com.learner.lm.ui.components.AppModePicker
 import com.learner.lm.ui.components.ChatBubble
 import com.learner.lm.ui.components.HintLevelIndicator
 import com.learner.lm.ui.components.LearnerLogo
 import com.learner.lm.ui.components.NotebookCard
+import com.learner.lm.ui.components.PremiumUpgradeBanner
 import com.learner.lm.ui.components.StreakBadge
 import com.learner.lm.ui.components.SubjectPicker
 import com.learner.lm.ui.components.TypingIndicator
@@ -67,12 +69,16 @@ import com.learner.lm.viewmodel.ProgressViewModel
 fun ChatScreen(
     gradeLevel: Int,
     subscriptionTier: String,
+    onNavigateToUpgrade: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: ChatViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var input by remember { mutableStateOf("") }
+    var showUpgradeBanner by remember { mutableStateOf(true) }
     val listState = rememberLazyListState()
+    val isPremium = subscriptionTier == SubscriptionTier.BASIC.name ||
+        subscriptionTier == SubscriptionTier.PRO.name
 
     LaunchedEffect(gradeLevel) {
         viewModel.setGradeLevel(gradeLevel)
@@ -105,6 +111,13 @@ fun ChatScreen(
         )
 
         HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
+
+        if (!isPremium && showUpgradeBanner) {
+            PremiumUpgradeBanner(
+                onUpgrade = onNavigateToUpgrade,
+                onDismiss = { showUpgradeBanner = false }
+            )
+        }
 
         AppModePicker(
             selectedMode = uiState.selectedMode,
@@ -153,14 +166,26 @@ fun ChatScreen(
                     .fillMaxWidth()
                     .padding(horizontal = AppSpacing.md, vertical = AppSpacing.xs),
                 shape = RoundedCornerShape(AppRadii.md),
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
-            ) {
-                Text(
-                    text = "Scanned: ${scanned.take(100)}${if (scanned.length > 100) "…" else ""}",
-                    style = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier.padding(12.dp),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
                 )
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(
+                        text = "Homework attached",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = scanned.take(120) + if (scanned.length > 120) "…" else "",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
             }
         }
 
@@ -440,70 +465,6 @@ fun ProgressScreen(
                         )
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun ScannerScreen(
-    onTextScanned: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(AppSpacing.lg),
-        verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
-    ) {
-        Text(
-            text = "Homework scanner",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.SemiBold
-        )
-        Text(
-            text = "Capture worksheets and textbook pages for guided tutoring.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        NotebookCard {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(AppRadii.xl),
-                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-                    modifier = Modifier.size(80.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            Icons.Default.CameraAlt,
-                            contentDescription = null,
-                            modifier = Modifier.size(40.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-                Text(
-                    text = "Scan your worksheet",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = "Point your camera at a worksheet or textbook page. ML Kit OCR extracts text for tutoring.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = "Camera integration connects via HomeworkScanner in your activity.",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
             }
         }
     }

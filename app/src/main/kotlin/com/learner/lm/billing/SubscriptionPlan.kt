@@ -36,11 +36,11 @@ object SubscriptionCatalog {
             period = "/ month",
             description = "Deeper AI tutoring, richer study packs, and better code help.",
             features = listOf(
-                "All 3 AI modes (Tutor, Study, Code)",
-                "Deeper explanations and more examples",
-                "Full study packs with quizzes",
-                "Better debugging assistance",
-                "Unlimited chat"
+                "Unlimited homework scans",
+                "Deeper AI tutoring with more examples",
+                "Full study packs with quizzes & flashcards",
+                "Advanced code debugging walkthroughs",
+                "Unlimited chat across all 3 models"
             ),
             isPopular = true
         ),
@@ -53,8 +53,9 @@ object SubscriptionCatalog {
             description = "Best value — pay for 10 months, get 12 ($9.99 × 10).",
             features = listOf(
                 "Everything in Premium monthly",
-                "2 months free ($19.98 savings)",
-                "vs $119.88/year at monthly rate"
+                "Unlimited homework scans",
+                "Save $19.98 vs paying monthly",
+                "Best value for daily learners"
             ),
             badge = "2 months free"
         )

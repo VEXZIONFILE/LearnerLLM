@@ -2,6 +2,7 @@ package com.learner.lm.ai
 
 import com.learner.lm.billing.SubscriptionTier
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -170,5 +171,12 @@ class SubscriptionCapabilitiesTest {
         val caps = SubscriptionCapabilities.forTier(SubscriptionTier.BASIC.name)
         assertTrue(caps.isPremium)
         assertEquals(SubscriptionCapabilities.StudySectionDepth.FULL, caps.studySections)
+        assertNull(caps.dailyHomeworkScans)
+    }
+
+    @Test
+    fun `free tier limits homework scans`() {
+        val caps = SubscriptionCapabilities.forTier(SubscriptionTier.FREE.name)
+        assertEquals(3, caps.dailyHomeworkScans)
     }
 }
