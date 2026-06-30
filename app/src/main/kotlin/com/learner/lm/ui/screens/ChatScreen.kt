@@ -109,7 +109,7 @@ fun ChatScreen(
                     )
                 }
                 Text(
-                    text = "${uiState.activeModelLabel} · G$gradeLevel",
+                    text = uiState.activeModelLabel,
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

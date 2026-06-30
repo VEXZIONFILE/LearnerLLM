@@ -47,6 +47,13 @@ class ModelRegistryTest {
         val premium = ModelRegistry.resolve(AppMode.STUDY, SubscriptionTier.BASIC.name)
         assertTrue(premium.maxTokens > free.maxTokens)
     }
+
+    @Test
+    fun `display label uses branded model names without tier suffix`() {
+        assertEquals("Learner Tutor", ModelRegistry.displayLabel(AppMode.TUTOR, SubscriptionTier.FREE.name))
+        assertEquals("Learner Study", ModelRegistry.displayLabel(AppMode.STUDY, SubscriptionTier.FREE.name))
+        assertEquals("Learner Code", ModelRegistry.displayLabel(AppMode.CODE, SubscriptionTier.BASIC.name))
+    }
 }
 
 class StudySubjectTest {

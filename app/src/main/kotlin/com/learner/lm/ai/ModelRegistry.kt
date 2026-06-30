@@ -18,29 +18,25 @@ object ModelRegistry {
         return when (mode) {
             AppMode.TUTOR -> ModelRoute(
                 modelId = TUTOR_MODEL,
-                displayName = "LearnerLM Tutor",
+                displayName = "Learner Tutor",
                 temperature = if (capabilities.isPremium) 0.7 else 0.65,
                 maxTokens = capabilities.tutorMaxTokens
             )
             AppMode.STUDY -> ModelRoute(
                 modelId = STUDY_MODEL,
-                displayName = "Nemotron Study",
+                displayName = "Learner Study",
                 temperature = if (capabilities.isPremium) 0.5 else 0.45,
                 maxTokens = capabilities.studyMaxTokens
             )
             AppMode.CODE -> ModelRoute(
                 modelId = CODE_MODEL,
-                displayName = "Laguna Code",
+                displayName = "Learner Code",
                 temperature = if (capabilities.isPremium) 0.4 else 0.35,
                 maxTokens = capabilities.codeMaxTokens
             )
         }
     }
 
-    fun displayLabel(mode: AppMode, subscriptionTier: String): String {
-        val route = resolve(mode, subscriptionTier)
-        val tier = SubscriptionCapabilities.forTier(subscriptionTier)
-        val tierTag = if (tier.isPremium) "Premium" else "Free"
-        return "${route.displayName} · $tierTag"
-    }
+    fun displayLabel(mode: AppMode, subscriptionTier: String): String =
+        resolve(mode, subscriptionTier).displayName
 }
