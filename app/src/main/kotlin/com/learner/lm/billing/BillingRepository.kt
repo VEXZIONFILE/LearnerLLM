@@ -20,6 +20,7 @@ data class BillingUiState(
     val isLoading: Boolean = true,
     val productDetails: Map<String, ProductDetails> = emptyMap(),
     val activeProductId: String? = null,
+    val activePurchaseToken: String? = null,
     val error: String? = null,
     val purchaseMessage: String? = null
 )
@@ -98,7 +99,8 @@ class BillingRepository(private val context: Context) : PurchasesUpdatedListener
             if (result.responseCode == BillingClient.BillingResponseCode.OK) {
                 val active = purchases.firstOrNull { it.purchaseState == Purchase.PurchaseState.PURCHASED }
                 _state.value = _state.value.copy(
-                    activeProductId = active?.products?.firstOrNull()
+                    activeProductId = active?.products?.firstOrNull(),
+                    activePurchaseToken = active?.purchaseToken
                 )
             }
         }
@@ -158,7 +160,8 @@ class BillingRepository(private val context: Context) : PurchasesUpdatedListener
                 billingClient?.acknowledgePurchase(params) { }
             }
             _state.value = _state.value.copy(
-                activeProductId = purchase.products.firstOrNull()
+                activeProductId = purchase.products.firstOrNull(),
+                activePurchaseToken = purchase.purchaseToken
             )
         }
     }

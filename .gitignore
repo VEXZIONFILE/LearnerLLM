@@ -43,6 +43,11 @@ google-services.json
 # Environment
 .env
 .env.local
+backend/.env
+backend/data/
+backend/.venv/
+backend/**/__pycache__/
+backend/**/*.pyc
 *.keystore
 
 # OS

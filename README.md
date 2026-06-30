@@ -44,42 +44,23 @@ It is: *"A thinking partner that helps students learn how to solve problems, not
 
 | Layer | Technology |
 |-------|------------|
-| Language | Kotlin |
-| UI Framework | Jetpack Compose |
-| Architecture | MVVM |
-| Database | Room (SQLite) |
-| Image Processing | ML Kit OCR |
-| Networking | Retrofit + OpenRouter API |
-| AI Model | `openai/gpt-oss-120b` (displayed as **LearnerLM**) |
-| Authentication | Firebase Auth (optional) |
-| Sync | Firebase Firestore (optional) |
+| **Android** | Kotlin, Jetpack Compose, MVVM, Room |
+| **Backend** | FastAPI, SQLAlchemy, Firebase Admin |
+| Image Processing | ML Kit OCR (on-device) |
+| Networking | Retrofit → LearnerLM API |
+| AI Models | gpt-oss-120b, Nemotron 3 Super, Laguna M.1 (via OpenRouter on server) |
+| Authentication | Firebase Auth + server token verification |
+| Billing | Google Play + server purchase verification |
 
 ## Project Structure
 
 ```
 LearnerLM/
-├── app/
-│   ├── src/
-│   │   ├── main/
-│   │   │   ├── kotlin/com/learner/lm/
-│   │   │   │   ├── ui/
-│   │   │   │   │   ├── screens/
-│   │   │   │   │   ├── components/
-│   │   │   │   │   └── theme/
-│   │   │   │   ├── viewmodel/
-│   │   │   │   ├── repository/
-│   │   │   │   ├── database/
-│   │   │   │   ├── ai/
-│   │   │   │   │   ├── TutorEngine.kt
-│   │   │   │   │   ├── PromptBuilder.kt
-│   │   │   │   │   └── SubjectClassifier.kt
-│   │   │   │   ├── ocr/
-│   │   │   │   ├── utils/
-│   │   │   │   └── MainActivity.kt
-│   │   │   ├── res/
-│   │   │   └── AndroidManifest.xml
-│   │   └── test/
-│   └── build.gradle.kts
+├── app/                    # Android app (Kotlin / Compose)
+├── backend/                # FastAPI server (AI, quotas, billing, sync)
+│   ├── learner_api/
+│   ├── tests/
+│   └── docker-compose.yml
 ├── build.gradle.kts
 ├── settings.gradle.kts
 └── README.md
@@ -114,25 +95,31 @@ cd LearnerLM
 ./gradlew test
 ```
 
-### AI API Configuration (OpenRouter)
+### Backend + Android setup
 
-Learner LM uses [OpenRouter](https://openrouter.ai) with the **OpenAI gpt-oss-120b** model, branded in-app as **LearnerLM**.
+1. **Start the backend** (see [backend/README.md](backend/README.md)):
 
-Set your OpenRouter API key in `local.properties`:
+```bash
+cd backend
+cp .env.example .env
+# Add OPENROUTER_API_KEY to .env
+pip install -r requirements.txt
+uvicorn learner_api.main:app --host 0.0.0.0 --port 8080
+```
+
+2. **Configure the Android app** in `local.properties`:
 
 ```properties
-OPENROUTER_API_KEY=sk-or-v1-your-key-here
+LEARNER_API_BASE_URL=http://10.0.2.2:8080/
 ```
 
 | Setting | Value |
 |---------|-------|
-| API Base URL | `https://openrouter.ai/api/v1/` |
-| Model ID | `openai/gpt-oss-120b` |
-| Display Name | LearnerLM |
+| API Base URL | Your LearnerLM backend (e.g. `http://10.0.2.2:8080/`) |
+| OpenRouter key | Backend `.env` only — never in the APK |
+| Auth | Firebase ID token sent on every request |
 
-Get an API key at https://openrouter.ai/settings/keys
-
-The app includes an offline fallback tutor mode when no API key is configured.
+See [ANDROID_STUDIO_SETUP.md](ANDROID_STUDIO_SETUP.md) for the full walkthrough.
 
 ### Custom Subjects
 

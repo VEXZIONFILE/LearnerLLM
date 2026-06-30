@@ -8,14 +8,20 @@ If you discover a security issue in Learner LM, please open a private security a
 
 ## Scope
 
-Learner LM handles student learning data locally on-device. When using OpenRouter:
+Learner LM handles student learning data. The Android app authenticates with Firebase; all AI requests, scan quotas, and subscription tiers are enforced by the **LearnerLM backend API**.
 
-- `OPENROUTER_API_KEY` should be stored in `local.properties` (never committed to the repository)
-- Student conversations are sent to OpenRouter using the `openai/gpt-oss-120b` model
-- Review OpenRouter's privacy policy before deploying to students
+## Secrets
+
+| Secret | Where it belongs |
+|--------|------------------|
+| `OPENROUTER_API_KEY` | Backend `.env` only — **never** in the Android app |
+| Firebase service account | Backend `.env` (`FIREBASE_CREDENTIALS_PATH`) |
+| Google Play credentials | Backend `.env` for purchase verification |
+| `LEARNER_API_BASE_URL` | Android `local.properties` (not a secret; points to your API) |
 
 ## Best Practices
 
 - Do not hardcode API keys in source code
-- Use `local.properties` for development secrets (gitignored)
-- Review AI provider privacy policies before deploying to students
+- Run the backend on a trusted host (Docker, VPS, or cloud)
+- Use Firebase ID tokens for all `/v1/*` API calls
+- Review OpenRouter and Firebase privacy policies before deploying to students

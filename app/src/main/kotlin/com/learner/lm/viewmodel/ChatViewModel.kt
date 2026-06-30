@@ -11,12 +11,11 @@ import com.learner.lm.ai.StudySubject
 import com.learner.lm.ai.Subject
 import com.learner.lm.ai.SubjectCategory
 import com.learner.lm.ai.TutorContext
-import com.learner.lm.ai.TutorEngine
 import com.learner.lm.billing.SubscriptionTier
 import com.learner.lm.database.ChatMessageEntity
-import com.learner.lm.repository.AiRepository
 import com.learner.lm.repository.ChatMessage
-import com.learner.lm.repository.NetworkModule
+import com.learner.lm.repository.LearnerApiConfig
+import com.learner.lm.repository.LearnerChatRepository
 import com.learner.lm.repository.SubjectRepository
 import com.learner.lm.repository.TutorRepository
 import com.learner.lm.utils.GradeLevelValidator
@@ -59,9 +58,17 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         customSubjectDao = database.customSubjectDao()
     )
 
-    private val tutorEngine = TutorEngine(
-        aiRepository = AiRepository(apiService = NetworkModule.createAiApiService())
-    )
+    private val learnerChatRepository: LearnerChatRepository? by lazy {
+        if (LearnerApiConfig.isConfigured) {
+            try {
+                LearnerChatRepository()
+            } catch (_: Exception) {
+                null
+            }
+        } else {
+            null
+        }
+    }
 
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
@@ -169,18 +176,21 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                 val history = state.messages.map { entity ->
                     entity.role to entity.content
                 }
-                val response = tutorEngine.respond(
-                    TutorContext(
-                        gradeLevel = state.gradeLevel,
-                        subject = state.selectedSubject,
-                        appMode = state.selectedMode,
-                        subscriptionTier = state.subscriptionTier,
-                        hintLevel = state.hintLevel,
-                        studentMessage = content,
-                        conversationHistory = history,
-                        scannedText = state.scannedText
-                    )
+                val context = TutorContext(
+                    gradeLevel = state.gradeLevel,
+                    subject = state.selectedSubject,
+                    appMode = state.selectedMode,
+                    subscriptionTier = state.subscriptionTier,
+                    hintLevel = state.hintLevel,
+                    studentMessage = content,
+                    conversationHistory = history,
+                    scannedText = state.scannedText
                 )
+                val chatRepository = learnerChatRepository
+                    ?: throw IllegalStateException(
+                        "Learner API not configured. Set LEARNER_API_BASE_URL in local.properties."
+                    )
+                val response = chatRepository.sendMessage(sessionId, context)
 
                 tutorRepository.saveMessage(
                     sessionId,

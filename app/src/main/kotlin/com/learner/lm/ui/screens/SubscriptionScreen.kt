@@ -58,9 +58,13 @@ fun SubscriptionScreen(
     val isPremium = userProfile?.subscriptionTier == SubscriptionTier.BASIC.name ||
         userProfile?.subscriptionTier == SubscriptionTier.PRO.name
 
-    LaunchedEffect(billingState.activeProductId, userProfile?.uid) {
+    LaunchedEffect(billingState.activeProductId, billingState.activePurchaseToken, userProfile?.uid) {
         val uid = userProfile?.uid ?: return@LaunchedEffect
-        billingViewModel.syncSubscriptionToProfile(uid, billingState.activeProductId)
+        billingViewModel.syncSubscriptionToProfile(
+            uid = uid,
+            productId = billingState.activeProductId,
+            purchaseToken = billingState.activePurchaseToken
+        )
     }
 
     Column(

@@ -1,6 +1,6 @@
 package com.learner.lm.ai
 
-import com.learner.lm.BuildConfig
+import com.learner.lm.repository.LearnerApiConfig
 
 object AiConfig {
     const val TUTOR_MODEL_ID = ModelRegistry.TUTOR_MODEL
@@ -10,7 +10,6 @@ object AiConfig {
     /** Default display name for branding */
     const val MODEL_DISPLAY_NAME = "LearnerLM"
 
-    val apiBaseUrl: String = BuildConfig.OPENROUTER_BASE_URL
-    val apiKey: String = BuildConfig.OPENROUTER_API_KEY
-    val appReferer: String = BuildConfig.APP_REFERER
+    val apiBaseUrl: String = LearnerApiConfig.baseUrl
+    val isBackendConfigured: Boolean = LearnerApiConfig.isConfigured
 }

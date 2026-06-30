@@ -1,77 +1,26 @@
 package com.learner.lm.repository
 
-import com.learner.lm.ai.AiConfig
 import com.learner.lm.ai.AppMode
+import com.learner.lm.ai.ModelRegistry
 import com.learner.lm.ai.ModelRoute
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import java.util.concurrent.TimeUnit
+import com.learner.lm.billing.SubscriptionTier
 
-object NetworkModule {
-    fun createAiApiService(): AiApiService {
-        val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BASIC
-        }
-        val client = OkHttpClient.Builder()
-            .addInterceptor(logging)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(120, TimeUnit.SECONDS)
-            .build()
-
-        return Retrofit.Builder()
-            .baseUrl(AiConfig.apiBaseUrl)
-            .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(AiApiService::class.java)
-    }
-}
-
-class AiRepository(
-    private val apiService: AiApiService,
-    private val apiKeyProvider: () -> String? = { AiConfig.apiKey.takeIf { it.isNotBlank() } }
-) {
+/**
+ * Legacy local AI client — production chat flows through [LearnerChatRepository] and the backend API.
+ * Kept for unit tests and offline fallback messaging.
+ */
+class AiRepository {
     suspend fun generateResponse(
         systemPrompt: String,
         userPrompt: String,
         route: ModelRoute
-    ): String {
-        val apiKey = apiKeyProvider()?.takeIf { it.isNotBlank() }
-            ?: return offlineFallbackResponse(route)
+    ): String = offlineFallbackResponse(route)
 
-        return try {
-            val response = apiService.createChatCompletion(
-                authorization = "Bearer $apiKey",
-                referer = AiConfig.appReferer,
-                title = AiConfig.MODEL_DISPLAY_NAME,
-                request = ChatCompletionRequest(
-                    model = route.modelId,
-                    messages = listOf(
-                        ChatMessageDto(role = "system", content = systemPrompt),
-                        ChatMessageDto(role = "user", content = userPrompt)
-                    ),
-                    temperature = route.temperature,
-                    max_tokens = route.maxTokens
-                )
-            )
-            response.choices.firstOrNull()?.message?.content
-                ?: offlineFallbackResponse(route)
-        } catch (_: Exception) {
-            offlineFallbackResponse(route)
-        }
-    }
-
-    /** @deprecated Use [generateResponse] with [ModelRoute] */
     suspend fun generateTutorResponse(systemPrompt: String, userPrompt: String): String =
         generateResponse(
             systemPrompt = systemPrompt,
             userPrompt = userPrompt,
-            route = com.learner.lm.ai.ModelRegistry.resolve(
-                AppMode.TUTOR,
-                com.learner.lm.billing.SubscriptionTier.FREE.name
-            )
+            route = ModelRegistry.resolve(AppMode.TUTOR, SubscriptionTier.FREE.name)
         )
 
     private fun offlineFallbackResponse(route: ModelRoute): String = when {
@@ -83,7 +32,7 @@ class AiRepository(
 
         route.modelId.contains("nemotron", ignoreCase = true) -> """
             ## Summary
-            Study mode is offline — add your OpenRouter API key in local.properties to generate study packs.
+            Study mode is offline — connect to the LearnerLM backend to generate study packs.
 
             ## Key Concepts
             - Review your class notes on this topic

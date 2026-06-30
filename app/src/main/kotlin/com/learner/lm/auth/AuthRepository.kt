@@ -7,6 +7,8 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.learner.lm.database.UserProfileDao
 import com.learner.lm.database.UserProfileEntity
+import com.learner.lm.repository.LearnerApiConfig
+import com.learner.lm.repository.LearnerProfileRepository
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -84,7 +86,10 @@ class AuthRepository(
 
             val profile = buildProfile(user, trimmedName)
             saveProfileLocally(profile)
-            Result.success(profile)
+            syncProfileFromBackend(profile).fold(
+                onSuccess = { Result.success(it) },
+                onFailure = { Result.success(profile) }
+            )
         } catch (e: Exception) {
             Result.failure(Exception(friendlyAuthMessage(e)))
         }
@@ -105,7 +110,10 @@ class AuthRepository(
 
             val profile = buildProfile(user)
             saveProfileLocally(profile)
-            Result.success(profile)
+            syncProfileFromBackend(profile).fold(
+                onSuccess = { Result.success(it) },
+                onFailure = { Result.success(profile) }
+            )
         } catch (e: Exception) {
             Result.failure(Exception(friendlyAuthMessage(e)))
         }
@@ -130,6 +138,13 @@ class AuthRepository(
     suspend fun updateGradeLevel(uid: String, gradeLevel: Int) {
         val existing = userProfileDao.getProfile(uid) ?: return
         userProfileDao.upsert(existing.copy(gradeLevel = gradeLevel))
+        if (LearnerApiConfig.isConfigured) {
+            try {
+                LearnerProfileRepository().updateGradeLevel(gradeLevel)
+            } catch (_: Exception) {
+                // Local profile remains source of truth offline
+            }
+        }
     }
 
     suspend fun updateSubscriptionTier(uid: String, tier: String) {
@@ -139,6 +154,19 @@ class AuthRepository(
 
     suspend fun signOut() {
         auth?.signOut()
+    }
+
+    suspend fun syncProfileFromBackend(localProfile: UserProfile): Result<UserProfile> {
+        if (!LearnerApiConfig.isConfigured) return Result.success(localProfile)
+        return LearnerProfileRepository().fetchProfile().map { remote ->
+            val merged = localProfile.copy(
+                gradeLevel = remote.gradeLevel,
+                subscriptionTier = remote.subscriptionTier,
+                displayName = remote.displayName.ifBlank { localProfile.displayName }
+            )
+            saveProfileLocally(merged)
+            merged
+        }
     }
 
     private suspend fun buildProfile(user: FirebaseUser, overrideName: String? = null): UserProfile {

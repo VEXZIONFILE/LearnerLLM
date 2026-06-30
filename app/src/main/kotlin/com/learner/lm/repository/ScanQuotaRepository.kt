@@ -1,37 +1,24 @@
 package com.learner.lm.repository
 
 import android.content.Context
-import com.google.firebase.FirebaseApp
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
 import com.learner.lm.billing.ScanQuotaExceededException
-import com.learner.lm.billing.ScanQuotaPolicy
 import com.learner.lm.billing.ScanQuotaStatus
 import com.learner.lm.billing.SubscriptionTier
-import java.time.LocalDate
-import kotlinx.coroutines.tasks.await
+import retrofit2.HttpException
 
 /**
- * Tracks homework scan usage in Firebase Firestore per authenticated user.
- * Survives sign-out/sign-in and app reinstalls (tied to Firebase Auth UID).
- *
- * Path: users/{uid}/scan_usage/{yyyy-MM-dd}
+ * Tracks homework scan usage via the LearnerLM backend API.
+ * Server enforces daily limits atomically per authenticated user.
  */
-class ScanQuotaRepository(context: Context) {
+class ScanQuotaRepository(@Suppress("UNUSED_PARAMETER") context: Context) {
 
-    private val appContext = context.applicationContext
-
-    private val firebaseAvailable: Boolean by lazy {
+    private val apiService: LearnerApiService? by lazy {
+        if (!LearnerApiConfig.isConfigured) return@lazy null
         try {
-            FirebaseApp.getApps(appContext).isNotEmpty() || FirebaseApp.initializeApp(appContext) != null
+            LearnerApiClient.createService()
         } catch (_: Exception) {
-            false
+            null
         }
-    }
-
-    private val firestore: FirebaseFirestore? by lazy {
-        if (firebaseAvailable) FirebaseFirestore.getInstance() else null
     }
 
     fun isPremiumTier(tierName: String): Boolean =
@@ -41,13 +28,12 @@ class ScanQuotaRepository(context: Context) {
         if (userId.isBlank()) {
             return Result.failure(IllegalStateException("Sign in required to scan homework."))
         }
-        if (isPremiumTier(tierName)) {
-            return Result.success(ScanQuotaStatus.forTier(usedToday = 0, tierName))
-        }
+        val service = apiService
+            ?: return Result.failure(IllegalStateException("Learner API not configured. Set LEARNER_API_BASE_URL in local.properties."))
 
         return try {
-            val usedToday = readTodayCount(userId)
-            Result.success(ScanQuotaStatus.forTier(usedToday, tierName))
+            val dto = service.getScanQuota()
+            Result.success(dto.toStatus())
         } catch (error: Exception) {
             Result.failure(
                 IllegalStateException(
@@ -58,50 +44,27 @@ class ScanQuotaRepository(context: Context) {
         }
     }
 
-    /**
-     * Atomically records a successful scan on the server after OCR succeeds.
-     * Uses a Firestore transaction so concurrent captures cannot exceed the limit.
-     */
     suspend fun recordSuccessfulScan(userId: String, tierName: String): Result<ScanQuotaStatus> {
         if (userId.isBlank()) {
             return Result.failure(IllegalStateException("Sign in required to scan homework."))
         }
-        if (isPremiumTier(tierName)) {
-            return Result.success(ScanQuotaStatus.forTier(usedToday = 0, tierName))
-        }
-
-        val db = firestore
-            ?: return Result.failure(IllegalStateException("Firebase not configured. Add google-services.json."))
+        val service = apiService
+            ?: return Result.failure(IllegalStateException("Learner API not configured. Set LEARNER_API_BASE_URL in local.properties."))
 
         return try {
-            val today = todayYmd()
-            val docRef = db.collection(COLLECTION_USERS)
-                .document(userId)
-                .collection(COLLECTION_SCAN_USAGE)
-                .document(today)
-
-            val newCount = db.runTransaction { transaction ->
-                val snapshot = transaction.get(docRef)
-                val current = snapshot.getLong(FIELD_COUNT)?.toInt() ?: 0
-                if (current >= ScanQuotaPolicy.FREE_DAILY_LIMIT) {
-                    throw ScanQuotaExceededException()
-                }
-                val updated = current + 1
-                transaction.set(
-                    docRef,
-                    mapOf(
-                        FIELD_COUNT to updated,
-                        FIELD_DATE to today,
-                        FIELD_UPDATED_AT to FieldValue.serverTimestamp()
-                    ),
-                    SetOptions.merge()
+            val dto = service.recordScan()
+            Result.success(dto.toStatus())
+        } catch (error: HttpException) {
+            if (error.code() == 429) {
+                Result.failure(ScanQuotaExceededException())
+            } else {
+                Result.failure(
+                    IllegalStateException(
+                        "Could not save scan usage. Check your connection and try again.",
+                        error
+                    )
                 )
-                updated
-            }.await()
-
-            Result.success(ScanQuotaStatus.forTier(newCount, tierName))
-        } catch (error: ScanQuotaExceededException) {
-            Result.failure(error)
+            }
         } catch (error: Exception) {
             Result.failure(
                 IllegalStateException(
@@ -112,27 +75,11 @@ class ScanQuotaRepository(context: Context) {
         }
     }
 
-    private suspend fun readTodayCount(userId: String): Int {
-        val db = firestore
-            ?: throw IllegalStateException("Firebase not configured. Add google-services.json.")
-
-        val snapshot = db.collection(COLLECTION_USERS)
-            .document(userId)
-            .collection(COLLECTION_SCAN_USAGE)
-            .document(todayYmd())
-            .get()
-            .await()
-
-        return snapshot.getLong(FIELD_COUNT)?.toInt() ?: 0
-    }
-
-    private fun todayYmd(): String = LocalDate.now().toString()
-
-    companion object {
-        private const val COLLECTION_USERS = "users"
-        private const val COLLECTION_SCAN_USAGE = "scan_usage"
-        private const val FIELD_COUNT = "count"
-        private const val FIELD_DATE = "date"
-        private const val FIELD_UPDATED_AT = "updatedAt"
-    }
+    private fun ScanQuotaResponseDto.toStatus(): ScanQuotaStatus = ScanQuotaStatus(
+        usedToday = used_today,
+        isPremium = is_premium,
+        canScan = can_scan,
+        remainingScans = remaining,
+        quotaLabel = quota_label
+    )
 }

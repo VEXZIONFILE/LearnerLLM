@@ -34,5 +34,11 @@ Create these subscription products in [Google Play Console](https://play.google.
 
 ```properties
 sdk.dir=/path/to/Android/Sdk
-OPENROUTER_API_KEY=sk-or-v1-your-key
+LEARNER_API_BASE_URL=https://api.yourdomain.com/
 ```
+
+## Backend
+
+Deploy the `backend/` FastAPI service and set `OPENROUTER_API_KEY` in the server environment. The Android app never receives the OpenRouter key.
+
+After a purchase, the app calls `POST /v1/billing/verify` so subscription tier is enforced server-side.

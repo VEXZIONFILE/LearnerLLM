@@ -40,8 +40,7 @@ android {
             useSupportLibrary = true
         }
 
-        buildConfigField("String", "OPENROUTER_BASE_URL", "\"https://openrouter.ai/api/v1/\"")
-        buildConfigField("String", "OPENROUTER_API_KEY", "\"${localProperty("OPENROUTER_API_KEY")}\"")
+        buildConfigField("String", "LEARNER_API_BASE_URL", "\"${localProperty("LEARNER_API_BASE_URL", "http://10.0.2.2:8080/")}\"")
         buildConfigField("String", "APP_REFERER", "\"https://github.com/VEXZIONFILE/LearnerLLM\"")
     }
 
@@ -120,7 +119,6 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     // firebase-auth 24.1.0+ requires Kotlin 2.3; pin to 24.0.0 for Kotlin 2.2.x toolchains.
     implementation("com.google.firebase:firebase-auth:24.0.0")
-    implementation("com.google.firebase:firebase-firestore")
 
     implementation("com.android.billingclient:billing-ktx:7.0.0")
 
