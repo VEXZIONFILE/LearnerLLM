@@ -51,6 +51,7 @@ import com.learner.lm.ui.components.ChatBubble
 import com.learner.lm.ui.components.EmptyStateCard
 import com.learner.lm.ui.components.HintLevelIndicator
 import com.learner.lm.ui.components.NotebookCard
+import com.learner.lm.ui.components.NotebookPanel
 import com.learner.lm.ui.components.StreakBadge
 import com.learner.lm.ui.components.SubjectPicker
 import com.learner.lm.viewmodel.ChatViewModel
@@ -86,34 +87,38 @@ fun ChatScreen(
             .fillMaxSize()
             .imePadding()
     ) {
-        Row(
+        NotebookPanel(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 16.dp, vertical = 6.dp)
         ) {
-            if (uiState.selectedMode == AppMode.TUTOR) {
-                HintLevelIndicator(level = uiState.hintLevel.level)
-            } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (uiState.selectedMode == AppMode.TUTOR) {
+                    HintLevelIndicator(level = uiState.hintLevel.level)
+                } else {
+                    Text(
+                        text = uiState.selectedMode.label,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
                 Text(
-                    text = uiState.selectedMode.label,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.SemiBold
+                    text = "${uiState.activeModelLabel} · G$gradeLevel",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Text(
-                text = "${uiState.activeModelLabel} · Grade $gradeLevel · ${uiState.selectedSubject.displayName}",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
 
         AppModePicker(
             selectedMode = uiState.selectedMode,
-            onModeSelected = viewModel::selectMode,
-            modifier = Modifier.padding(bottom = 8.dp)
+            onModeSelected = viewModel::selectMode
         )
 
         SubjectPicker(

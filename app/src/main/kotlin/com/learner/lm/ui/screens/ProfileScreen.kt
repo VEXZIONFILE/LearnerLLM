@@ -1,8 +1,6 @@
 package com.learner.lm.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,7 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Grade
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -29,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.learner.lm.auth.UserProfile
@@ -40,7 +36,6 @@ import com.learner.lm.ui.components.ProfileAvatar
 import com.learner.lm.ui.components.ProfileStatCard
 import com.learner.lm.ui.components.SectionHeader
 import com.learner.lm.ui.components.SettingsRow
-import com.learner.lm.ui.theme.learnerHeroBrush
 
 @Composable
 fun ProfileScreen(
@@ -50,145 +45,132 @@ fun ProfileScreen(
     onSignOut: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val scrollState = rememberScrollState()
-    val darkTheme = isSystemInDarkTheme()
-
     Column(
         modifier = modifier
             .fillMaxSize()
-            .verticalScroll(scrollState)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(learnerHeroBrush(darkTheme))
-                .padding(top = 8.dp, bottom = 32.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+        Text(
+            text = "Account",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Medium
+        )
+
+        NotebookCard {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 ProfileAvatar(
                     name = profile.displayName,
                     photoUrl = profile.photoUrl,
-                    size = 96.dp,
-                    modifier = Modifier.clip(RoundedCornerShape(48.dp))
+                    size = 56.dp,
+                    modifier = Modifier.clip(RoundedCornerShape(28.dp))
                 )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = profile.displayName,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = Color.White,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = profile.email,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.85f)
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                    NotebookBadge(
-                        text = tierLabel(profile.subscriptionTier),
-                        highlighted = profile.subscriptionTier != SubscriptionTier.FREE.name
-                    )
-            }
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                ProfileStatCard(
-                    label = "Grade",
-                    value = "${profile.gradeLevel}",
-                    modifier = Modifier.weight(1f)
-                )
-                ProfileStatCard(
-                    label = "Plan",
-                    value = planShortLabel(profile.subscriptionTier),
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            SectionHeader(title = "Learning")
-            NotebookCard {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Column(modifier = Modifier.padding(start = 14.dp)) {
                     Text(
-                        text = "Grade level",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = MaterialTheme.typography.titleMedium.fontWeight
+                        text = profile.displayName,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Medium
                     )
                     Text(
-                        text = "Tutor responses adapt to grade ${profile.gradeLevel}",
+                        text = profile.email,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Slider(
-                        value = profile.gradeLevel.toFloat(),
-                        onValueChange = { onGradeLevelChange(it.toInt()) },
-                        valueRange = 6f..12f,
-                        steps = 5,
-                        colors = SliderDefaults.colors(
-                            thumbColor = MaterialTheme.colorScheme.primary,
-                            activeTrackColor = MaterialTheme.colorScheme.primary
-                        )
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("6", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("12", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
-            }
-
-            SectionHeader(title = "Account")
-            NotebookCard {
-                Column {
-                    SettingsRow(
-                        icon = Icons.Default.Star,
-                        title = "Subscription",
-                        subtitle = subscriptionDescription(profile.subscriptionTier),
-                        trailing = "Manage",
-                        onClick = onNavigateToSubscription
-                    )
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
-                    SettingsRow(
-                        icon = Icons.Default.Grade,
-                        title = "Grade ${profile.gradeLevel}",
-                        subtitle = "Adjust how advanced explanations are"
+                    NotebookBadge(
+                        text = tierLabel(profile.subscriptionTier),
+                        highlighted = profile.subscriptionTier != SubscriptionTier.FREE.name
                     )
                 }
             }
+        }
 
-            OutlinedButton(
-                onClick = onSignOut,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colorScheme.error
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            ProfileStatCard(
+                label = "Grade",
+                value = "${profile.gradeLevel}",
+                modifier = Modifier.weight(1f)
+            )
+            ProfileStatCard(
+                label = "Plan",
+                value = planShortLabel(profile.subscriptionTier),
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        SectionHeader(title = "Learning")
+        NotebookCard {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = "Grade level",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium
                 )
-            ) {
-                androidx.compose.material3.Icon(
-                    Icons.Default.ExitToApp,
-                    contentDescription = null,
-                    modifier = Modifier.padding(end = 8.dp)
+                Text(
+                    text = "Tutor responses adapt to grade ${profile.gradeLevel}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Text("Sign out", fontWeight = FontWeight.Medium)
+                Spacer(modifier = Modifier.height(8.dp))
+                Slider(
+                    value = profile.gradeLevel.toFloat(),
+                    onValueChange = { onGradeLevelChange(it.toInt()) },
+                    valueRange = 6f..12f,
+                    steps = 5,
+                    colors = SliderDefaults.colors(
+                        thumbColor = MaterialTheme.colorScheme.primary,
+                        activeTrackColor = MaterialTheme.colorScheme.primary
+                    )
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("6", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("12", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
+        }
+
+        SectionHeader(title = "Account")
+        NotebookCard {
+            Column {
+                SettingsRow(
+                    icon = Icons.Default.Star,
+                    title = "Subscription",
+                    subtitle = subscriptionDescription(profile.subscriptionTier),
+                    trailing = "Manage",
+                    onClick = onNavigateToSubscription
+                )
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                SettingsRow(
+                    icon = Icons.Default.Grade,
+                    title = "Grade ${profile.gradeLevel}",
+                    subtitle = "Adjust how advanced explanations are"
+                )
+            }
+        }
+
+        OutlinedButton(
+            onClick = onSignOut,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp),
+            shape = RoundedCornerShape(24.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = MaterialTheme.colorScheme.error
+            )
+        ) {
+            androidx.compose.material3.Icon(
+                Icons.Default.ExitToApp,
+                contentDescription = null,
+                modifier = Modifier.padding(end = 8.dp)
+            )
+            Text("Sign out", fontWeight = FontWeight.Medium)
         }
     }
 }

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -17,11 +16,11 @@ import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.BorderStroke
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -57,61 +56,68 @@ fun NotebookScaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column {
+                TopAppBar(
+                    title = {
+                        Column {
                             if (!showBack) {
-                                LearnerLogo(
-                                    showWordmark = false,
-                                    modifier = Modifier.size(30.dp)
+                                BrandMark(iconSize = 26.dp, showWordmark = true)
+                            } else {
+                                Text(
+                                    text = currentDestination.title,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Medium
                                 )
-                                Spacer(modifier = Modifier.width(10.dp))
                             }
-                            Text(
-                                text = currentDestination.title,
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.SemiBold
+                            if (!showBack) {
+                                Text(
+                                    text = currentDestination.title,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    },
+                    navigationIcon = {
+                        if (showBack && onBack != null) {
+                            IconButton(onClick = onBack) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                            }
+                        }
+                    },
+                    actions = {
+                        if (currentDestination == AppDestination.Profile && userProfile != null) {
+                            ProfileAvatar(
+                                name = userProfile.displayName,
+                                photoUrl = userProfile.photoUrl,
+                                size = 32.dp,
+                                modifier = Modifier.padding(end = 12.dp)
                             )
                         }
-                        userProfile?.let { profile ->
-                            Text(
-                                text = profile.displayName,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                },
-                navigationIcon = {
-                    if (showBack && onBack != null) {
-                        IconButton(onClick = onBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                        }
-                    }
-                },
-                actions = {
-                    if (currentDestination == AppDestination.Profile && userProfile != null) {
-                        ProfileAvatar(
-                            name = userProfile.displayName,
-                            photoUrl = userProfile.photoUrl,
-                            size = 36.dp,
-                            modifier = Modifier.padding(end = 12.dp)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surface
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.background,
+                        scrolledContainerColor = MaterialTheme.colorScheme.background
+                    )
                 )
-            )
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
+                    thickness = 0.5.dp
+                )
+            }
         },
         bottomBar = {
             if (currentDestination.showsBottomNav) {
-                LearnerBottomNav(
-                    currentDestination = currentDestination,
-                    onNavigate = onNavigate
-                )
+                Column {
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
+                        thickness = 0.5.dp
+                    )
+                    LearnerBottomNav(
+                        currentDestination = currentDestination,
+                        onNavigate = onNavigate
+                    )
+                }
             }
         }
     ) { innerPadding ->
@@ -133,19 +139,31 @@ private fun LearnerBottomNav(
 ) {
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
-        tonalElevation = 3.dp
+        tonalElevation = 0.dp
     ) {
         AppDestination.bottomNavDestinations.forEach { destination ->
-            val icon = destination.icon()
             NavigationBarItem(
                 selected = currentDestination == destination,
                 onClick = { onNavigate(destination) },
-                icon = { Icon(icon, contentDescription = destination.shortLabel) },
-                label = { Text(destination.shortLabel) },
+                icon = {
+                    Icon(
+                        destination.icon(),
+                        contentDescription = destination.shortLabel,
+                        modifier = Modifier.size(22.dp)
+                    )
+                },
+                label = {
+                    Text(
+                        destination.shortLabel,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = MaterialTheme.colorScheme.primary,
                     selectedTextColor = MaterialTheme.colorScheme.primary,
-                    indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    indicatorColor = NotebookColors.NotebookChipSelected.copy(alpha = 0.65f)
                 )
             )
         }
@@ -157,7 +175,7 @@ private fun AppDestination.icon(): ImageVector = when (this) {
     AppDestination.Scanner -> Icons.Default.CameraAlt
     AppDestination.Progress -> Icons.Default.Insights
     AppDestination.Profile -> Icons.Default.Person
-    else -> Icons.Default.Star
+    else -> Icons.AutoMirrored.Filled.Chat
 }
 
 @Composable
@@ -167,12 +185,12 @@ fun NotebookCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.28f))
     ) {
-        Box(modifier = Modifier.padding(20.dp)) {
+        Box(modifier = Modifier.padding(18.dp)) {
             content()
         }
     }
@@ -186,16 +204,41 @@ fun NotebookBadge(
 ) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(20.dp),
-        color = if (highlighted) NotebookColors.ProGold.copy(alpha = 0.18f)
-        else MaterialTheme.colorScheme.primaryContainer
+        shape = RoundedCornerShape(999.dp),
+        color = if (highlighted) {
+            NotebookColors.ProGold.copy(alpha = 0.15f)
+        } else {
+            MaterialTheme.colorScheme.surfaceVariant
+        },
+        border = BorderStroke(
+            1.dp,
+            if (highlighted) NotebookColors.ProGold.copy(alpha = 0.4f)
+            else MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
+        )
     ) {
         Text(
             text = text,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
             style = MaterialTheme.typography.labelMedium,
-            color = if (highlighted) NotebookColors.ProGold else MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.SemiBold
+            color = if (highlighted) NotebookColors.ProGold else MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = FontWeight.Medium
         )
+    }
+}
+
+/** NotebookLM-style inset panel for toolbars and chip rows. */
+@Composable
+fun NotebookPanel(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.22f)),
+        tonalElevation = 0.dp
+    ) {
+        content()
     }
 }

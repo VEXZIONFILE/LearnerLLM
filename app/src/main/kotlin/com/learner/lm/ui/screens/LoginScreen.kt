@@ -1,14 +1,11 @@
 package com.learner.lm.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -27,7 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -46,7 +42,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.learner.lm.ui.components.LearnerLogo
+import com.learner.lm.ui.components.BrandMark
+import com.learner.lm.ui.components.NotebookCard
 import com.learner.lm.viewmodel.AuthViewModel
 
 @Composable
@@ -66,53 +63,34 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
             .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp, vertical = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White)
-                .statusBarsPadding()
-                .padding(top = 20.dp, bottom = 16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                LearnerLogo(
-                    modifier = Modifier
-                        .fillMaxWidth(0.72f)
-                        .height(110.dp),
-                    showWordmark = true
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = if (isSignUp) "Create your account" else "Your AI study partner",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
+        BrandMark(iconSize = 40.dp, showWordmark = true)
 
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .offset(y = (-24).dp)
-                .padding(horizontal = 20.dp),
-            shape = RoundedCornerShape(24.dp),
-            tonalElevation = 4.dp,
-            shadowElevation = 8.dp
-        ) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = if (isSignUp) "Create your account" else "Sign in to continue",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(28.dp))
+
+        NotebookCard {
+            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Text(
-                    text = if (isSignUp) "Sign up" else "Sign in",
+                    text = if (isSignUp) "Sign up" else "Welcome back",
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = "You'll stay signed in even after closing the app.",
+                    text = "Your session stays active after closing the app.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -153,8 +131,6 @@ fun LoginScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
-
                 Button(
                     onClick = {
                         if (isSignUp) {
@@ -165,21 +141,20 @@ fun LoginScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(52.dp),
-                    shape = RoundedCornerShape(16.dp),
+                        .height(48.dp),
+                    shape = RoundedCornerShape(24.dp),
                     enabled = !isLoading
                 ) {
                     if (isLoading) {
                         CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(22.dp),
                             color = Color.White,
                             strokeWidth = 2.dp
                         )
                     } else {
                         Text(
                             if (isSignUp) "Create account" else "Sign in",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold
+                            style = MaterialTheme.typography.labelLarge
                         )
                     }
                 }
@@ -194,21 +169,20 @@ fun LoginScreen(
                     Text(
                         if (isSignUp) "Already have an account? Sign in"
                         else "Don't have an account? Sign up",
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
 
                 OutlinedButton(
                     onClick = onNavigateToSubscription,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(24.dp)
                 ) {
-                    Text("View plans")
+                    Text("View Premium plans", style = MaterialTheme.typography.labelLarge)
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 
@@ -246,10 +220,12 @@ private fun AuthTextField(
             }
         } else null,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface
         )
     )
 }

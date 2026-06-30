@@ -8,11 +8,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -51,30 +49,30 @@ fun ProfileAvatar(
             contentDescription = "Profile photo",
             modifier = modifier
                 .size(size)
-                .clip(CircleShape),
+                .clip(RoundedCornerShape(size / 2)),
             contentScale = ContentScale.Crop
         )
     } else {
         Box(
             modifier = modifier
                 .size(size)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary),
+                .clip(RoundedCornerShape(size / 2))
+                .background(MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.Center
         ) {
             if (initials.length >= 2) {
                 Text(
                     text = initials,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold
                 )
             } else {
                 Icon(
                     Icons.Default.Person,
                     contentDescription = null,
-                    modifier = Modifier.size(size * 0.5f),
-                    tint = MaterialTheme.colorScheme.onPrimary
+                    modifier = Modifier.size(size * 0.45f),
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         }
@@ -87,20 +85,12 @@ fun ProfileStatCard(
     value: String,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 1.dp
-    ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    NotebookCard(modifier = modifier) {
+        Column {
             Text(
                 text = value,
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.primary
             )
             Text(
@@ -125,24 +115,24 @@ fun SettingsRow(
         modifier = modifier
             .fillMaxWidth()
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = 4.dp, vertical = 14.dp),
+            .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
-            shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-            modifier = Modifier.size(40.dp)
+            shape = RoundedCornerShape(10.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            modifier = Modifier.size(36.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     icon,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }
-        Spacer(modifier = Modifier.width(14.dp))
+        Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
@@ -160,16 +150,17 @@ fun SettingsRow(
         if (trailing != null) {
             Text(
                 text = trailing,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary
             )
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(2.dp))
         }
         if (onClick != null) {
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp)
             )
         }
     }
@@ -182,10 +173,10 @@ fun SectionHeader(
 ) {
     Text(
         text = title,
-        modifier = modifier.padding(horizontal = 4.dp, vertical = 8.dp),
+        modifier = modifier.padding(horizontal = 2.dp, vertical = 4.dp),
         style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        fontWeight = FontWeight.SemiBold
+        fontWeight = FontWeight.Medium
     )
 }
 
@@ -197,7 +188,7 @@ fun EmptyStateCard(
 ) {
     NotebookCard(modifier = modifier) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -208,7 +199,7 @@ fun EmptyStateCard(
             )
             Text(
                 text = message,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }

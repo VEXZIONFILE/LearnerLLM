@@ -35,40 +35,46 @@ fun SubjectPicker(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = "What are you working on?",
-            style = MaterialTheme.typography.labelLarge,
+        NotebookPanel(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            StudySubject.builtinSubjects.forEach { builtin ->
-                SubjectChip(
-                    label = builtin.displayName,
-                    selected = selectedSubject.storageKey == builtin.storageKey,
-                    onClick = { onSubjectSelected(builtin) }
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text(
+                    text = "Subject",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            }
-            customSubjects.forEach { custom ->
-                SubjectChip(
-                    label = "${custom.emoji} ${custom.displayName}",
-                    selected = selectedSubject.storageKey == custom.storageKey,
-                    onClick = { onSubjectSelected(custom) }
-                )
-            }
-            FilterChip(
-                selected = false,
-                onClick = onAddCustomSubject,
-                label = { Text("Add yours") },
-                leadingIcon = {
-                    Icon(Icons.Default.Add, contentDescription = "Add custom subject")
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    StudySubject.builtinSubjects.forEach { builtin ->
+                        SubjectChip(
+                            label = builtin.displayName,
+                            selected = selectedSubject.storageKey == builtin.storageKey,
+                            onClick = { onSubjectSelected(builtin) }
+                        )
+                    }
+                    customSubjects.forEach { custom ->
+                        SubjectChip(
+                            label = "${custom.emoji} ${custom.displayName}",
+                            selected = selectedSubject.storageKey == custom.storageKey,
+                            onClick = { onSubjectSelected(custom) }
+                        )
+                    }
+                    FilterChip(
+                        selected = false,
+                        onClick = onAddCustomSubject,
+                        label = { Text("Add yours") },
+                        leadingIcon = {
+                            Icon(Icons.Default.Add, contentDescription = "Add custom subject")
+                        }
+                    )
                 }
-            )
+            }
         }
     }
 }
