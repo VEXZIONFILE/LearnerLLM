@@ -4,10 +4,9 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
-}
 
-if (file("google-services.json").exists()) {
-    apply(plugin = "com.google.gms.google-services")
+    // Add the Google services Gradle plugin
+    id("com.google.gms.google-services")
 }
 
 val localProperties = Properties().apply {
@@ -105,8 +104,13 @@ dependencies {
 
     implementation("com.google.mlkit:text-recognition:16.0.1")
 
-    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
-    implementation("com.google.firebase:firebase-auth-ktx")
+    // Import the Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:34.15.0"))
+
+    // Firebase products (versions managed by BoM)
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
+
     implementation("com.android.billingclient:billing-ktx:7.0.0")
 
     implementation("io.coil-kt:coil-compose:2.6.0")
