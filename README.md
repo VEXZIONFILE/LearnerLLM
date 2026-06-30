@@ -147,6 +147,14 @@ Students can tap **"Add yours"** on the chat screen to create personal subjects 
 
 Custom subjects are saved locally and tailor the AI tutor's guidance to that context.
 
+### Google Sign-In & Subscriptions
+
+- **Google Sign-In** via Firebase Auth (see `PLAY_STORE_SETUP.md`)
+- **Subscriptions** via Google Play Billing:
+  - Learner Basic — **$9.99/month**
+  - Learner Pro — **$19.99/month**
+  - Learner Pro Yearly — **$239.88/year** (2 months free)
+
 ## AI Tutor Engine
 
 The core AI behavior follows the **Socratic Method** with a **Hint Ladder System**:
