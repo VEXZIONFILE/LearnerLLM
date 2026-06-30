@@ -26,9 +26,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.learner.lm.ui.theme.AppColors
+import com.learner.lm.ui.theme.AppRadii
+import com.learner.lm.ui.theme.AppSpacing
 
 @Composable
 fun ProfileAvatar(
@@ -57,7 +61,7 @@ fun ProfileAvatar(
             modifier = modifier
                 .size(size)
                 .clip(RoundedCornerShape(size / 2))
-                .background(MaterialTheme.colorScheme.primaryContainer),
+                .background(AppColors.AccentLight),
             contentAlignment = Alignment.Center
         ) {
             if (initials.length >= 2) {
@@ -65,7 +69,7 @@ fun ProfileAvatar(
                     text = initials,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.Bold
                 )
             } else {
                 Icon(
@@ -89,8 +93,8 @@ fun ProfileStatCard(
         Column {
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Medium,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary
             )
             Text(
@@ -119,9 +123,9 @@ fun SettingsRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
-            shape = RoundedCornerShape(10.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier.size(36.dp)
+            shape = RoundedCornerShape(AppRadii.sm),
+            color = AppColors.AccentLight.copy(alpha = 0.55f),
+            modifier = Modifier.size(38.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
@@ -151,7 +155,8 @@ fun SettingsRow(
             Text(
                 text = trailing,
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.width(2.dp))
         }
@@ -172,11 +177,11 @@ fun SectionHeader(
     modifier: Modifier = Modifier
 ) {
     Text(
-        text = title,
+        text = title.uppercase(),
         modifier = modifier.padding(horizontal = 2.dp, vertical = 4.dp),
-        style = MaterialTheme.typography.labelLarge,
+        style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        fontWeight = FontWeight.Medium
+        fontWeight = FontWeight.SemiBold
     )
 }
 
@@ -186,7 +191,7 @@ fun EmptyStateCard(
     message: String,
     modifier: Modifier = Modifier
 ) {
-    NotebookCard(modifier = modifier) {
+    NotebookCard(modifier = modifier, elevated = false) {
         Column(
             verticalArrangement = Arrangement.spacedBy(6.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -195,12 +200,14 @@ fun EmptyStateCard(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center
             )
             Text(
                 text = message,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
             )
         }
     }

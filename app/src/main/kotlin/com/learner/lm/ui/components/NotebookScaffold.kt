@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,7 +41,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.learner.lm.auth.UserProfile
 import com.learner.lm.ui.navigation.AppDestination
-import com.learner.lm.ui.theme.NotebookColors
+import com.learner.lm.ui.theme.AppColors
+import com.learner.lm.ui.theme.AppRadii
+import com.learner.lm.ui.theme.AppSpacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,67 +59,68 @@ fun NotebookScaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Column {
-                TopAppBar(
-                    title = {
-                        Column {
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                shadowElevation = 1.dp
+            ) {
+                Column {
+                    TopAppBar(
+                        title = {
                             if (!showBack) {
-                                BrandMark(iconSize = 26.dp, showWordmark = true)
+                                BrandMark(iconSize = 28.dp, showWordmark = true)
                             } else {
                                 Text(
                                     text = currentDestination.title,
                                     style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Medium
+                                    fontWeight = FontWeight.SemiBold
                                 )
                             }
-                            if (!showBack) {
-                                Text(
-                                    text = currentDestination.title,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                        navigationIcon = {
+                            if (showBack && onBack != null) {
+                                IconButton(onClick = onBack) {
+                                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                                }
+                            }
+                        },
+                        actions = {
+                            if (currentDestination == AppDestination.Profile && userProfile != null) {
+                                ProfileAvatar(
+                                    name = userProfile.displayName,
+                                    photoUrl = userProfile.photoUrl,
+                                    size = 34.dp,
+                                    modifier = Modifier.padding(end = AppSpacing.md)
                                 )
                             }
-                        }
-                    },
-                    navigationIcon = {
-                        if (showBack && onBack != null) {
-                            IconButton(onClick = onBack) {
-                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                            }
-                        }
-                    },
-                    actions = {
-                        if (currentDestination == AppDestination.Profile && userProfile != null) {
-                            ProfileAvatar(
-                                name = userProfile.displayName,
-                                photoUrl = userProfile.photoUrl,
-                                size = 32.dp,
-                                modifier = Modifier.padding(end = 12.dp)
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.background,
-                        scrolledContainerColor = MaterialTheme.colorScheme.background
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            scrolledContainerColor = MaterialTheme.colorScheme.surface
+                        )
                     )
-                )
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
-                    thickness = 0.5.dp
-                )
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                        thickness = 0.5.dp
+                    )
+                }
             }
         },
         bottomBar = {
             if (currentDestination.showsBottomNav) {
-                Column {
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
-                        thickness = 0.5.dp
-                    )
-                    LearnerBottomNav(
-                        currentDestination = currentDestination,
-                        onNavigate = onNavigate
-                    )
+                Surface(
+                    color = MaterialTheme.colorScheme.surface,
+                    shadowElevation = 8.dp
+                ) {
+                    Column {
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
+                            thickness = 0.5.dp
+                        )
+                        LearnerBottomNav(
+                            currentDestination = currentDestination,
+                            onNavigate = onNavigate
+                        )
+                    }
                 }
             }
         }
@@ -142,8 +146,9 @@ private fun LearnerBottomNav(
         tonalElevation = 0.dp
     ) {
         AppDestination.bottomNavDestinations.forEach { destination ->
+            val selected = currentDestination == destination
             NavigationBarItem(
-                selected = currentDestination == destination,
+                selected = selected,
                 onClick = { onNavigate(destination) },
                 icon = {
                     Icon(
@@ -155,7 +160,8 @@ private fun LearnerBottomNav(
                 label = {
                     Text(
                         destination.shortLabel,
-                        style = MaterialTheme.typography.labelSmall
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
@@ -163,7 +169,7 @@ private fun LearnerBottomNav(
                     selectedTextColor = MaterialTheme.colorScheme.primary,
                     unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    indicatorColor = NotebookColors.NotebookChipSelected.copy(alpha = 0.65f)
+                    indicatorColor = AppColors.AccentLight.copy(alpha = 0.7f)
                 )
             )
         }
@@ -181,16 +187,22 @@ private fun AppDestination.icon(): ImageVector = when (this) {
 @Composable
 fun NotebookCard(
     modifier: Modifier = Modifier,
+    elevated: Boolean = true,
     content: @Composable () -> Unit
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(AppRadii.lg),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.28f))
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (elevated) 2.dp else 0.dp
+        ),
+        border = if (elevated) null else BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+        )
     ) {
-        Box(modifier = Modifier.padding(18.dp)) {
+        Box(modifier = Modifier.padding(AppSpacing.lg)) {
             content()
         }
     }
@@ -204,29 +216,28 @@ fun NotebookBadge(
 ) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(999.dp),
+        shape = RoundedCornerShape(AppRadii.pill),
         color = if (highlighted) {
-            NotebookColors.ProGold.copy(alpha = 0.15f)
+            AppColors.ProGold.copy(alpha = 0.12f)
         } else {
             MaterialTheme.colorScheme.surfaceVariant
         },
         border = BorderStroke(
             1.dp,
-            if (highlighted) NotebookColors.ProGold.copy(alpha = 0.4f)
-            else MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
+            if (highlighted) AppColors.ProGold.copy(alpha = 0.35f)
+            else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
         )
     ) {
         Text(
             text = text,
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
             style = MaterialTheme.typography.labelMedium,
-            color = if (highlighted) NotebookColors.ProGold else MaterialTheme.colorScheme.onSurfaceVariant,
-            fontWeight = FontWeight.Medium
+            color = if (highlighted) AppColors.ProGold else MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = FontWeight.SemiBold
         )
     }
 }
 
-/** NotebookLM-style inset panel for toolbars and chip rows. */
 @Composable
 fun NotebookPanel(
     modifier: Modifier = Modifier,
@@ -234,9 +245,9 @@ fun NotebookPanel(
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(AppRadii.lg),
         color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.22f)),
+        shadowElevation = 1.dp,
         tonalElevation = 0.dp
     ) {
         content()

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -19,6 +20,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +37,9 @@ import com.learner.lm.billing.SubscriptionCatalog
 import com.learner.lm.billing.SubscriptionProducts
 import com.learner.lm.ui.components.NotebookBadge
 import com.learner.lm.ui.components.NotebookCard
+import com.learner.lm.ui.theme.AppColors
+import com.learner.lm.ui.theme.AppRadii
+import com.learner.lm.ui.theme.AppSpacing
 import com.learner.lm.viewmodel.BillingViewModel
 
 @Composable
@@ -57,13 +62,13 @@ fun SubscriptionScreen(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(AppSpacing.lg),
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
     ) {
         Text(
-            text = "Choose your plan",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Normal
+            text = "Upgrade to Premium",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.SemiBold
         )
         onBack?.let { back ->
             androidx.compose.material3.TextButton(onClick = back) {
@@ -71,7 +76,7 @@ fun SubscriptionScreen(
             }
         }
         Text(
-            text = "Unlock LearnerLM tutoring with a plan that fits your learning goals.",
+            text = "Unlock deeper AI tutoring, full study packs, and better code help.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -85,36 +90,47 @@ fun SubscriptionScreen(
         }
 
         billingState.purchaseMessage?.let { msg ->
-            Text(text = msg, color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyMedium)
+            Surface(
+                shape = RoundedCornerShape(AppRadii.md),
+                color = AppColors.AccentLight.copy(alpha = 0.5f)
+            ) {
+                Text(
+                    text = msg,
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
         }
 
         SubscriptionCatalog.plans.forEach { plan ->
             val livePrice = billingViewModel.formattedPrice(plan.productId, plan.price)
             val isActive = billingState.activeProductId == plan.productId
+            val isFeatured = plan.isPopular || plan.badge != null
 
-            NotebookCard {
+            NotebookCard(elevated = isFeatured) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column {
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = plan.title,
                                 style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.SemiBold
                             )
                             Text(
                                 text = plan.description,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 2.dp)
                             )
                         }
-                        if (plan.badge != null) {
-                            NotebookBadge(text = plan.badge, highlighted = true)
-                        } else if (plan.isPopular) {
-                            NotebookBadge(text = "Popular")
+                        when {
+                            plan.badge != null -> NotebookBadge(text = plan.badge, highlighted = true)
+                            plan.isPopular -> NotebookBadge(text = "Popular", highlighted = true)
                         }
                     }
 
@@ -122,7 +138,7 @@ fun SubscriptionScreen(
                         Text(
                             text = livePrice,
                             style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
                         )
                         Text(
@@ -135,7 +151,7 @@ fun SubscriptionScreen(
 
                     if (plan.productId == SubscriptionProducts.PREMIUM_YEARLY) {
                         Text(
-                            text = "$9.99/mo × 10 months = $99.90/yr — 2 months free (vs $119.88 billed monthly)",
+                            text = "$9.99/mo × 10 months = $99.90/yr — save $19.98 vs monthly",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -159,18 +175,18 @@ fun SubscriptionScreen(
                         OutlinedButton(
                             onClick = { },
                             modifier = Modifier.fillMaxWidth(),
-                            enabled = false
+                            enabled = false,
+                            shape = RoundedCornerShape(AppRadii.md)
                         ) {
-                            Text("Current plan")
+                            Text("Current plan", fontWeight = FontWeight.SemiBold)
                         }
                     } else {
                         Button(
                             onClick = { billingViewModel.purchase(activity, plan.productId) },
                             modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(AppRadii.md),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (plan.isPopular || plan.badge != null)
-                                    MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.secondary
+                                containerColor = MaterialTheme.colorScheme.primary
                             )
                         ) {
                             Text(
@@ -178,7 +194,8 @@ fun SubscriptionScreen(
                                     SubscriptionProducts.PREMIUM_MONTHLY -> "Subscribe — $9.99/mo"
                                     SubscriptionProducts.PREMIUM_YEARLY -> "Subscribe — $99.90/yr"
                                     else -> "Subscribe"
-                                }
+                                },
+                                fontWeight = FontWeight.SemiBold
                             )
                         }
                     }
@@ -187,7 +204,7 @@ fun SubscriptionScreen(
         }
 
         Text(
-            text = "Subscriptions are billed through Google Play. Cancel anytime in Play Store settings.",
+            text = "Billed through Google Play. Cancel anytime in Play Store settings.",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

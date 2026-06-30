@@ -12,7 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Grade
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ButtonDefaults
@@ -36,6 +36,7 @@ import com.learner.lm.ui.components.ProfileAvatar
 import com.learner.lm.ui.components.ProfileStatCard
 import com.learner.lm.ui.components.SectionHeader
 import com.learner.lm.ui.components.SettingsRow
+import com.learner.lm.ui.theme.AppSpacing
 
 @Composable
 fun ProfileScreen(
@@ -49,13 +50,18 @@ fun ProfileScreen(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+            .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md),
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
     ) {
         Text(
-            text = "Account",
+            text = "Settings",
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            text = "Manage your account and learning preferences.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         NotebookCard {
@@ -70,19 +76,16 @@ fun ProfileScreen(
                     Text(
                         text = profile.displayName,
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.SemiBold
                     )
                     Text(
                         text = profile.email,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
                     if (isPremiumTier(profile.subscriptionTier)) {
-                        NotebookBadge(
-                            text = "Premium",
-                            highlighted = true
-                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        NotebookBadge(text = "Premium", highlighted = true)
                     }
                 }
             }
@@ -93,7 +96,7 @@ fun ProfileScreen(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             ProfileStatCard(
-                label = "Grade",
+                label = "Grade level",
                 value = "${profile.gradeLevel}",
                 modifier = Modifier.weight(1f)
             )
@@ -112,10 +115,10 @@ fun ProfileScreen(
                 Text(
                     text = "Grade level",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = "Tutor responses adapt to grade ${profile.gradeLevel}",
+                    text = "Responses adapt to grade ${profile.gradeLevel}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -140,7 +143,7 @@ fun ProfileScreen(
             }
         }
 
-        SectionHeader(title = "Account")
+        SectionHeader(title = "Billing")
         NotebookCard {
             Column {
                 SettingsRow(
@@ -150,11 +153,11 @@ fun ProfileScreen(
                     trailing = "Manage",
                     onClick = onNavigateToSubscription
                 )
-                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
                 SettingsRow(
                     icon = Icons.Default.Grade,
                     title = "Grade ${profile.gradeLevel}",
-                    subtitle = "Adjust how advanced explanations are"
+                    subtitle = "How advanced explanations should be"
                 )
             }
         }
@@ -164,17 +167,17 @@ fun ProfileScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.outlinedButtonColors(
                 contentColor = MaterialTheme.colorScheme.error
             )
         ) {
             androidx.compose.material3.Icon(
-                Icons.Default.ExitToApp,
+                Icons.AutoMirrored.Filled.ExitToApp,
                 contentDescription = null,
                 modifier = Modifier.padding(end = 8.dp)
             )
-            Text("Sign out", fontWeight = FontWeight.Medium)
+            Text("Sign out", fontWeight = FontWeight.SemiBold)
         }
     }
 }

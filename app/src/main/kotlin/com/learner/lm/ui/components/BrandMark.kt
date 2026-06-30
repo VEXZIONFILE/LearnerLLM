@@ -15,11 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.learner.lm.ui.theme.NotebookColors
+import com.learner.lm.ui.theme.AppColors
+import com.learner.lm.ui.theme.AppRadii
 
-/**
- * Compact brand lockup — small icon (launcher proportions) + optional wordmark text.
- */
 @Composable
 fun BrandMark(
     modifier: Modifier = Modifier,
@@ -32,31 +30,31 @@ fun BrandMark(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(AppRadii.sm),
             color = if (onSurface) {
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
+                AppColors.AccentLight.copy(alpha = 0.8f)
             } else {
                 MaterialTheme.colorScheme.surface
             },
-            tonalElevation = 0.dp
+            shadowElevation = if (onSurface) 0.dp else 2.dp
         ) {
             LearnerLogo(
                 showWordmark = false,
                 modifier = Modifier
-                    .padding(3.dp)
-                    .size(iconSize - 6.dp)
+                    .padding(4.dp)
+                    .size(iconSize - 8.dp)
             )
         }
         if (showWordmark) {
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(10.dp))
             Text(
                 text = "LearnerLM",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Bold,
                 color = if (onSurface) {
                     MaterialTheme.colorScheme.onSurface
                 } else {
-                    NotebookColors.GoogleBlue
+                    AppColors.Accent
                 }
             )
         }
