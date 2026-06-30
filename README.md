@@ -153,7 +153,7 @@ Custom subjects are saved locally and tailor the AI tutor's guidance to that con
 - **Subscriptions** via Google Play Billing:
   - Learner Basic — **$9.99/month**
   - Learner Pro — **$19.99/month**
-  - Learner Pro Yearly — **$239.88/year** (2 months free)
+  - Learner Pro Yearly — **$199.90/year** ($19.99 × 10 months — 2 months free vs $239.88/yr monthly)
 
 ## AI Tutor Engine
 

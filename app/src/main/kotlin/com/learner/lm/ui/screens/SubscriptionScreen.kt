@@ -65,6 +65,11 @@ fun SubscriptionScreen(
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Normal
         )
+        onBack?.let { back ->
+            androidx.compose.material3.TextButton(onClick = back) {
+                Text("← Back to sign in")
+            }
+        }
         Text(
             text = "Unlock LearnerLM tutoring with a plan that fits your learning goals.",
             style = MaterialTheme.typography.bodyMedium,
@@ -130,7 +135,7 @@ fun SubscriptionScreen(
 
                     if (plan.productId == SubscriptionProducts.PRO_YEARLY) {
                         Text(
-                            text = "Pay for 10 months, get 12 — save \$40/year vs monthly Pro",
+                            text = "$19.99/mo × 10 months = $199.90/yr — 2 months free (vs $239.88 billed monthly)",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary
                         )

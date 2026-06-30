@@ -62,13 +62,13 @@ object SubscriptionCatalog {
             productId = SubscriptionProducts.PRO_YEARLY,
             tier = SubscriptionTier.PRO,
             title = "Learner Pro",
-            price = "$239.88",
+            price = "$199.90",
             period = "/ year",
-            description = "Best value — pay for 10 months, get 12.",
+            description = "Best value — 10 months of Pro ($19.99 × 10), get 12.",
             features = listOf(
                 "Everything in Learner Pro",
-                "2 months free",
-                "Save $40 per year"
+                "2 months free ($39.98 savings)",
+                "vs $239.88/year at monthly rate"
             ),
             badge = "2 months free"
         )
