@@ -17,7 +17,7 @@ import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.BorderStroke
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -62,13 +62,11 @@ fun NotebookScaffold(
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             if (!showBack) {
-                                Icon(
-                                    Icons.Default.School,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(22.dp)
+                                LearnerLogo(
+                                    showWordmark = false,
+                                    modifier = Modifier.size(30.dp)
                                 )
-                                Spacer(modifier = Modifier.width(8.dp))
+                                Spacer(modifier = Modifier.width(10.dp))
                             }
                             Text(
                                 text = currentDestination.title,
@@ -159,7 +157,7 @@ private fun AppDestination.icon(): ImageVector = when (this) {
     AppDestination.Scanner -> Icons.Default.CameraAlt
     AppDestination.Progress -> Icons.Default.Insights
     AppDestination.Profile -> Icons.Default.Person
-    else -> Icons.Default.School
+    else -> Icons.Default.Star
 }
 
 @Composable

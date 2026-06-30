@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
@@ -36,10 +35,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -49,7 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.learner.lm.ui.theme.learnerHeroBrush
+import com.learner.lm.ui.components.LearnerLogo
 import com.learner.lm.viewmodel.AuthViewModel
 
 @Composable
@@ -59,7 +56,6 @@ fun LoginScreen(
 ) {
     val isLoading by authViewModel.isLoading.collectAsStateWithLifecycle()
     val authError by authViewModel.authError.collectAsStateWithLifecycle()
-    val darkTheme = isSystemInDarkTheme()
 
     var isSignUp by remember { mutableStateOf(false) }
     var displayName by remember { mutableStateOf("") }
@@ -76,36 +72,23 @@ fun LoginScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(220.dp)
-                .background(learnerHeroBrush(darkTheme))
-                .statusBarsPadding(),
+                .background(Color.White)
+                .statusBarsPadding()
+                .padding(top = 20.dp, bottom = 16.dp),
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Surface(
-                    shape = RoundedCornerShape(20.dp),
-                    color = Color.White.copy(alpha = 0.15f)
-                ) {
-                    Icon(
-                        Icons.Default.School,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .size(40.dp),
-                        tint = Color.White
-                    )
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Learner LM",
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = Color.White,
-                    fontWeight = FontWeight.SemiBold
+                LearnerLogo(
+                    modifier = Modifier
+                        .fillMaxWidth(0.72f)
+                        .height(110.dp),
+                    showWordmark = true
                 )
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = if (isSignUp) "Create your account" else "Your AI study partner",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color.White.copy(alpha = 0.9f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
