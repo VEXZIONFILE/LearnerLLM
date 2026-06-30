@@ -49,3 +49,15 @@ data class CustomSubjectEntity(
     val emoji: String,
     val createdAt: Long = System.currentTimeMillis()
 )
+
+@Entity(tableName = "user_profiles")
+data class UserProfileEntity(
+    @PrimaryKey val uid: String,
+    val displayName: String,
+    val email: String,
+    val photoUrl: String?,
+    val gradeLevel: Int = 8,
+    val subscriptionTier: String = "FREE",
+    val createdAt: Long = System.currentTimeMillis(),
+    val lastSignInAt: Long = System.currentTimeMillis()
+)

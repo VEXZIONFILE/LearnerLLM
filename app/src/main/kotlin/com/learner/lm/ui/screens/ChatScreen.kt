@@ -21,11 +21,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,7 +42,6 @@ import com.learner.lm.ui.components.HintLevelIndicator
 import com.learner.lm.ui.components.SubjectPicker
 import com.learner.lm.viewmodel.ChatViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
     modifier: Modifier = Modifier,
@@ -61,72 +57,52 @@ fun ChatScreen(
         }
     }
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text("Learner LM 🎓", fontWeight = FontWeight.Bold)
-                        Text(
-                            "Grade ${uiState.gradeLevel} · ${uiState.selectedSubject.displayName} · ${AiConfig.MODEL_DISPLAY_NAME}",
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .imePadding()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            HintLevelIndicator(level = uiState.hintLevel.level)
+            Text(
+                text = "${AiConfig.MODEL_DISPLAY_NAME} · Grade ${uiState.gradeLevel} · ${uiState.selectedSubject.displayName}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .imePadding()
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                HintLevelIndicator(level = uiState.hintLevel.level)
-                Text(
-                    text = "Socratic tutoring — no direct answers",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-            }
 
-            SubjectPicker(
-                selectedSubject = uiState.selectedSubject,
-                customSubjects = uiState.customSubjects,
-                onSubjectSelected = viewModel::selectSubject,
-                onAddCustomSubject = viewModel::showAddSubjectDialog
+        SubjectPicker(
+            selectedSubject = uiState.selectedSubject,
+            customSubjects = uiState.customSubjects,
+            onSubjectSelected = viewModel::selectSubject,
+            onAddCustomSubject = viewModel::showAddSubjectDialog
+        )
+
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            Text("Grade Level", style = MaterialTheme.typography.labelLarge)
+            Slider(
+                value = uiState.gradeLevel.toFloat(),
+                onValueChange = { viewModel.setGradeLevel(it.toInt()) },
+                valueRange = 6f..12f,
+                steps = 5
             )
+        }
 
-            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                Text("Grade Level: ${uiState.gradeLevel}")
-                Slider(
-                    value = uiState.gradeLevel.toFloat(),
-                    onValueChange = { viewModel.setGradeLevel(it.toInt()) },
-                    valueRange = 6f..12f,
-                    steps = 5
-                )
-            }
-
-            LazyColumn(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                state = listState,
-                contentPadding = PaddingValues(vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+        LazyColumn(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            state = listState,
+            contentPadding = PaddingValues(vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
                 if (uiState.messages.isEmpty()) {
                     item {
                         Text(
@@ -174,8 +150,9 @@ fun ChatScreen(
                     value = input,
                     onValueChange = { input = it },
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("Ask a question or describe your problem...") },
-                    maxLines = 4
+                    placeholder = { Text("Ask a question...") },
+                    maxLines = 4,
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp)
                 )
                 IconButton(
                     onClick = {
@@ -187,7 +164,6 @@ fun ChatScreen(
                     Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send")
                 }
             }
-        }
     }
 
     if (uiState.showAddSubjectDialog) {

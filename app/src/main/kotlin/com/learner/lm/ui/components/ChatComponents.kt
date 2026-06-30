@@ -29,16 +29,13 @@ fun ChatBubble(
     ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth(0.85f)
-                .clip(RoundedCornerShape(16.dp))
+                .fillMaxWidth(0.88f)
+                .clip(RoundedCornerShape(if (isStudent) 20.dp else 4.dp, 20.dp, 20.dp, if (isStudent) 4.dp else 20.dp))
                 .background(
-                    if (isStudent) {
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                    } else {
-                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
-                    }
+                    if (isStudent) MaterialTheme.colorScheme.primaryContainer
+                    else MaterialTheme.colorScheme.surface
                 )
-                .padding(12.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
             Text(
                 text = message,
@@ -53,14 +50,18 @@ fun ChatBubble(
 fun HintLevelIndicator(level: Int, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(8.dp),
-        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
+        )
     ) {
         Text(
-            text = "Hint Level $level",
+            text = "Hint $level",
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.secondary
+            color = MaterialTheme.colorScheme.primary
         )
     }
 }
@@ -69,11 +70,11 @@ fun HintLevelIndicator(level: Int, modifier: Modifier = Modifier) {
 fun StreakBadge(streak: Int, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.primaryContainer
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text("🔥", style = MaterialTheme.typography.titleLarge)

@@ -56,3 +56,18 @@ interface CustomSubjectDao {
     @Query("DELETE FROM custom_subjects WHERE id = :id")
     suspend fun delete(id: Long)
 }
+
+@Dao
+interface UserProfileDao {
+    @Query("SELECT * FROM user_profiles WHERE uid = :uid LIMIT 1")
+    fun observeProfile(uid: String): Flow<UserProfileEntity?>
+
+    @Query("SELECT * FROM user_profiles WHERE uid = :uid LIMIT 1")
+    suspend fun getProfile(uid: String): UserProfileEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(profile: UserProfileEntity)
+
+    @Query("DELETE FROM user_profiles WHERE uid = :uid")
+    suspend fun delete(uid: String)
+}

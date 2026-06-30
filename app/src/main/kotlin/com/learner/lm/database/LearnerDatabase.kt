@@ -11,9 +11,10 @@ import androidx.room.RoomDatabase
         StudyTopicEntity::class,
         LearningStreakEntity::class,
         PracticeProblemEntity::class,
-        CustomSubjectEntity::class
+        CustomSubjectEntity::class,
+        UserProfileEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class LearnerDatabase : RoomDatabase() {
@@ -22,6 +23,7 @@ abstract class LearnerDatabase : RoomDatabase() {
     abstract fun learningStreakDao(): LearningStreakDao
     abstract fun practiceProblemDao(): PracticeProblemDao
     abstract fun customSubjectDao(): CustomSubjectDao
+    abstract fun userProfileDao(): UserProfileDao
 
     companion object {
         @Volatile

@@ -6,10 +6,14 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 val localProperties = Properties().apply {
-    val file = rootProject.file("local.properties")
-    if (file.exists()) {
-        load(file.inputStream())
+    val propsFile = rootProject.file("local.properties")
+    if (propsFile.exists()) {
+        load(propsFile.inputStream())
     }
 }
 
@@ -36,7 +40,8 @@ android {
 
         buildConfigField("String", "OPENROUTER_BASE_URL", "\"https://openrouter.ai/api/v1/\"")
         buildConfigField("String", "OPENROUTER_API_KEY", "\"${localProperty("OPENROUTER_API_KEY")}\"")
-        buildConfigField("String", "APP_REFERER", "\"https://github.com/VEXZIONFILE/LearnerLM\"")
+        buildConfigField("String", "APP_REFERER", "\"https://github.com/VEXZIONFILE/LearnerLLM\"")
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProperty("GOOGLE_WEB_CLIENT_ID")}\"")
     }
 
     buildTypes {
@@ -101,7 +106,15 @@ dependencies {
 
     implementation("com.google.mlkit:text-recognition:16.0.1")
 
+    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+    implementation("com.android.billingclient:billing-ktx:7.0.0")
+
+    implementation("io.coil-kt:coil-compose:2.6.0")
+
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
