@@ -3,7 +3,9 @@ package com.learner.lm.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,12 +33,13 @@ fun LearnerApp() {
     val chatViewModel: ChatViewModel = viewModel()
     val billingViewModel: BillingViewModel = viewModel()
     val authState by authViewModel.authState.collectAsStateWithLifecycle()
+    val userProfile by authViewModel.userProfile.collectAsStateWithLifecycle()
     var currentDestination by remember { mutableStateOf(AppDestination.Chat) }
 
     when (val state = authState) {
         AuthState.Loading -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         }
         AuthState.SignedOut -> {
@@ -54,15 +57,28 @@ fun LearnerApp() {
             }
         }
         is AuthState.SignedIn -> {
-            val profile = state.profile
+            val profile = userProfile ?: state.profile
+
+            LaunchedEffect(profile.gradeLevel) {
+                chatViewModel.setGradeLevel(profile.gradeLevel)
+            }
+
+            val isSubscription = currentDestination == AppDestination.Subscription
+
             NotebookScaffold(
                 currentDestination = currentDestination,
                 userProfile = profile,
                 onNavigate = { currentDestination = it },
-                onSignOut = { authViewModel.signOut() }
+                showBack = isSubscription,
+                onBack = if (isSubscription) {
+                    { currentDestination = AppDestination.Profile }
+                } else null
             ) {
                 when (currentDestination) {
-                    AppDestination.Chat -> ChatScreen(viewModel = chatViewModel)
+                    AppDestination.Chat -> ChatScreen(
+                        gradeLevel = profile.gradeLevel,
+                        viewModel = chatViewModel
+                    )
                     AppDestination.Scanner -> ScannerScreen(
                         onTextScanned = { chatViewModel.setScannedText(it) }
                     )
@@ -71,17 +87,25 @@ fun LearnerApp() {
                         profile = profile,
                         onGradeLevelChange = { grade ->
                             authViewModel.updateGradeLevel(profile, grade)
+                            chatViewModel.setGradeLevel(grade)
                         },
-                        onNavigateToSubscription = { currentDestination = AppDestination.Subscription }
+                        onNavigateToSubscription = { currentDestination = AppDestination.Subscription },
+                        onSignOut = { authViewModel.signOut() }
                     )
                     AppDestination.Subscription -> SubscriptionScreen(
                         userProfile = profile,
-                        billingViewModel = billingViewModel
+                        billingViewModel = billingViewModel,
+                        onBack = { currentDestination = AppDestination.Profile }
                     )
                     AppDestination.Login -> Unit
                 }
             }
         }
-        is AuthState.Error -> LoginScreen(authViewModel = authViewModel)
+        is AuthState.Error -> {
+            LoginScreen(
+                authViewModel = authViewModel,
+                onNavigateToSubscription = { currentDestination = AppDestination.Subscription }
+            )
+        }
     }
 }

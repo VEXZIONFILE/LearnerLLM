@@ -1,237 +1,165 @@
 package com.learner.lm.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.TrendingUp
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.BorderStroke
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.learner.lm.auth.UserProfile
 import com.learner.lm.ui.navigation.AppDestination
 import com.learner.lm.ui.theme.NotebookColors
-import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotebookScaffold(
     currentDestination: AppDestination,
     userProfile: UserProfile?,
     onNavigate: (AppDestination) -> Unit,
-    onSignOut: () -> Unit,
+    showBack: Boolean = false,
+    onBack: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
-
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet(
-                modifier = Modifier.width(300.dp),
-                drawerContainerColor = MaterialTheme.colorScheme.surface
-            ) {
-                NotebookDrawerContent(
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            TopAppBar(
+                title = {
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (!showBack) {
+                                Icon(
+                                    Icons.Default.School,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                            }
+                            Text(
+                                text = currentDestination.title,
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                        userProfile?.let { profile ->
+                            Text(
+                                text = profile.displayName,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                },
+                navigationIcon = {
+                    if (showBack && onBack != null) {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        }
+                    }
+                },
+                actions = {
+                    if (currentDestination == AppDestination.Profile && userProfile != null) {
+                        ProfileAvatar(
+                            name = userProfile.displayName,
+                            photoUrl = userProfile.photoUrl,
+                            size = 36.dp,
+                            modifier = Modifier.padding(end = 12.dp)
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface
+                )
+            )
+        },
+        bottomBar = {
+            if (currentDestination.showsBottomNav) {
+                LearnerBottomNav(
                     currentDestination = currentDestination,
-                    userProfile = userProfile,
-                    onNavigate = { dest ->
-                        onNavigate(dest)
-                        scope.launch { drawerState.close() }
-                    },
-                    onSignOut = onSignOut
+                    onNavigate = onNavigate
                 )
             }
         }
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            NotebookTopBar(
-                title = currentDestination.title,
-                subtitle = userProfile?.displayName,
-                onMenuClick = { scope.launch { drawerState.open() } }
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-            ) {
-                content()
-            }
-        }
-    }
-}
-
-@Composable
-private fun NotebookTopBar(
-    title: String,
-    subtitle: String?,
-    onMenuClick: () -> Unit
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
-        shadowElevation = 1.dp
-    ) {
-        Row(
+    ) { innerPadding ->
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxSize()
+                .padding(innerPadding)
+                .background(MaterialTheme.colorScheme.background)
         ) {
-            IconButton(onClick = onMenuClick) {
-                Icon(Icons.Default.Menu, contentDescription = "Menu")
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.School,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(22.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-                subtitle?.let {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+            content()
         }
     }
 }
 
 @Composable
-private fun NotebookDrawerContent(
+private fun LearnerBottomNav(
     currentDestination: AppDestination,
-    userProfile: UserProfile?,
-    onNavigate: (AppDestination) -> Unit,
-    onSignOut: () -> Unit
+    onNavigate: (AppDestination) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxHeight()
-            .padding(vertical = 16.dp)
+    NavigationBar(
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 3.dp
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (userProfile?.photoUrl != null) {
-                AsyncImage(
-                    model = userProfile.photoUrl,
-                    contentDescription = "Profile photo",
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(Icons.Default.Person, contentDescription = null)
-                }
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            Column {
-                Text(
-                    text = userProfile?.displayName ?: "Student",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = userProfile?.email ?: "",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-        val navItems = listOf(
-            AppDestination.Chat to Icons.AutoMirrored.Filled.Chat,
-            AppDestination.Scanner to Icons.Default.CameraAlt,
-            AppDestination.Progress to Icons.Default.TrendingUp,
-            AppDestination.Profile to Icons.Default.Person,
-            AppDestination.Subscription to Icons.Default.Star
-        )
-
-        navItems.forEach { (dest, icon) ->
-            NavigationDrawerItem(
-                icon = { Icon(icon, contentDescription = dest.title) },
-                label = { Text(dest.title) },
-                selected = currentDestination == dest,
-                onClick = { onNavigate(dest) },
-                modifier = Modifier.padding(horizontal = 12.dp),
-                colors = NavigationDrawerItemDefaults.colors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer
+        AppDestination.bottomNavDestinations.forEach { destination ->
+            val icon = destination.icon()
+            NavigationBarItem(
+                selected = currentDestination == destination,
+                onClick = { onNavigate(destination) },
+                icon = { Icon(icon, contentDescription = destination.shortLabel) },
+                label = { Text(destination.shortLabel) },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                    indicatorColor = MaterialTheme.colorScheme.primaryContainer
                 )
             )
         }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-        NavigationDrawerItem(
-            icon = { Icon(Icons.Default.Close, contentDescription = "Sign out") },
-            label = { Text("Sign out") },
-            selected = false,
-            onClick = onSignOut,
-            modifier = Modifier.padding(horizontal = 12.dp)
-        )
     }
+}
+
+private fun AppDestination.icon(): ImageVector = when (this) {
+    AppDestination.Chat -> Icons.AutoMirrored.Filled.Chat
+    AppDestination.Scanner -> Icons.Default.CameraAlt
+    AppDestination.Progress -> Icons.Default.Insights
+    AppDestination.Profile -> Icons.Default.Person
+    else -> Icons.Default.School
 }
 
 @Composable
@@ -241,10 +169,10 @@ fun NotebookCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
     ) {
         Box(modifier = Modifier.padding(20.dp)) {
             content()
@@ -261,15 +189,15 @@ fun NotebookBadge(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp),
-        color = if (highlighted) NotebookColors.ProGold.copy(alpha = 0.15f)
+        color = if (highlighted) NotebookColors.ProGold.copy(alpha = 0.18f)
         else MaterialTheme.colorScheme.primaryContainer
     ) {
         Text(
             text = text,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
             style = MaterialTheme.typography.labelMedium,
             color = if (highlighted) NotebookColors.ProGold else MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.SemiBold
         )
     }
 }
