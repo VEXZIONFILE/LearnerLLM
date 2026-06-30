@@ -89,10 +89,10 @@ fun ProfileScreen(
                     color = Color.White.copy(alpha = 0.85f)
                 )
                 Spacer(modifier = Modifier.height(12.dp))
-                NotebookBadge(
-                    text = tierLabel(profile.subscriptionTier),
-                    highlighted = profile.subscriptionTier == SubscriptionTier.PRO.name
-                )
+                    NotebookBadge(
+                        text = tierLabel(profile.subscriptionTier),
+                        highlighted = profile.subscriptionTier != SubscriptionTier.FREE.name
+                    )
             }
         }
 
@@ -194,19 +194,19 @@ fun ProfileScreen(
 }
 
 private fun tierLabel(tier: String): String = when (tier) {
-    SubscriptionTier.BASIC.name -> "Learner Basic"
-    SubscriptionTier.PRO.name -> "Learner Pro"
+    SubscriptionTier.BASIC.name,
+    SubscriptionTier.PRO.name -> "Premium"
     else -> "Free plan"
 }
 
 private fun planShortLabel(tier: String): String = when (tier) {
-    SubscriptionTier.BASIC.name -> "Basic"
-    SubscriptionTier.PRO.name -> "Pro"
+    SubscriptionTier.BASIC.name,
+    SubscriptionTier.PRO.name -> "Premium"
     else -> "Free"
 }
 
 private fun subscriptionDescription(tier: String): String = when (tier) {
-    SubscriptionTier.BASIC.name -> "Unlimited study chat and homework help"
-    SubscriptionTier.PRO.name -> "Priority AI, practice generator, and more"
-    else -> "Upgrade for unlimited tutoring"
+    SubscriptionTier.BASIC.name,
+    SubscriptionTier.PRO.name -> "Premium AI — deeper tutoring, full study packs, better code help"
+    else -> "Free tier — standard tutoring, limited study packs, basic code help"
 }

@@ -4,14 +4,24 @@ Create these subscription products in [Google Play Console](https://play.google.
 
 | Product ID | Price | Billing period |
 |------------|-------|----------------|
-| `learnerlm_basic_monthly` | $9.99 | Monthly |
-| `learnerlm_pro_monthly` | $19.99 | Monthly |
-| `learnerlm_pro_yearly` | $199.90 | Yearly (10 months of Pro — 2 months free) |
+| `learnerlm_basic_monthly` | $9.99 | Monthly (Premium) |
+| `learnerlm_pro_yearly` | $99.90 | Yearly (Premium — 10 months, 2 months free) |
 
-## Yearly savings
+## Premium pricing
 
-- Pro monthly × 12: $19.99 × 12 = **$239.88/year**
-- Pro yearly: $19.99 × 10 = **$199.90/year** (2 months free — save **$39.98**)
+- Premium monthly: **$9.99/month**
+- Premium yearly: $9.99 × 10 = **$99.90/year** (2 months free — save **$19.98** vs monthly)
+
+## AI modes (multi-model routing)
+
+| Mode | OpenRouter model | Purpose |
+|------|------------------|---------|
+| Tutor | `openai/gpt-oss-120b` | Socratic tutoring grades 6–12 |
+| Study | `nvidia/nemotron-3-super-120b-a12b` | Summaries, flashcards, quizzes |
+| Code Help | `poolside/laguna-m.1` | Debug & explain code (small pieces only) |
+
+**Free users:** standard depth, limited study pack sections, basic code help.  
+**Premium users:** deeper explanations, full study packs with quizzes, richer code debugging.
 
 ## Firebase Email & Password Auth
 
@@ -19,8 +29,6 @@ Create these subscription products in [Google Play Console](https://play.google.
 2. Add Android app with package `com.learnerlm`
 3. Download `google-services.json` → place in `app/google-services.json`
 4. In Firebase Console → **Authentication** → **Sign-in method** → enable **Email/Password**
-
-Users stay signed in automatically after closing the app (Firebase persists the session on device).
 
 ## local.properties example
 

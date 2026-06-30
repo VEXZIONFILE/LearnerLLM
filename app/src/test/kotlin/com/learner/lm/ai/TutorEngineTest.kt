@@ -1,18 +1,51 @@
 package com.learner.lm.ai
 
+import com.learner.lm.billing.SubscriptionTier
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AiConfigTest {
     @Test
-    fun `uses openrouter gpt-oss-120b model id`() {
-        assertEquals("openai/gpt-oss-120b", AiConfig.MODEL_ID)
+    fun `tutor model uses gpt-oss-120b`() {
+        assertEquals("openai/gpt-oss-120b", AiConfig.TUTOR_MODEL_ID)
     }
 
     @Test
-    fun `model is displayed as LearnerLM`() {
-        assertEquals("LearnerLM", AiConfig.MODEL_DISPLAY_NAME)
+    fun `study model uses nemotron 3 super`() {
+        assertEquals("nvidia/nemotron-3-super-120b-a12b", AiConfig.STUDY_MODEL_ID)
+    }
+
+    @Test
+    fun `code model uses laguna m1`() {
+        assertEquals("poolside/laguna-m.1", AiConfig.CODE_MODEL_ID)
+    }
+}
+
+class ModelRegistryTest {
+    @Test
+    fun `tutor mode routes to gpt-oss-120b`() {
+        val route = ModelRegistry.resolve(AppMode.TUTOR, SubscriptionTier.FREE.name)
+        assertEquals(ModelRegistry.TUTOR_MODEL, route.modelId)
+    }
+
+    @Test
+    fun `study mode routes to nemotron`() {
+        val route = ModelRegistry.resolve(AppMode.STUDY, SubscriptionTier.FREE.name)
+        assertEquals(ModelRegistry.STUDY_MODEL, route.modelId)
+    }
+
+    @Test
+    fun `code mode routes to laguna`() {
+        val route = ModelRegistry.resolve(AppMode.CODE, SubscriptionTier.FREE.name)
+        assertEquals(ModelRegistry.CODE_MODEL, route.modelId)
+    }
+
+    @Test
+    fun `premium tier increases token limits`() {
+        val free = ModelRegistry.resolve(AppMode.STUDY, SubscriptionTier.FREE.name)
+        val premium = ModelRegistry.resolve(AppMode.STUDY, SubscriptionTier.BASIC.name)
+        assertTrue(premium.maxTokens > free.maxTokens)
     }
 }
 
@@ -62,33 +95,73 @@ class PromptBuilderTest {
     private val builder = PromptBuilder()
 
     @Test
-    fun `system prompt enforces no-answer policy`() {
-        val prompt = builder.buildSystemPrompt(8, StudySubject.Builtin(Subject.MATH))
-        assertTrue(prompt.contains("NEVER provide final answers"))
+    fun `tutor system prompt enforces no-answer policy`() {
+        val prompt = builder.buildSystemPrompt(
+            TutorContext(
+                gradeLevel = 8,
+                subject = StudySubject.Builtin(Subject.MATH),
+                appMode = AppMode.TUTOR,
+                studentMessage = "help"
+            )
+        )
+        assertTrue(prompt.contains("NEVER give final answers"))
         assertTrue(prompt.contains("Socratic"))
     }
 
     @Test
-    fun `custom subject prompt includes student context`() {
+    fun `study system prompt requires structured sections`() {
         val prompt = builder.buildSystemPrompt(
-            9,
-            StudySubject.Custom(1, "Science Fair Project", SubjectCategory.PROJECT)
+            TutorContext(
+                gradeLevel = 9,
+                subject = StudySubject.Builtin(Subject.SCIENCE),
+                appMode = AppMode.STUDY,
+                studentMessage = "photosynthesis"
+            )
         )
-        assertTrue(prompt.contains("Science Fair Project"))
-        assertTrue(prompt.contains("Project"))
+        assertTrue(prompt.contains("## Summary"))
+        assertTrue(prompt.contains("Flashcards"))
     }
 
     @Test
-    fun `user prompt includes hint level`() {
+    fun `code system prompt forbids full apps`() {
+        val prompt = builder.buildSystemPrompt(
+            TutorContext(
+                gradeLevel = 10,
+                subject = StudySubject.Builtin(Subject.GENERAL),
+                appMode = AppMode.CODE,
+                studentMessage = "build my app"
+            )
+        )
+        assertTrue(prompt.contains("NEVER generate full applications"))
+    }
+
+    @Test
+    fun `user prompt includes hint level for tutor mode`() {
         val prompt = builder.buildUserPrompt(
             TutorContext(
                 gradeLevel = 7,
                 subject = StudySubject.Builtin(Subject.MATH),
+                appMode = AppMode.TUTOR,
                 hintLevel = HintLevel.GENTLE_NUDGE,
                 studentMessage = "How do I solve 2x + 4 = 10?"
             )
         )
-        assertTrue(prompt.contains("hint level: 1"))
+        assertTrue(prompt.contains("Hint level: 1"))
         assertTrue(prompt.contains("How do I solve 2x + 4 = 10?"))
+    }
+}
+
+class SubscriptionCapabilitiesTest {
+    @Test
+    fun `free tier has limited study sections`() {
+        val caps = SubscriptionCapabilities.forTier(SubscriptionTier.FREE.name)
+        assertEquals(SubscriptionCapabilities.StudySectionDepth.BASIC, caps.studySections)
+    }
+
+    @Test
+    fun `premium tier unlocks full study packs`() {
+        val caps = SubscriptionCapabilities.forTier(SubscriptionTier.BASIC.name)
+        assertTrue(caps.isPremium)
+        assertEquals(SubscriptionCapabilities.StudySectionDepth.FULL, caps.studySections)
     }
 }

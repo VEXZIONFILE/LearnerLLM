@@ -37,8 +37,9 @@ class BillingViewModel(application: Application) : AndroidViewModel(application)
 
     fun syncSubscriptionToProfile(uid: String, productId: String?) {
         val tier = when (productId) {
-            SubscriptionProducts.BASIC_MONTHLY -> SubscriptionTier.BASIC.name
-            SubscriptionProducts.PRO_MONTHLY, SubscriptionProducts.PRO_YEARLY -> SubscriptionTier.PRO.name
+            SubscriptionProducts.PREMIUM_MONTHLY,
+            SubscriptionProducts.PREMIUM_YEARLY -> SubscriptionTier.BASIC.name
+            SubscriptionProducts.PRO_MONTHLY -> SubscriptionTier.PRO.name
             else -> SubscriptionTier.FREE.name
         }
         viewModelScope.launch {

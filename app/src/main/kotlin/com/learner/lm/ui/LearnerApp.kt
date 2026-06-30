@@ -59,8 +59,9 @@ fun LearnerApp() {
         is AuthState.SignedIn -> {
             val profile = userProfile ?: state.profile
 
-            LaunchedEffect(profile.gradeLevel) {
+            LaunchedEffect(profile.gradeLevel, profile.subscriptionTier) {
                 chatViewModel.setGradeLevel(profile.gradeLevel)
+                chatViewModel.setSubscriptionTier(profile.subscriptionTier)
             }
 
             val isSubscription = currentDestination == AppDestination.Subscription
@@ -77,6 +78,7 @@ fun LearnerApp() {
                 when (currentDestination) {
                     AppDestination.Chat -> ChatScreen(
                         gradeLevel = profile.gradeLevel,
+                        subscriptionTier = profile.subscriptionTier,
                         viewModel = chatViewModel
                     )
                     AppDestination.Scanner -> ScannerScreen(

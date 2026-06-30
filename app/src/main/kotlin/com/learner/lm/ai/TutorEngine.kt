@@ -10,32 +10,38 @@ class TutorEngine(
 
     suspend fun respond(context: TutorContext): TutorResponse {
         val subject = resolveSubject(context)
+        val enriched = context.copy(subject = subject)
+        val route = ModelRegistry.resolve(enriched.appMode, enriched.subscriptionTier)
 
-        val enrichedContext = context.copy(subject = subject)
-        val systemPrompt = promptBuilder.buildSystemPrompt(enrichedContext.gradeLevel, subject)
-        val userPrompt = promptBuilder.buildUserPrompt(enrichedContext)
+        val systemPrompt = promptBuilder.buildSystemPrompt(enriched)
+        val userPrompt = promptBuilder.buildUserPrompt(enriched)
 
-        val message = aiRepository.generateTutorResponse(systemPrompt, userPrompt)
-        val sanitized = sanitizeResponse(message)
-        val nextHintLevel = determineNextHintLevel(enrichedContext, sanitized)
+        val message = aiRepository.generateResponse(
+            systemPrompt = systemPrompt,
+            userPrompt = userPrompt,
+            route = route
+        )
+
+        val sanitized = sanitizeResponse(message, enriched.appMode)
+        val nextHintLevel = when (enriched.appMode) {
+            AppMode.TUTOR -> determineNextHintLevel(enriched, sanitized)
+            else -> enriched.hintLevel
+        }
 
         return TutorResponse(
             message = sanitized,
             hintLevel = nextHintLevel,
             subject = subject,
-            detectedMistake = detectMistakeSeeking(enrichedContext.studentMessage),
+            detectedMistake = detectMistakeSeeking(enriched),
             encouragesAttempt = !containsDirectAnswer(sanitized)
         )
     }
 
     private fun resolveSubject(context: TutorContext): StudySubject {
-        if (context.subject is StudySubject.Custom) {
-            return context.subject
-        }
+        if (context.subject is StudySubject.Custom) return context.subject
         val builtin = context.subject as? StudySubject.Builtin ?: return StudySubject.Builtin(Subject.GENERAL)
-        if (builtin.subject != Subject.GENERAL) {
-            return builtin
-        }
+        if (builtin.subject != Subject.GENERAL) return builtin
+        if (context.appMode == AppMode.CODE) return StudySubject.Builtin(Subject.GENERAL)
         val classified = subjectClassifier.classify(
             listOfNotNull(context.studentMessage, context.scannedText).joinToString(" ")
         )
@@ -46,7 +52,8 @@ class TutorEngine(
         val studentAttempted = context.studentMessage.length > 20 &&
             !isAnswerSeeking(context.studentMessage)
         return when {
-            studentAttempted && context.hintLevel == HintLevel.NEAR_SOLUTION -> HintLevel.STUDENT_ATTEMPT_REQUIRED
+            studentAttempted && context.hintLevel == HintLevel.NEAR_SOLUTION ->
+                HintLevel.STUDENT_ATTEMPT_REQUIRED
             isAnswerSeeking(context.studentMessage) -> context.hintLevel.next()
             else -> context.hintLevel
         }
@@ -57,14 +64,20 @@ class TutorEngine(
         return lower.contains("what is the answer") ||
             lower.contains("just tell me") ||
             lower.contains("solve this for me") ||
-            lower.contains("give me the answer")
+            lower.contains("give me the answer") ||
+            lower.contains("write the whole") ||
+            lower.contains("build the entire app")
     }
 
-    private fun detectMistakeSeeking(message: String): String? {
-        return if (isAnswerSeeking(message)) {
-            "It looks like you're asking for a direct answer. Let's work through this step by step instead."
-        } else {
-            null
+    private fun detectMistakeSeeking(context: TutorContext): String? {
+        return when (context.appMode) {
+            AppMode.TUTOR -> if (isAnswerSeeking(context.studentMessage)) {
+                "It looks like you're asking for a direct answer. Let's work through this step by step instead."
+            } else null
+            AppMode.CODE -> if (isAnswerSeeking(context.studentMessage)) {
+                "I can't build full apps or projects — let's focus on one function or bug at a time."
+            } else null
+            AppMode.STUDY -> null
         }
     }
 
@@ -73,14 +86,18 @@ class TutorEngine(
         return lower.contains("the answer is") || lower.contains("the solution is")
     }
 
-    private fun sanitizeResponse(response: String): String {
+    private fun sanitizeResponse(response: String, mode: AppMode): String {
+        if (mode != AppMode.TUTOR) return response.trim()
         var sanitized = response
         val forbiddenPatterns = listOf(
             Regex("the answer is\\s+.+", RegexOption.IGNORE_CASE),
             Regex("the solution is\\s+.+", RegexOption.IGNORE_CASE)
         )
         forbiddenPatterns.forEach { pattern ->
-            sanitized = sanitized.replace(pattern, "Let's keep working on this together — what's your next step?")
+            sanitized = sanitized.replace(
+                pattern,
+                "Let's keep working on this together — what's your next step?"
+            )
         }
         return sanitized.trim()
     }

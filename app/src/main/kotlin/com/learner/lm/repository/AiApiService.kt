@@ -6,9 +6,10 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 
 data class ChatCompletionRequest(
-    val model: String = AiConfig.MODEL_ID,
+    val model: String = AiConfig.TUTOR_MODEL_ID,
     val messages: List<ChatMessageDto>,
-    val temperature: Double = 0.7
+    val temperature: Double = 0.7,
+    val max_tokens: Int = 1024
 )
 
 data class ChatMessageDto(

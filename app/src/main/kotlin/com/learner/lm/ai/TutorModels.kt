@@ -68,6 +68,8 @@ enum class HintLevel(val level: Int) {
 data class TutorContext(
     val gradeLevel: Int,
     val subject: StudySubject,
+    val appMode: AppMode = AppMode.TUTOR,
+    val subscriptionTier: String = "FREE",
     val hintLevel: HintLevel = HintLevel.GENTLE_NUDGE,
     val studentMessage: String,
     val conversationHistory: List<Pair<String, String>> = emptyList(),

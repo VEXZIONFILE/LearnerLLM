@@ -4,12 +4,15 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.learner.lm.LearnerLMApplication
+import com.learner.lm.ai.AppMode
 import com.learner.lm.ai.HintLevel
+import com.learner.lm.ai.ModelRegistry
 import com.learner.lm.ai.StudySubject
 import com.learner.lm.ai.Subject
 import com.learner.lm.ai.SubjectCategory
 import com.learner.lm.ai.TutorContext
 import com.learner.lm.ai.TutorEngine
+import com.learner.lm.billing.SubscriptionTier
 import com.learner.lm.database.ChatMessageEntity
 import com.learner.lm.repository.AiRepository
 import com.learner.lm.repository.ChatMessage
@@ -28,13 +31,18 @@ data class ChatUiState(
     val messages: List<ChatMessageEntity> = emptyList(),
     val isLoading: Boolean = false,
     val gradeLevel: Int = 8,
+    val selectedMode: AppMode = AppMode.TUTOR,
+    val subscriptionTier: String = SubscriptionTier.FREE.name,
     val selectedSubject: StudySubject = StudySubject.Builtin(Subject.GENERAL),
     val customSubjects: List<StudySubject.Custom> = emptyList(),
     val hintLevel: HintLevel = HintLevel.GENTLE_NUDGE,
     val scannedText: String? = null,
     val error: String? = null,
     val showAddSubjectDialog: Boolean = false
-)
+) {
+    val activeModelLabel: String
+        get() = ModelRegistry.displayLabel(selectedMode, subscriptionTier)
+}
 
 class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val app = application as LearnerLMApplication
@@ -80,6 +88,14 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setGradeLevel(grade: Int) {
         _uiState.update { it.copy(gradeLevel = GradeLevelValidator.clamp(grade)) }
+    }
+
+    fun setSubscriptionTier(tier: String) {
+        _uiState.update { it.copy(subscriptionTier = tier) }
+    }
+
+    fun selectMode(mode: AppMode) {
+        _uiState.update { it.copy(selectedMode = mode, error = null) }
     }
 
     fun selectSubject(subject: StudySubject) {
@@ -157,6 +173,8 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     TutorContext(
                         gradeLevel = state.gradeLevel,
                         subject = state.selectedSubject,
+                        appMode = state.selectedMode,
+                        subscriptionTier = state.subscriptionTier,
                         hintLevel = state.hintLevel,
                         studentMessage = content,
                         conversationHistory = history,
@@ -177,7 +195,11 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        hintLevel = response.hintLevel,
+                        hintLevel = if (state.selectedMode == AppMode.TUTOR) {
+                            response.hintLevel
+                        } else {
+                            HintLevel.GENTLE_NUDGE
+                        },
                         selectedSubject = response.subject
                     )
                 }

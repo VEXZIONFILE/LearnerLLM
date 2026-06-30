@@ -1,13 +1,13 @@
 package com.learner.lm.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -38,12 +39,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.learner.lm.ai.AiConfig
+import com.learner.lm.ai.AppMode
 import com.learner.lm.ui.components.AddCustomSubjectDialog
+import com.learner.lm.ui.components.AppModePicker
 import com.learner.lm.ui.components.ChatBubble
 import com.learner.lm.ui.components.EmptyStateCard
 import com.learner.lm.ui.components.HintLevelIndicator
@@ -56,6 +59,7 @@ import com.learner.lm.viewmodel.ProgressViewModel
 @Composable
 fun ChatScreen(
     gradeLevel: Int,
+    subscriptionTier: String,
     modifier: Modifier = Modifier,
     viewModel: ChatViewModel = viewModel()
 ) {
@@ -65,6 +69,10 @@ fun ChatScreen(
 
     LaunchedEffect(gradeLevel) {
         viewModel.setGradeLevel(gradeLevel)
+    }
+
+    LaunchedEffect(subscriptionTier) {
+        viewModel.setSubscriptionTier(subscriptionTier)
     }
 
     LaunchedEffect(uiState.messages.size) {
@@ -85,13 +93,28 @@ fun ChatScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            HintLevelIndicator(level = uiState.hintLevel.level)
+            if (uiState.selectedMode == AppMode.TUTOR) {
+                HintLevelIndicator(level = uiState.hintLevel.level)
+            } else {
+                Text(
+                    text = uiState.selectedMode.label,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
             Text(
-                text = "${AiConfig.MODEL_DISPLAY_NAME} · Grade $gradeLevel · ${uiState.selectedSubject.displayName}",
+                text = "${uiState.activeModelLabel} · Grade $gradeLevel · ${uiState.selectedSubject.displayName}",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+
+        AppModePicker(
+            selectedMode = uiState.selectedMode,
+            onModeSelected = viewModel::selectMode,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
 
         SubjectPicker(
             selectedSubject = uiState.selectedSubject,
@@ -112,8 +135,8 @@ fun ChatScreen(
             if (uiState.messages.isEmpty()) {
                 item {
                     EmptyStateCard(
-                        title = "Start learning",
-                        message = "Ask about your homework — I'll guide you with hints and questions, never direct answers.",
+                        title = emptyStateTitle(uiState.selectedMode),
+                        message = emptyStateMessage(uiState.selectedMode),
                         modifier = Modifier.padding(horizontal = 4.dp, vertical = 16.dp)
                     )
                 }
@@ -156,29 +179,61 @@ fun ChatScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                    shape = RoundedCornerShape(32.dp)
+                )
+                .padding(horizontal = 4.dp, vertical = 4.dp),
             verticalAlignment = Alignment.Bottom
         ) {
             OutlinedTextField(
                 value = input,
                 onValueChange = { input = it },
-                modifier = Modifier.weight(1f),
-                placeholder = { Text("Ask a question…") },
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 8.dp),
+                placeholder = {
+                    Text(
+                        inputPlaceholder(uiState.selectedMode),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    )
+                },
                 maxLines = 4,
-                shape = RoundedCornerShape(24.dp),
+                shape = RoundedCornerShape(28.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent
                 )
             )
-            IconButton(
-                onClick = {
-                    viewModel.sendMessage(input)
-                    input = ""
+            Surface(
+                shape = CircleShape,
+                color = if (input.isNotBlank() && !uiState.isLoading) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant
                 },
-                enabled = input.isNotBlank() && !uiState.isLoading,
-                modifier = Modifier.padding(start = 4.dp)
+                modifier = Modifier.padding(4.dp)
             ) {
-                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send")
+                IconButton(
+                    onClick = {
+                        viewModel.sendMessage(input)
+                        input = ""
+                    },
+                    enabled = input.isNotBlank() && !uiState.isLoading
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.Send,
+                        contentDescription = "Send",
+                        tint = if (input.isNotBlank() && !uiState.isLoading) {
+                            MaterialTheme.colorScheme.onPrimary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
+                }
             }
         }
     }
@@ -190,6 +245,24 @@ fun ChatScreen(
             error = uiState.error
         )
     }
+}
+
+private fun emptyStateTitle(mode: AppMode): String = when (mode) {
+    AppMode.TUTOR -> "Start learning"
+    AppMode.STUDY -> "Generate a study pack"
+    AppMode.CODE -> "Get code help"
+}
+
+private fun emptyStateMessage(mode: AppMode): String = when (mode) {
+    AppMode.TUTOR -> "Ask about your homework — I'll guide you with hints and questions, never direct answers."
+    AppMode.STUDY -> "Enter a topic to get a summary, key concepts, flashcards, and quiz questions."
+    AppMode.CODE -> "Paste a function, error, or small code snippet — I'll debug and explain step-by-step."
+}
+
+private fun inputPlaceholder(mode: AppMode): String = when (mode) {
+    AppMode.TUTOR -> "Ask a question…"
+    AppMode.STUDY -> "Enter a topic to study…"
+    AppMode.CODE -> "Paste code or describe the bug…"
 }
 
 @Composable
@@ -309,7 +382,7 @@ fun ScannerScreen(
                     color = MaterialTheme.colorScheme.primaryContainer,
                     modifier = Modifier.size(72.dp)
                 ) {
-                    androidx.compose.foundation.layout.Box(contentAlignment = Alignment.Center) {
+                    Box(contentAlignment = Alignment.Center) {
                         Icon(
                             Icons.Default.CameraAlt,
                             contentDescription = null,

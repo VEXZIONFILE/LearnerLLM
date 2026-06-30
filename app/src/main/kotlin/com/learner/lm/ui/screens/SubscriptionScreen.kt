@@ -133,9 +133,9 @@ fun SubscriptionScreen(
                         )
                     }
 
-                    if (plan.productId == SubscriptionProducts.PRO_YEARLY) {
+                    if (plan.productId == SubscriptionProducts.PREMIUM_YEARLY) {
                         Text(
-                            text = "$19.99/mo × 10 months = $199.90/yr — 2 months free (vs $239.88 billed monthly)",
+                            text = "$9.99/mo × 10 months = $99.90/yr — 2 months free (vs $119.88 billed monthly)",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -175,9 +175,8 @@ fun SubscriptionScreen(
                         ) {
                             Text(
                                 when (plan.productId) {
-                                    SubscriptionProducts.BASIC_MONTHLY -> "Subscribe — $9.99/mo"
-                                    SubscriptionProducts.PRO_MONTHLY -> "Subscribe — $19.99/mo"
-                                    SubscriptionProducts.PRO_YEARLY -> "Subscribe — $199.90/yr"
+                                    SubscriptionProducts.PREMIUM_MONTHLY -> "Subscribe — $9.99/mo"
+                                    SubscriptionProducts.PREMIUM_YEARLY -> "Subscribe — $99.90/yr"
                                     else -> "Subscribe"
                                 }
                             )
