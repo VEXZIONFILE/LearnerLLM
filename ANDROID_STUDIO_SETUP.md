@@ -66,6 +66,7 @@ Get a key at: https://openrouter.ai/settings/keys
 | **SDK location not found** | Create `local.properties` with `sdk.dir` (see step 4) |
 | Opened wrong folder | Open the folder that contains `settings.gradle.kts` and `app/` |
 | Gradle sync failed | Install **Android SDK API 34** via **Tools → SDK Manager** |
+| **Kotlin metadata / kspDebugKotlin failed** | Sync after pulling latest `build.gradle.kts`. Project uses **Kotlin 2.2.21**, **KSP 2.2.21-2.0.5**, and **Room 2.7+** for Firebase BoM 34.x compatibility |
 | **No matching client found for package name** | `applicationId` must match `package_name` in `app/google-services.json`. Default is `com.learnerlm`. Re-download `google-services.json` from Firebase if you used a different package, or set `APP_APPLICATION_ID` in `local.properties` to match your file |
 
 ## Project structure (what you should see)

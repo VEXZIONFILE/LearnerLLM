@@ -90,7 +90,7 @@ LearnerLM/
 ### Prerequisites
 
 - Android Studio Koala or later
-- Kotlin 1.9+
+- Kotlin 2.2+
 - Gradle 8.0+
 - Java 11+
 
