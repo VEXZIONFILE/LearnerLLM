@@ -1,6 +1,6 @@
 # Google Play Subscriptions Setup
 
-Create these subscription products in [Google Play Console](https://play.google.com/console) for app `com.learner.lm`:
+Create these subscription products in [Google Play Console](https://play.google.com/console) for app `com.learnerlm`:
 
 | Product ID | Price | Billing period |
 |------------|-------|----------------|
@@ -16,7 +16,7 @@ Create these subscription products in [Google Play Console](https://play.google.
 ## Firebase Email & Password Auth
 
 1. Create a Firebase project at https://console.firebase.google.com
-2. Add Android app with package `com.learner.lm`
+2. Add Android app with package `com.learnerlm`
 3. Download `google-services.json` → place in `app/google-services.json`
 4. In Firebase Console → **Authentication** → **Sign-in method** → enable **Email/Password**
 

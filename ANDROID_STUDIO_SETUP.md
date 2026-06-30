@@ -66,6 +66,7 @@ Get a key at: https://openrouter.ai/settings/keys
 | **SDK location not found** | Create `local.properties` with `sdk.dir` (see step 4) |
 | Opened wrong folder | Open the folder that contains `settings.gradle.kts` and `app/` |
 | Gradle sync failed | Install **Android SDK API 34** via **Tools → SDK Manager** |
+| **No matching client found for package name** | `applicationId` must match `package_name` in `app/google-services.json`. Default is `com.learnerlm`. Re-download `google-services.json` from Firebase if you used a different package, or set `APP_APPLICATION_ID` in `local.properties` to match your file |
 
 ## Project structure (what you should see)
 

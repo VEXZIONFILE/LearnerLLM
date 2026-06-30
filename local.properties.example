@@ -1,3 +1,6 @@
 # Copy to local.properties and fill in your values
 sdk.dir=/path/to/Android/Sdk
 OPENROUTER_API_KEY=sk-or-v1-your-openrouter-api-key
+
+# Must match package_name in app/google-services.json (default: com.learnerlm)
+# APP_APPLICATION_ID=com.learnerlm

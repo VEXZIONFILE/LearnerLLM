@@ -26,7 +26,8 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.learner.lm"
+        // Must match package_name in app/google-services.json (Firebase Console).
+        applicationId = localProperty("APP_APPLICATION_ID", "com.learnerlm")
         minSdk = 26
         targetSdk = 34
         versionCode = 1
