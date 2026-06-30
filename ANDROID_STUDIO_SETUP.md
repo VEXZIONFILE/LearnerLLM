@@ -50,7 +50,19 @@ Android Studio usually creates `sdk.dir` automatically. You only need to add `OP
 
 Get a key at: https://openrouter.ai/settings/keys
 
-## 5. Run on your phone
+## 5. Enable Firebase Firestore (required for homework scan limits)
+
+Homework scan quotas are stored **server-side** per Firebase Auth user (sign-out cannot reset the daily limit).
+
+1. Open [Firebase Console](https://console.firebase.google.com/) → your project
+2. Go to **Build → Firestore Database** → **Create database**
+3. Start in **production mode** (you will add rules next)
+4. Choose a region close to your users
+5. In **Firestore → Rules**, paste the contents of `firestore.rules.example` from this repo and **Publish**
+
+Without Firestore, the scanner will show a connection/configuration error when loading quota.
+
+## 6. Run on your phone
 
 1. Enable **USB debugging** on your phone (Settings → Developer options)
 2. Connect phone via USB
@@ -67,6 +79,7 @@ Get a key at: https://openrouter.ai/settings/keys
 | Opened wrong folder | Open the folder that contains `settings.gradle.kts` and `app/` |
 | Gradle sync failed | Install **Android SDK API 34** via **Tools → SDK Manager** |
 | **Kotlin metadata / kspDebugKotlin failed** | Sync after pulling latest `build.gradle.kts`. Project uses **Kotlin 2.2.21**, **KSP 2.2.21-2.0.5**, and **Room 2.7+** for Firebase BoM 34.x compatibility |
+| **Could not load scan quota** | Enable **Firestore** in Firebase Console and deploy `firestore.rules.example` (see step 5) |
 | **No matching client found for package name** | `applicationId` must match `package_name` in `app/google-services.json`. Default is `com.learnerlm`. Re-download `google-services.json` from Firebase if you used a different package, or set `APP_APPLICATION_ID` in `local.properties` to match your file |
 
 ## Project structure (what you should see)

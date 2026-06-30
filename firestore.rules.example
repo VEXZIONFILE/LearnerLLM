@@ -1,0 +1,25 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+  // Homework scan quota — one document per user per day (yyyy-MM-dd).
+  // Client may only read/write its own usage docs.
+    match /users/{userId}/scan_usage/{dateId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.count is int
+        && request.resource.data.count == 1
+        && request.resource.data.date == dateId;
+
+      allow update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.date == dateId
+        && request.resource.data.count is int
+        && resource.data.count is int
+        && request.resource.data.count == resource.data.count + 1
+        && request.resource.data.count <= 3;
+    }
+  }
+}

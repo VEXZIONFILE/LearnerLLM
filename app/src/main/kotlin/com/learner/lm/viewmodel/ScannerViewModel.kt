@@ -6,6 +6,7 @@ import androidx.camera.core.ImageCaptureException
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.learner.lm.billing.ScanQuotaExceededException
 import com.learner.lm.ocr.HomeworkScanner
 import com.learner.lm.repository.ScanQuotaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,10 +18,11 @@ import kotlinx.coroutines.launch
 data class ScannerUiState(
     val hasCameraPermission: Boolean = false,
     val isProcessing: Boolean = false,
+    val isQuotaLoading: Boolean = false,
     val extractedText: String? = null,
     val error: String? = null,
     val quotaLabel: String = "",
-    val canScan: Boolean = true,
+    val canScan: Boolean = false,
     val isPremium: Boolean = false,
     val scanSucceeded: Boolean = false
 )
@@ -30,13 +32,15 @@ class ScannerViewModel(application: Application) : AndroidViewModel(application)
     private val scanQuotaRepository = ScanQuotaRepository(application)
     private val homeworkScanner = HomeworkScanner()
     private var imageCapture: ImageCapture? = null
+    private var userId: String = ""
     private var subscriptionTier: String = "FREE"
 
     private val _uiState = MutableStateFlow(ScannerUiState())
     val uiState: StateFlow<ScannerUiState> = _uiState.asStateFlow()
 
-    fun setSubscriptionTier(tier: String) {
-        subscriptionTier = tier
+    fun setUser(userId: String, subscriptionTier: String) {
+        this.userId = userId
+        this.subscriptionTier = subscriptionTier
         refreshQuota()
     }
 
@@ -49,13 +53,40 @@ class ScannerViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun refreshQuota() {
-        val premium = scanQuotaRepository.isPremiumTier(subscriptionTier)
-        _uiState.update {
-            it.copy(
-                isPremium = premium,
-                quotaLabel = scanQuotaRepository.quotaLabel(subscriptionTier),
-                canScan = scanQuotaRepository.canScan(subscriptionTier)
-            )
+        if (userId.isBlank()) {
+            _uiState.update {
+                it.copy(
+                    isQuotaLoading = false,
+                    canScan = false,
+                    quotaLabel = "",
+                    error = "Sign in to scan homework."
+                )
+            }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isQuotaLoading = true, error = null) }
+            scanQuotaRepository.fetchStatus(userId, subscriptionTier)
+                .onSuccess { status ->
+                    _uiState.update {
+                        it.copy(
+                            isQuotaLoading = false,
+                            isPremium = status.isPremium,
+                            quotaLabel = status.quotaLabel,
+                            canScan = status.canScan
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _uiState.update {
+                        it.copy(
+                            isQuotaLoading = false,
+                            canScan = false,
+                            error = error.message
+                        )
+                    }
+                }
         }
     }
 
@@ -65,7 +96,11 @@ class ScannerViewModel(application: Application) : AndroidViewModel(application)
             _uiState.update { it.copy(error = "Camera not ready. Try again in a moment.") }
             return
         }
-        if (!scanQuotaRepository.canScan(subscriptionTier)) {
+        if (userId.isBlank()) {
+            _uiState.update { it.copy(error = "Sign in to scan homework.") }
+            return
+        }
+        if (!_uiState.value.canScan && !_uiState.value.isPremium) {
             _uiState.update {
                 it.copy(
                     error = "Daily scan limit reached. Upgrade to Premium for unlimited homework scans.",
@@ -85,16 +120,37 @@ class ScannerViewModel(application: Application) : AndroidViewModel(application)
                         val result = homeworkScanner.extractText(image)
                         result.fold(
                             onSuccess = { text ->
-                                scanQuotaRepository.recordScan(subscriptionTier)
-                                refreshQuota()
-                                _uiState.update {
-                                    it.copy(
-                                        isProcessing = false,
-                                        extractedText = text,
-                                        scanSucceeded = true,
-                                        error = null
-                                    )
-                                }
+                                scanQuotaRepository.recordSuccessfulScan(userId, subscriptionTier)
+                                    .onSuccess { status ->
+                                        _uiState.update {
+                                            it.copy(
+                                                isProcessing = false,
+                                                extractedText = text,
+                                                scanSucceeded = true,
+                                                error = null,
+                                                isPremium = status.isPremium,
+                                                quotaLabel = status.quotaLabel,
+                                                canScan = status.canScan
+                                            )
+                                        }
+                                    }
+                                    .onFailure { quotaError ->
+                                        val message = when (quotaError) {
+                                            is ScanQuotaExceededException ->
+                                                "Daily scan limit reached. Upgrade to Premium for unlimited homework scans."
+                                            else -> quotaError.message
+                                                ?: "Could not verify scan quota."
+                                        }
+                                        _uiState.update {
+                                            it.copy(
+                                                isProcessing = false,
+                                                scanSucceeded = false,
+                                                error = message,
+                                                canScan = false
+                                            )
+                                        }
+                                        refreshQuota()
+                                    }
                             },
                             onFailure = { error ->
                                 _uiState.update {

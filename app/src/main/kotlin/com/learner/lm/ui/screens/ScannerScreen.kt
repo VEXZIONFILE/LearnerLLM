@@ -55,6 +55,7 @@ import com.learner.lm.viewmodel.ScannerViewModel
 
 @Composable
 fun ScannerScreen(
+    userId: String,
     subscriptionTier: String,
     onTextScanned: (String) -> Unit,
     onNavigateToUpgrade: () -> Unit,
@@ -70,8 +71,8 @@ fun ScannerScreen(
         viewModel.setCameraPermission(granted)
     }
 
-    LaunchedEffect(subscriptionTier) {
-        viewModel.setSubscriptionTier(subscriptionTier)
+    LaunchedEffect(userId, subscriptionTier) {
+        viewModel.setUser(userId, subscriptionTier)
     }
 
     LaunchedEffect(Unit) {
@@ -118,10 +119,14 @@ fun ScannerScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            NotebookBadge(
-                text = uiState.quotaLabel,
-                highlighted = uiState.isPremium
-            )
+            if (uiState.isQuotaLoading) {
+                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+            } else {
+                NotebookBadge(
+                    text = uiState.quotaLabel,
+                    highlighted = uiState.isPremium
+                )
+            }
             if (!uiState.isPremium && !uiState.canScan) {
                 Text(
                     text = "Limit reached",

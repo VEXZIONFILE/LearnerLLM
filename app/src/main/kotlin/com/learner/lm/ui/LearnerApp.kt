@@ -83,6 +83,7 @@ fun LearnerApp() {
                         viewModel = chatViewModel
                     )
                     AppDestination.Scanner -> ScannerScreen(
+                        userId = profile.uid,
                         subscriptionTier = profile.subscriptionTier,
                         onTextScanned = { text ->
                             chatViewModel.setScannedText(text)

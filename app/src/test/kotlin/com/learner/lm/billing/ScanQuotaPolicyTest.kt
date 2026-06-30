@@ -34,4 +34,13 @@ class ScanQuotaPolicyTest {
         assertEquals("Unlimited scans", ScanQuotaPolicy.quotaLabel(10, isPremium = true))
         assertEquals("2 of 3 scans left today", ScanQuotaPolicy.quotaLabel(1, isPremium = false))
     }
+
+    @Test
+    fun `scan quota status maps policy for free tier`() {
+        val status = ScanQuotaStatus.forTier(2, SubscriptionTier.FREE.name)
+        assertEquals(2, status.usedToday)
+        assertFalse(status.isPremium)
+        assertTrue(status.canScan)
+        assertEquals(1, status.remainingScans)
+    }
 }

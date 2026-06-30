@@ -120,10 +120,7 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     // firebase-auth 24.1.0+ requires Kotlin 2.3; pin to 24.0.0 for Kotlin 2.2.x toolchains.
     implementation("com.google.firebase:firebase-auth:24.0.0")
-
-    // Add more Firebase SDKs here if needed:
-    // implementation("com.google.firebase:firebase-firestore")
-    // https://firebase.google.com/docs/android/setup#available-libraries
+    implementation("com.google.firebase:firebase-firestore")
 
     implementation("com.android.billingclient:billing-ktx:7.0.0")
 
