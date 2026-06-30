@@ -2,11 +2,12 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("com.google.devtools.ksp")
 
     // Add the Google services Gradle plugin
     id("com.google.gms.google-services")
+
+    id("org.jetbrains.kotlin.android")
+    id("com.google.devtools.ksp")
 }
 
 val localProperties = Properties().apply {
@@ -108,9 +109,10 @@ dependencies {
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:34.15.0"))
 
-    // Firebase products (versions managed by BoM)
+    // Firebase products (versions managed by BoM — do not specify versions)
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
+    // https://firebase.google.com/docs/android/setup#available-libraries
 
     implementation("com.android.billingclient:billing-ktx:7.0.0")
 
