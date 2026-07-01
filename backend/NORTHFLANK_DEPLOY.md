@@ -6,6 +6,20 @@ Northflank is a strong fit for this backend: **Docker from GitHub**, **HTTPS URL
 
 ---
 
+## Important: pick the right branch
+
+The backend is **not on `main`**. Use a branch that includes the `backend/` folder:
+
+| Branch | Has backend? |
+|--------|----------------|
+| **`LearnerLM`** | Yes |
+| **`cursor/learner-lm-android-scaffold-6bf2`** | Yes (latest) |
+| `main` | **No** — Android app only |
+
+If Northflank says **“No Dockerfile found”**, you are usually on **`main`** or the Dockerfile path is wrong.
+
+---
+
 ## 1. Sign up and connect GitHub
 
 1. Go to https://northflank.com and create an account
@@ -22,15 +36,27 @@ Northflank is a strong fit for this backend: **Docker from GitHub**, **HTTPS URL
 2. Choose **Combined service** (build + deploy in one step)
 3. **Name:** `learnerlm-api`
 4. **Repository:** `VEXZIONFILE/LearnerLLM`
-5. **Branch:** your deploy branch (e.g. `LearnerLM` or `main`)
+5. **Branch:** **`LearnerLM`** (not `main`)
 
-### Build settings
+### Build settings — Option A (easiest)
+
+Use the **root** `Dockerfile` at the repo root:
 
 | Field | Value |
 |-------|--------|
 | **Build type** | Dockerfile |
-| **Dockerfile path** | `/backend/Dockerfile` |
-| **Build context** | `/backend` |
+| **Dockerfile path** | `Dockerfile` |
+| **Build context** | `.` (repository root) |
+
+### Build settings — Option B (backend folder)
+
+| Field | Value |
+|-------|--------|
+| **Build type** | Dockerfile |
+| **Dockerfile path** | `backend/Dockerfile` |
+| **Build context** | `backend` |
+
+Do **not** use a leading slash unless Northflank requires it — try `Dockerfile` or `backend/Dockerfile` first.
 
 Northflank should detect **port 8080** from the Dockerfile.
 
@@ -169,7 +195,8 @@ Push to GitHub → Northflank builds and redeploys automatically.
 
 | Problem | Fix |
 |---------|-----|
-| Build failed | Dockerfile path = `/backend/Dockerfile`, context = `/backend` |
+| **No Dockerfile found** | Branch must be **`LearnerLM`** (not `main`). Use Dockerfile path `Dockerfile` + context `.` **or** `backend/Dockerfile` + context `backend` |
+| Build failed | Check **Logs**; confirm branch has `backend/` folder |
 | `/health` fails | Check logs; confirm port **8080** |
 | `401` on API | Set `FIREBASE_CREDENTIALS_JSON` + `FIREBASE_PROJECT_ID` |
 | Data lost after restart | Add volume mounted at `/app/data` |
