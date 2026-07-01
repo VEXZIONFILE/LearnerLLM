@@ -15,36 +15,36 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/** Professional SaaS / LLM product palette. */
+/** Premium SaaS LLM product palette — ChatGPT / Claude inspired. */
 object AppColors {
-    val Accent = Color(0xFF4F46E5)
-    val AccentHover = Color(0xFF4338CA)
-    val AccentLight = Color(0xFFEEF2FF)
-    val AccentMuted = Color(0xFFC7D2FE)
+    val Accent = Color(0xFF10A37F)
+    val AccentHover = Color(0xFF0D8C6D)
+    val AccentLight = Color(0xFFE6F7F2)
+    val AccentMuted = Color(0xFFB8E8DA)
 
-    val Background = Color(0xFFF8F9FC)
+    val Background = Color(0xFFF7F7F8)
     val Surface = Color(0xFFFFFFFF)
     val SurfaceElevated = Color(0xFFFFFFFF)
-    val SurfaceMuted = Color(0xFFF3F4F6)
-    val Border = Color(0xFFE5E7EB)
-    val BorderSubtle = Color(0xFFF0F1F3)
+    val SurfaceMuted = Color(0xFFF0F0F0)
+    val Border = Color(0xFFE3E3E8)
+    val BorderSubtle = Color(0xFFEDEDF0)
 
-    val TextPrimary = Color(0xFF111827)
-    val TextSecondary = Color(0xFF6B7280)
-    val TextTertiary = Color(0xFF9CA3AF)
+    val TextPrimary = Color(0xFF0D0D0D)
+    val TextSecondary = Color(0xFF676767)
+    val TextTertiary = Color(0xFF9B9B9B)
 
-    val UserBubble = Color(0xFFF3F4F6)
+    val UserBubble = Color(0xFFF4F4F4)
     val AssistantBubble = Color(0xFFFFFFFF)
 
-    val DarkBackground = Color(0xFF09090B)
-    val DarkSurface = Color(0xFF18181B)
-    val DarkSurfaceElevated = Color(0xFF27272A)
-    val DarkBorder = Color(0xFF3F3F46)
-    val DarkTextPrimary = Color(0xFFFAFAFA)
-    val DarkTextSecondary = Color(0xFFA1A1AA)
+    val DarkBackground = Color(0xFF212121)
+    val DarkSurface = Color(0xFF2F2F2F)
+    val DarkSurfaceElevated = Color(0xFF3A3A3A)
+    val DarkBorder = Color(0xFF4A4A4A)
+    val DarkTextPrimary = Color(0xFFECECEC)
+    val DarkTextSecondary = Color(0xFFB4B4B4)
 
-    val AccentDark = Color(0xFF818CF8)
-    val AccentDarkContainer = Color(0xFF312E81)
+    val AccentDark = Color(0xFF19C37D)
+    val AccentDarkContainer = Color(0xFF1A4D3E)
     val ProGold = Color(0xFFF59E0B)
     val Error = Color(0xFFDC2626)
     val Success = Color(0xFF059669)

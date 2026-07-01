@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,7 +40,8 @@ fun ChatBubble(
     message: String,
     isStudent: Boolean,
     modifier: Modifier = Modifier,
-    onReport: (() -> Unit)? = null
+    onReport: (() -> Unit)? = null,
+    onCopy: (() -> Unit)? = null
 ) {
     if (isStudent) {
         Row(
@@ -89,17 +91,32 @@ fun ChatBubble(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.SemiBold
                     )
-                    if (onReport != null) {
-                        IconButton(
-                            onClick = onReport,
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Icon(
-                                Icons.Outlined.Flag,
-                                contentDescription = "Report AI content",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(18.dp)
-                            )
+                    Row {
+                        if (onCopy != null) {
+                            IconButton(
+                                onClick = onCopy,
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    Icons.Outlined.ContentCopy,
+                                    contentDescription = "Copy message",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
+                        if (onReport != null) {
+                            IconButton(
+                                onClick = onReport,
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    Icons.Outlined.Flag,
+                                    contentDescription = "Report AI content",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -107,8 +124,7 @@ fun ChatBubble(
                     text = message,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
-                    lineHeight = MaterialTheme.typography.bodyMedium.lineHeight,
-                    modifier = Modifier.padding(bottom = if (onReport != null) 0.dp else 0.dp)
+                    lineHeight = MaterialTheme.typography.bodyMedium.lineHeight
                 )
             }
         }

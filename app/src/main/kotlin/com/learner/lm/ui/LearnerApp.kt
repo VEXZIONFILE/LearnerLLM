@@ -36,6 +36,20 @@ fun LearnerApp() {
     val userProfile by authViewModel.userProfile.collectAsStateWithLifecycle()
     var currentDestination by remember { mutableStateOf(AppDestination.Chat) }
 
+    LaunchedEffect(authState) {
+        when (authState) {
+            AuthState.SignedOut, is AuthState.Error -> {
+                currentDestination = AppDestination.Login
+            }
+            is AuthState.SignedIn -> {
+                if (currentDestination == AppDestination.Login) {
+                    currentDestination = AppDestination.Chat
+                }
+            }
+            AuthState.Loading -> Unit
+        }
+    }
+
     when (val state = authState) {
         AuthState.Loading -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -99,7 +113,10 @@ fun LearnerApp() {
                             chatViewModel.setGradeLevel(grade)
                         },
                         onNavigateToSubscription = { currentDestination = AppDestination.Subscription },
-                        onSignOut = { authViewModel.signOut() }
+                        onSignOut = {
+                            authViewModel.signOut()
+                            currentDestination = AppDestination.Login
+                        }
                     )
                     AppDestination.Subscription -> SubscriptionScreen(
                         userProfile = profile,
@@ -111,10 +128,19 @@ fun LearnerApp() {
             }
         }
         is AuthState.Error -> {
-            LoginScreen(
-                authViewModel = authViewModel,
-                onNavigateToSubscription = { currentDestination = AppDestination.Subscription }
-            )
+            if (currentDestination == AppDestination.Subscription) {
+                SubscriptionScreen(
+                    userProfile = null,
+                    billingViewModel = billingViewModel,
+                    onBack = { currentDestination = AppDestination.Login }
+                )
+            } else {
+                LoginScreen(
+                    authViewModel = authViewModel,
+                    configError = state.message,
+                    onNavigateToSubscription = { currentDestination = AppDestination.Subscription }
+                )
+            }
         }
     }
 }

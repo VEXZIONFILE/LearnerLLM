@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -40,6 +41,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.learner.lm.auth.UserProfile
+import com.learner.lm.billing.SubscriptionTier
 import com.learner.lm.ui.navigation.AppDestination
 import com.learner.lm.ui.theme.AppColors
 import com.learner.lm.ui.theme.AppRadii
@@ -61,19 +63,30 @@ fun NotebookScaffold(
         topBar = {
             Surface(
                 color = MaterialTheme.colorScheme.surface,
-                shadowElevation = 1.dp
+                shadowElevation = 0.dp
             ) {
                 Column {
                     TopAppBar(
                         title = {
-                            if (!showBack) {
-                                BrandMark(iconSize = 28.dp, showWordmark = true)
-                            } else {
+                            if (showBack) {
                                 Text(
                                     text = currentDestination.title,
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.SemiBold
                                 )
+                            } else {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    BrandMark(iconSize = 28.dp, showWordmark = true)
+                                    if (currentDestination != AppDestination.Chat) {
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = "· ${currentDestination.title}",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                    }
+                                }
                             }
                         },
                         navigationIcon = {
@@ -84,6 +97,22 @@ fun NotebookScaffold(
                             }
                         },
                         actions = {
+                            if (userProfile != null && isPremiumTier(userProfile.subscriptionTier)) {
+                                Surface(
+                                    shape = RoundedCornerShape(AppRadii.pill),
+                                    color = AppColors.ProGold.copy(alpha = 0.12f),
+                                    border = BorderStroke(1.dp, AppColors.ProGold.copy(alpha = 0.35f)),
+                                    modifier = Modifier.padding(end = 8.dp)
+                                ) {
+                                    Text(
+                                        text = "Premium",
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = AppColors.ProGold,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
                             if (currentDestination == AppDestination.Profile && userProfile != null) {
                                 ProfileAvatar(
                                     name = userProfile.displayName,
@@ -99,7 +128,7 @@ fun NotebookScaffold(
                         )
                     )
                     HorizontalDivider(
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
                         thickness = 0.5.dp
                     )
                 }
@@ -109,11 +138,11 @@ fun NotebookScaffold(
             if (currentDestination.showsBottomNav) {
                 Surface(
                     color = MaterialTheme.colorScheme.surface,
-                    shadowElevation = 8.dp
+                    shadowElevation = 0.dp
                 ) {
                     Column {
                         HorizontalDivider(
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
                             thickness = 0.5.dp
                         )
                         LearnerBottomNav(
@@ -143,7 +172,8 @@ private fun LearnerBottomNav(
 ) {
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
-        tonalElevation = 0.dp
+        tonalElevation = 0.dp,
+        modifier = Modifier.height(64.dp)
     ) {
         AppDestination.bottomNavDestinations.forEach { destination ->
             val selected = currentDestination == destination
@@ -161,7 +191,7 @@ private fun LearnerBottomNav(
                     Text(
                         destination.shortLabel,
                         style = MaterialTheme.typography.labelSmall,
-                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium
+                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
@@ -169,12 +199,15 @@ private fun LearnerBottomNav(
                     selectedTextColor = MaterialTheme.colorScheme.primary,
                     unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    indicatorColor = AppColors.AccentLight.copy(alpha = 0.7f)
+                    indicatorColor = AppColors.AccentLight.copy(alpha = 0.65f)
                 )
             )
         }
     }
 }
+
+private fun isPremiumTier(tier: String): Boolean =
+    tier == SubscriptionTier.BASIC.name || tier == SubscriptionTier.PRO.name
 
 private fun AppDestination.icon(): ImageVector = when (this) {
     AppDestination.Chat -> Icons.AutoMirrored.Filled.Chat
@@ -195,11 +228,11 @@ fun NotebookCard(
         shape = RoundedCornerShape(AppRadii.lg),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = if (elevated) 2.dp else 0.dp
+            defaultElevation = if (elevated) 1.dp else 0.dp
         ),
-        border = if (elevated) null else BorderStroke(
+        border = BorderStroke(
             1.dp,
-            MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+            MaterialTheme.colorScheme.outline.copy(alpha = if (elevated) 0.25f else 0.5f)
         )
     ) {
         Box(modifier = Modifier.padding(AppSpacing.lg)) {
@@ -247,8 +280,9 @@ fun NotebookPanel(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(AppRadii.lg),
         color = MaterialTheme.colorScheme.surface,
-        shadowElevation = 1.dp,
-        tonalElevation = 0.dp
+        shadowElevation = 0.dp,
+        tonalElevation = 0.dp,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
     ) {
         content()
     }
