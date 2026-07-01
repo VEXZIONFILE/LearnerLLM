@@ -29,22 +29,22 @@ object SubscriptionFeatures {
         PlanComparisonRow(
             feature = "Study packs",
             standard = "Summary + flashcards",
-            premium = "Quizzes + practice problems (Pro)"
+            premium = "Quizzes + practice problems (Premium)"
         ),
         PlanComparisonRow(
             feature = "Tutor examples",
             standard = "1 per reply",
-            premium = "Up to 5 per reply (Pro)"
+            premium = "Up to 5 per reply (Premium)"
         ),
         PlanComparisonRow(
             feature = "Code debugging",
             standard = "~20 lines of help",
-            premium = "Up to 60 lines + strategies (Pro)"
+            premium = "Up to 60 lines + strategies (Premium)"
         ),
         PlanComparisonRow(
             feature = "Chat memory",
             standard = "Last 8 messages",
-            premium = "Last 16 messages (Pro)"
+            premium = "Last 16 messages (Premium)"
         ),
         PlanComparisonRow(
             feature = "Quick actions",
@@ -54,7 +54,7 @@ object SubscriptionFeatures {
         PlanComparisonRow(
             feature = "Priority depth",
             standard = "—",
-            premium = "Premium Pro only",
+            premium = "Premium only",
             premiumHighlight = true
         )
     )
@@ -63,11 +63,11 @@ object SubscriptionFeatures {
         "Unlimited homework scans every day",
         "Longer, smarter answers from frontier AI models",
         "Full study packs with quizzes and flashcards",
-        "Premium Pro adds practice problems and max-depth tutoring",
+        "Premium adds practice problems and max-depth tutoring",
         "Quick-action buttons: explain simpler, quiz me, give examples"
     )
 
-    val proExclusiveBenefits = listOf(
+    val premiumExclusiveBenefits = listOf(
         "Longest AI responses across Tutor, Study & Code",
         "Practice problem sets in Study mode",
         "Up to 5 worked examples per tutor reply",

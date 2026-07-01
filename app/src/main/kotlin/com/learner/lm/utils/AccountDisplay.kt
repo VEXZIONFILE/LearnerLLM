@@ -20,8 +20,8 @@ object AccountDisplay {
     }
 
     fun planLabel(tier: String): String = when (tier) {
-        "PRO" -> "Premium Pro"
-        "BASIC" -> "Premium"
+        "PRO" -> "Premium"
+        "BASIC" -> "Pro"
         else -> "Standard"
     }
 }

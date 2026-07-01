@@ -313,7 +313,7 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(AppRadii.md)
             ) {
-                Text("View Premium plans", style = MaterialTheme.typography.labelLarge)
+                Text("View plans", style = MaterialTheme.typography.labelLarge)
             }
 
             Spacer(modifier = Modifier.height(AppSpacing.xl))

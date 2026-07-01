@@ -35,6 +35,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.learner.lm.auth.UserProfile
 import com.learner.lm.billing.SubscriptionCatalog
+import com.learner.lm.billing.SubscriptionFeatures
 import com.learner.lm.billing.SubscriptionProducts
 import com.learner.lm.billing.SubscriptionTier
 import com.learner.lm.ui.components.NotebookBadge
@@ -99,12 +100,12 @@ fun SubscriptionScreen(
             NotebookCard {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "Premium Pro exclusive",
+                        text = "Premium exclusive",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = AppColors.ProGold
                     )
-                    com.learner.lm.billing.SubscriptionFeatures.proExclusiveBenefits.forEach { benefit ->
+                    SubscriptionFeatures.premiumExclusiveBenefits.forEach { benefit ->
                         Row(verticalAlignment = Alignment.Top) {
                             Icon(
                                 Icons.Default.Check,
@@ -199,9 +200,9 @@ fun SubscriptionScreen(
                         )
                     }
 
-                    if (plan.productId == SubscriptionProducts.PREMIUM_YEARLY) {
+                    if (plan.productId == SubscriptionProducts.MEGA_YEARLY) {
                         Text(
-                            text = "$9.99/mo × 10 months = $99.90/yr — save $19.98 vs monthly",
+                            text = "$9.99/mo × 10 months = $99.99/yr — 2 months free",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -241,8 +242,9 @@ fun SubscriptionScreen(
                         ) {
                             Text(
                                 when (plan.productId) {
-                                    SubscriptionProducts.PREMIUM_MONTHLY -> "Subscribe — $9.99/mo"
-                                    SubscriptionProducts.PREMIUM_YEARLY -> "Subscribe — $99.90/yr"
+                                    SubscriptionProducts.PRO_MONTHLY -> "Subscribe — $9.99/mo"
+                                    SubscriptionProducts.PREMIUM_MONTHLY -> "Subscribe — $14.99/mo"
+                                    SubscriptionProducts.MEGA_YEARLY -> "Subscribe — $190.00/yr"
                                     else -> "Subscribe"
                                 },
                                 fontWeight = FontWeight.SemiBold

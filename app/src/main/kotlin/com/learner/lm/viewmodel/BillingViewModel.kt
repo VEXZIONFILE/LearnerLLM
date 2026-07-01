@@ -62,9 +62,9 @@ class BillingViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private fun localTierForProduct(productId: String?): String = when (productId) {
-        SubscriptionProducts.PREMIUM_MONTHLY,
-        SubscriptionProducts.PREMIUM_YEARLY -> SubscriptionTier.BASIC.name
-        SubscriptionProducts.PRO_MONTHLY -> SubscriptionTier.PRO.name
+        SubscriptionProducts.PRO_MONTHLY,
+        SubscriptionProducts.MEGA_YEARLY -> SubscriptionTier.BASIC.name
+        SubscriptionProducts.PREMIUM_MONTHLY -> SubscriptionTier.PRO.name
         else -> SubscriptionTier.FREE.name
     }
 

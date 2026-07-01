@@ -46,6 +46,7 @@ import com.learner.lm.ui.navigation.AppDestination
 import com.learner.lm.ui.theme.AppColors
 import com.learner.lm.ui.theme.AppRadii
 import com.learner.lm.ui.theme.AppSpacing
+import com.learner.lm.utils.AccountDisplay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -105,7 +106,7 @@ fun NotebookScaffold(
                                     modifier = Modifier.padding(end = 8.dp)
                                 ) {
                                     Text(
-                                        text = "Premium",
+                                        text = AccountDisplay.planLabel(userProfile.subscriptionTier),
                                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = AppColors.ProGold,

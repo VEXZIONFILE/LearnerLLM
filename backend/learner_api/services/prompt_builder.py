@@ -208,9 +208,9 @@ class PromptBuilder:
 
 def when_tier_note(tier: str) -> str:
     if is_pro_tier(tier):
-        return "Subscription: Premium Pro — maximum depth, longest responses, richest examples."
+        return "Subscription: Premium — maximum depth, longest responses, richest examples."
     if is_premium_tier(tier):
-        return "Subscription: Premium — provide richer examples and more detail."
+        return "Subscription: Pro — provide richer examples and more detail."
     return "Subscription: Standard — keep responses concise but correct."
 
 

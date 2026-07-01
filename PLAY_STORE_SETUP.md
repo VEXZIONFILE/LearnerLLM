@@ -2,15 +2,17 @@
 
 Create these subscription products in [Google Play Console](https://play.google.com/console) for app `com.learnerlm`:
 
-| Product ID | Price | Billing period |
-|------------|-------|----------------|
-| `learnerlm_basic_monthly` | $9.99 | Monthly (Premium) |
-| `learnerlm_pro_yearly` | $99.90 | Yearly (Premium — 10 months, 2 months free) |
+| Product ID | Price | Plan |
+|------------|-------|------|
+| `learnerlm_basic_monthly` | $9.99 | Pro (monthly) |
+| `learnerlm_pro_monthly` | $14.99 | Premium (monthly) |
+| `learnerlm_pro_yearly` | $99.99 | Mega (yearly — 2 months free) |
 
-## Premium pricing
+## Plan pricing
 
-- Premium monthly: **$9.99/month**
-- Premium yearly: $9.99 × 10 = **$99.90/year** (2 months free — save **$19.98** vs monthly)
+- **Pro** monthly: **$9.99/month**
+- **Premium** monthly: **$14.99/month**
+- **Mega** yearly: **$190.00/year** ($19/mo × 10 months — 2 months free)
 
 ## AI modes (multi-model routing)
 
@@ -21,7 +23,7 @@ Create these subscription products in [Google Play Console](https://play.google.
 | Code Help | `poolside/laguna-m.1` | Debug & explain code (small pieces only) |
 
 **Free users:** standard depth, limited study pack sections, basic code help.  
-**Premium users:** deeper explanations, full study packs with quizzes, richer code debugging.
+**Pro & Premium users:** deeper explanations, full study packs with quizzes, richer code debugging.
 
 ## Firebase Email & Password Auth
 
@@ -34,7 +36,7 @@ Create these subscription products in [Google Play Console](https://play.google.
 
 ```properties
 sdk.dir=/path/to/Android/Sdk
-LEARNER_API_BASE_URL=https://api.yourdomain.com/
+LEARNER_API_BASE_URL=https://learnerllm-2.onrender.com/
 ```
 
 ## Backend
@@ -54,6 +56,4 @@ LearnerLM includes:
 - Reports are sent to `POST /v1/reports` on your Learner API backend
 - **Settings → Safety & AI** explains how reporting works
 
-When filling out the Play Console **AI-generated content** declaration, state that users can report content via the in-chat flag button.
-
-Report submissions are stored in the backend and emailed to **elijahjmaxwell43@gmail.com**. Set `RESEND_API_KEY` as a Cloudflare Worker secret.
+Report emails are sent to `elijahjmaxwell43@gmail.com` via Resend when `RESEND_API_KEY` is configured on the backend.

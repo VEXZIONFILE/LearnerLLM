@@ -19,8 +19,8 @@ class PromptBuilder {
         val scanned = context.scannedText?.let { "\n\nScanned material:\n$it" }.orEmpty()
         val subjectLine = subjectLineFor(context.subject)
         val tierNote = when {
-            capabilities.isPro -> "Subscription: Premium Pro — maximum depth, longest responses, richest examples."
-            capabilities.isPremium -> "Subscription: Premium — provide richer examples and more detail."
+            capabilities.isPro -> "Subscription: Premium — maximum depth, longest responses, richest examples."
+            capabilities.isPremium -> "Subscription: Pro — provide richer examples and more detail."
             else -> "Subscription: Standard — keep responses concise but correct."
         }
 

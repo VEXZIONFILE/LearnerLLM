@@ -1,17 +1,20 @@
 package com.learner.lm.billing
 
 object SubscriptionProducts {
-    const val PREMIUM_MONTHLY = "learnerlm_basic_monthly"
-    const val PREMIUM_YEARLY = "learnerlm_pro_yearly"
-    const val PRO_MONTHLY = "learnerlm_pro_monthly"
+    /** Monthly Pro — maps to BASIC tier */
+    const val PRO_MONTHLY = "learnerlm_basic_monthly"
+    /** Monthly Premium — maps to PRO tier */
+    const val PREMIUM_MONTHLY = "learnerlm_pro_monthly"
+    /** Annual Mega — maps to BASIC tier */
+    const val MEGA_YEARLY = "learnerlm_pro_yearly"
 
-    val allProductIds = listOf(PREMIUM_MONTHLY, PREMIUM_YEARLY, PRO_MONTHLY)
+    val allProductIds = listOf(PRO_MONTHLY, PREMIUM_MONTHLY, MEGA_YEARLY)
 }
 
 enum class SubscriptionTier(val displayName: String) {
     FREE("Standard"),
-    BASIC("Premium"),
-    PRO("Premium Pro")
+    BASIC("Pro"),
+    PRO("Premium")
 }
 
 data class SubscriptionPlan(
@@ -29,9 +32,9 @@ data class SubscriptionPlan(
 object SubscriptionCatalog {
     val plans = listOf(
         SubscriptionPlan(
-            productId = SubscriptionProducts.PREMIUM_MONTHLY,
+            productId = SubscriptionProducts.PRO_MONTHLY,
             tier = SubscriptionTier.BASIC,
-            title = "Premium",
+            title = "Pro",
             price = "$9.99",
             period = "/ month",
             description = "Unlimited scans, deeper AI, and full study packs.",
@@ -46,14 +49,14 @@ object SubscriptionCatalog {
             isPopular = true
         ),
         SubscriptionPlan(
-            productId = SubscriptionProducts.PRO_MONTHLY,
+            productId = SubscriptionProducts.PREMIUM_MONTHLY,
             tier = SubscriptionTier.PRO,
-            title = "Premium Pro",
+            title = "Premium",
             price = "$14.99",
             period = "/ month",
             description = "Maximum AI depth for power learners.",
             features = listOf(
-                "Everything in Premium",
+                "Everything in Pro",
                 "Longest responses — 3× Standard depth",
                 "Practice problem sets in Study mode",
                 "Up to 5 tutor examples per reply",
@@ -63,16 +66,16 @@ object SubscriptionCatalog {
             badge = "Best for daily use"
         ),
         SubscriptionPlan(
-            productId = SubscriptionProducts.PREMIUM_YEARLY,
+            productId = SubscriptionProducts.MEGA_YEARLY,
             tier = SubscriptionTier.BASIC,
-            title = "Premium Annual",
-            price = "$99.90",
+            title = "Mega",
+            price = "$99.99",
             period = "/ year",
-            description = "Best value — pay for 10 months, get 12.",
+            description = "Best value — pay for 10 months, get 12 (2 months free).",
             features = listOf(
-                "Everything in Premium monthly",
+                "Everything in Pro monthly",
                 "Unlimited homework scans",
-                "Save $19.98 vs paying monthly",
+                "2 months free vs paying monthly",
                 "Best value for committed learners"
             ),
             badge = "2 months free"
