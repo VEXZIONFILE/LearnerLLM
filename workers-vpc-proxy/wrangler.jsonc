@@ -1,19 +1,18 @@
 {
-  "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "learnerlm-api",
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "WORKER-NAME",
   "main": "src/index.ts",
   "compatibility_date": "2026-07-01",
-  "vars": {
-    "VPC_TARGET_ORIGIN": "http://localhost:8080"
+  "observability": {
+    "enabled": true
   },
+
+  // Add this to your wrangler.jsonc
   "vpc_services": [
     {
       "binding": "VPC_SERVICE",
-      "service_id": "REPLACE_WITH_YOUR_VPC_SERVICE_ID",
+      "service_id": "019f1f65-da14-72f3-b3ad-601dbfdb684c",
       "remote": true
     }
-  ],
-  "observability": {
-    "enabled": true
-  }
+  ]
 }
