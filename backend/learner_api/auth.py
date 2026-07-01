@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import json
 
 from fastapi import Depends, HTTPException, Request, status
 from firebase_admin import auth as firebase_auth
@@ -17,7 +18,10 @@ def _ensure_firebase(settings: Settings) -> None:
     global _firebase_initialized
     if _firebase_initialized or settings.firebase_auth_disabled:
         return
-    if settings.firebase_credentials_path:
+    if settings.firebase_credentials_json.strip():
+        cred = credentials.Certificate(json.loads(settings.firebase_credentials_json))
+        initialize_app(cred, {"projectId": settings.firebase_project_id or None})
+    elif settings.firebase_credentials_path:
         cred = credentials.Certificate(settings.firebase_credentials_path)
         initialize_app(cred, {"projectId": settings.firebase_project_id or None})
     else:

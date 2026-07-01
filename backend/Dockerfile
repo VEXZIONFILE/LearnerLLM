@@ -10,9 +10,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY learner_api ./learner_api
 COPY pyproject.toml .
+COPY entrypoint.sh /app/entrypoint.sh
 
-RUN mkdir -p /app/data
+RUN mkdir -p /app/data /app/secrets && chmod +x /app/entrypoint.sh
 
 EXPOSE 8080
 
-CMD ["uvicorn", "learner_api.main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["/app/entrypoint.sh"]

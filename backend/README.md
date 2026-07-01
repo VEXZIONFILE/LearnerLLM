@@ -49,6 +49,24 @@ cp .env.example .env
 docker compose up --build
 ```
 
+## Vercel (free Hobby, no SSH)
+
+See **[VERCEL_DEPLOY.md](VERCEL_DEPLOY.md)** — GitHub import, Root Directory = `backend`, free HTTPS.  
+Note: SQLite data is ephemeral on Vercel (fine for testing).
+
+## Render (free tier, no SSH)
+
+See **[RENDER_DEPLOY.md](RENDER_DEPLOY.md)** — connect GitHub, deploy Docker, free HTTPS URL.  
+Sleeps after 15 min idle; first request may take ~1 min to wake.
+
+## Fly.io (optional cloud hosting)
+
+See **[FLY_DEPLOY.md](FLY_DEPLOY.md)** if you want a public cloud URL.
+
+## Self-host at home (no public port, no monthly VPS)
+
+See **[SELF_HOST.md](SELF_HOST.md)** — run on your dad's server with Docker + **Tailscale** (free private VPN, no router port forwarding).
+
 ## Android app configuration
 
 In project `local.properties`:

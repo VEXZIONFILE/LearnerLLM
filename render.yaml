@@ -1,0 +1,30 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# Deploy: connect GitHub repo → Render auto-detects this file → Apply
+services:
+  - type: web
+    name: learnerlm-api
+    runtime: docker
+    rootDir: backend
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: DEBUG
+        value: "false"
+      - key: DATABASE_URL
+        value: sqlite+aiosqlite:///./data/learnerlm.db
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: FIREBASE_AUTH_DISABLED
+        value: "false"
+      - key: BILLING_VERIFICATION_DISABLED
+        value: "true"
+      - key: GOOGLE_PLAY_PACKAGE_NAME
+        value: com.learnerlm
+      - key: FREE_DAILY_SCAN_LIMIT
+        value: "3"
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_CREDENTIALS_JSON
+        sync: false
