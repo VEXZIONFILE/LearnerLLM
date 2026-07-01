@@ -45,7 +45,7 @@ FIREBASE_AUTH_DISABLED=true uvicorn learner_api.main:app --host 0.0.0.0 --port 8
 ```
 
 See [backend/README.md](backend/README.md) for production Firebase and billing setup.  
-**Production hosting:** [backend/ORACLE_DEPLOY.md](backend/ORACLE_DEPLOY.md) (Oracle Always Free VM) · [backend/RENDER_DEPLOY.md](backend/RENDER_DEPLOY.md) (Render free) · [backend/FLY_DEPLOY.md](backend/FLY_DEPLOY.md) (Fly.io) · [backend/VERCEL_DEPLOY.md](backend/VERCEL_DEPLOY.md) (Vercel) · [backend/SELF_HOST.md](backend/SELF_HOST.md) (home server).
+**Production hosting:** [backend/NORTHFLANK_DEPLOY.md](backend/NORTHFLANK_DEPLOY.md) (Northflank) · [backend/ORACLE_DEPLOY.md](backend/ORACLE_DEPLOY.md) (Oracle Always Free VM) · [backend/RENDER_DEPLOY.md](backend/RENDER_DEPLOY.md) (Render free) · [backend/FLY_DEPLOY.md](backend/FLY_DEPLOY.md) (Fly.io) · [backend/VERCEL_DEPLOY.md](backend/VERCEL_DEPLOY.md) (Vercel) · [backend/SELF_HOST.md](backend/SELF_HOST.md) (home server).
 
 ## 5. Configure the Android app
 
