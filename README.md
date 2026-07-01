@@ -45,7 +45,7 @@ It is: *"A thinking partner that helps students learn how to solve problems, not
 | Layer | Technology |
 |-------|------------|
 | **Android** | Kotlin, Jetpack Compose, MVVM, Room |
-| **Backend (production)** | Cloudflare Workers, FastAPI, D1 |
+| **Backend (production)** | Fly.io or Cloudflare Workers, FastAPI |
 | **Backend (local dev)** | FastAPI, SQLite (`backend/`) |
 | Image Processing | ML Kit OCR (on-device) |
 | Networking | Retrofit → LearnerLM API |

@@ -2,7 +2,7 @@
 
 FastAPI reference implementation for [LearnerLM](https://github.com/VEXZIONFILE/LearnerLLM). Use this folder for **local development and tests**.
 
-**Production hosting:** deploy **[`workers/`](../workers/CLOUDFLARE_DEPLOY.md)** on Cloudflare Workers (D1 + `wrangler deploy`).
+**Production hosting:** **[FLY_DEPLOY.md](FLY_DEPLOY.md)** (Fly.io — import GitHub from dashboard) · **[../workers/CLOUDFLARE_DEPLOY.md](../workers/CLOUDFLARE_DEPLOY.md)** (Cloudflare Workers — free tier).
 
 ## Features
 
@@ -43,14 +43,11 @@ Set `FIREBASE_AUTH_DISABLED=true` in `.env`, then call APIs with:
 Authorization: Bearer dev
 ```
 
-## Deploy to production (Cloudflare)
+## Deploy to production
 
-See **[../workers/CLOUDFLARE_DEPLOY.md](../workers/CLOUDFLARE_DEPLOY.md)**.
+**Fly.io (recommended):** [FLY_DEPLOY.md](FLY_DEPLOY.md) — launch from GitHub on fly.io/dashboard, root directory `backend`.
 
-1. Create D1 database and apply migrations
-2. Set secrets (`OPENROUTER_API_KEY`, `FIREBASE_PROJECT_ID`, `RESEND_API_KEY`)
-3. `uv run pywrangler deploy`
-4. Put your Workers URL in Android `local.properties` as `LEARNER_API_BASE_URL`
+**Cloudflare Workers (free):** [../workers/CLOUDFLARE_DEPLOY.md](../workers/CLOUDFLARE_DEPLOY.md).
 
 ## Android app configuration
 
@@ -58,6 +55,12 @@ See **[../workers/CLOUDFLARE_DEPLOY.md](../workers/CLOUDFLARE_DEPLOY.md)**.
 
 ```properties
 LEARNER_API_BASE_URL=http://10.0.2.2:8080/
+```
+
+**Production (Fly.io):**
+
+```properties
+LEARNER_API_BASE_URL=https://learnerlm-api.fly.dev/
 ```
 
 **Production (Cloudflare Workers):**
