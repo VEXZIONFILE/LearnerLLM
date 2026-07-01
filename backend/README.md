@@ -49,6 +49,11 @@ cp .env.example .env
 docker compose up --build
 ```
 
+## Vercel (free Hobby, no SSH)
+
+See **[VERCEL_DEPLOY.md](VERCEL_DEPLOY.md)** — GitHub import, Root Directory = `backend`, free HTTPS.  
+Note: SQLite data is ephemeral on Vercel (fine for testing).
+
 ## Render (free tier, no SSH)
 
 See **[RENDER_DEPLOY.md](RENDER_DEPLOY.md)** — connect GitHub, deploy Docker, free HTTPS URL.  

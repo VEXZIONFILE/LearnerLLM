@@ -18,6 +18,7 @@ class Settings(BaseSettings):
 
     firebase_project_id: str = ""
     firebase_credentials_path: str = ""
+    firebase_credentials_json: str = ""
     firebase_auth_disabled: bool = False
     dev_auth_uid: str = "dev-user"
 
