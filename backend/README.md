@@ -2,7 +2,7 @@
 
 FastAPI reference implementation for [LearnerLM](https://github.com/VEXZIONFILE/LearnerLLM). Use this folder for **local development and tests**.
 
-**Production hosting:** **[RENDER_DEPLOY.md](RENDER_DEPLOY.md)** (Render — easiest, GitHub import) · [FLY_DEPLOY.md](FLY_DEPLOY.md) (Fly.io) · [../workers/CLOUDFLARE_DEPLOY.md](../workers/CLOUDFLARE_DEPLOY.md) (Cloudflare Workers).
+**Production hosting:** **[RENDER_DEPLOY.md](RENDER_DEPLOY.md)** (Render — recommended for production).
 
 ## Features
 
@@ -45,9 +45,7 @@ Authorization: Bearer dev
 
 ## Deploy to production
 
-**Fly.io (recommended):** [FLY_DEPLOY.md](FLY_DEPLOY.md) — launch from GitHub on fly.io/dashboard, root directory `backend`.
-
-**Cloudflare Workers (free):** [../workers/CLOUDFLARE_DEPLOY.md](../workers/CLOUDFLARE_DEPLOY.md).
+**Render (recommended):** [RENDER_DEPLOY.md](RENDER_DEPLOY.md) — connect your GitHub repo, set root directory to `backend`.
 
 ## Android app configuration
 
@@ -57,16 +55,10 @@ Authorization: Bearer dev
 LEARNER_API_BASE_URL=http://10.0.2.2:8080/
 ```
 
-**Production (Fly.io):**
+**Production (Render):**
 
 ```properties
-LEARNER_API_BASE_URL=https://learnerlm-api.fly.dev/
-```
-
-**Production (Cloudflare Workers):**
-
-```properties
-LEARNER_API_BASE_URL=https://learnerlm-api.<your-subdomain>.workers.dev/
+LEARNER_API_BASE_URL=https://learnerllm-2.onrender.com/
 ```
 
 ## Environment variables
