@@ -214,8 +214,8 @@ private fun isPremiumTier(tier: String): Boolean =
 
 private fun subscriptionDescription(tier: String): String = when (tier) {
     SubscriptionTier.PRO.name ->
-        "Premium Pro — longest answers, practice problems, priority-depth tutoring"
+        "Premium — longest answers, practice problems, priority-depth tutoring"
     SubscriptionTier.BASIC.name ->
-        "Premium — unlimited scans, full study packs, deeper AI tutoring"
+        "Pro — unlimited scans, full study packs, deeper AI tutoring"
     else -> "Standard — core tutoring, study packs, and code help"
 }

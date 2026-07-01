@@ -140,9 +140,9 @@ Custom subjects are saved locally and tailor the AI tutor's guidance to that con
 
 - **Email & password** via Firebase Auth — stays signed in after closing the app
 - **Subscriptions** via Google Play Billing:
-  - Learner Basic — **$9.99/month**
-  - Learner Pro — **$19.99/month**
-  - Learner Pro Yearly — **$199.90/year** ($19.99 × 10 months — 2 months free vs $239.88/yr monthly)
+  - **Pro** — **$9.99/month** (`learnerlm_basic_monthly`)
+  - **Premium** — **$14.99/month** (`learnerlm_pro_monthly`)
+  - **Mega** — **$190.00/year** (`learnerlm_pro_yearly` — pay for 10 months, get 12; 2 months free)
 
 ## AI Tutor Engine
 
