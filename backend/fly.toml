@@ -1,0 +1,41 @@
+# LearnerLM API on Fly.io — root directory: backend/
+
+app = "learnerlm-api"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8080"
+  DEBUG = "false"
+  DATABASE_URL = "sqlite+aiosqlite:///./data/learnerlm.db"
+  CORS_ORIGINS = "*"
+  BILLING_VERIFICATION_DISABLED = "true"
+  GOOGLE_PLAY_PACKAGE_NAME = "com.learnerlm"
+  FREE_DAILY_SCAN_LIMIT = "3"
+  REPORT_NOTIFICATION_EMAIL = "elijahjmaxwell43@gmail.com"
+  REPORT_EMAIL_FROM = "LearnerLM Reports <onboarding@resend.dev>"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    grace_period = "15s"
+    interval = "30s"
+    method = "GET"
+    timeout = "5s"
+    path = "/health"
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[mounts]
+  source = "learnerlm_data"
+  destination = "/app/data"
