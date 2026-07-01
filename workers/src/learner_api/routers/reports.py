@@ -5,6 +5,7 @@ from learner_api.config import Settings
 from learner_api.database import D1Database, get_db
 from learner_api.models import User
 from learner_api.schemas import ReportContentRequest, ReportContentResponse
+from learner_api.services.report_email import send_report_notification
 
 router = APIRouter(prefix="/v1/reports", tags=["reports"])
 
@@ -31,4 +32,5 @@ async def report_content(
         body.details,
         body.app_mode,
     )
+    await send_report_notification(settings, report_id, user, body)
     return ReportContentResponse(report_id=report_id, status="received")

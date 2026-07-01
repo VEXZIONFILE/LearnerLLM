@@ -55,3 +55,5 @@ LearnerLM includes:
 - **Settings → Safety & AI** explains how reporting works
 
 When filling out the Play Console **AI-generated content** declaration, state that users can report content via the in-chat flag button.
+
+Report submissions are stored in the backend and emailed to **elijahjmaxwell43@gmail.com**. Set `RESEND_API_KEY` (or Gmail `SMTP_*` vars on FastAPI) — see `backend/.env.example`.

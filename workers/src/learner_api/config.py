@@ -18,6 +18,11 @@ class Settings(BaseModel):
     billing_verification_disabled: bool = True
     free_daily_scan_limit: int = 3
 
+    report_notification_email: str = "elijahjmaxwell43@gmail.com"
+    report_email_from: str = ""
+    report_email_disabled: bool = False
+    resend_api_key: str = ""
+
     @classmethod
     def from_env(cls, env) -> "Settings":
         def _bool(name: str, default: bool = False) -> bool:
@@ -52,6 +57,12 @@ class Settings(BaseModel):
             google_play_package_name=_str("GOOGLE_PLAY_PACKAGE_NAME", "com.learnerlm"),
             billing_verification_disabled=_bool("BILLING_VERIFICATION_DISABLED", True),
             free_daily_scan_limit=_int("FREE_DAILY_SCAN_LIMIT", 3),
+            report_notification_email=_str(
+                "REPORT_NOTIFICATION_EMAIL", "elijahjmaxwell43@gmail.com"
+            ),
+            report_email_from=_str("REPORT_EMAIL_FROM"),
+            report_email_disabled=_bool("REPORT_EMAIL_DISABLED"),
+            resend_api_key=_str("RESEND_API_KEY"),
         )
 
 

@@ -97,6 +97,9 @@ See `.env.example` for all options. Key settings:
 - `FIREBASE_CREDENTIALS_PATH` — Firebase Admin service account JSON
 - `FIREBASE_AUTH_DISABLED` — `true` for local development
 - `BILLING_VERIFICATION_DISABLED` — `true` accepts tokens without Google Play API (dev only)
+- `REPORT_NOTIFICATION_EMAIL` — where AI content reports are emailed (default: `elijahjmaxwell43@gmail.com`)
+- `RESEND_API_KEY` — send report emails via [Resend](https://resend.com) (recommended on Workers)
+- `SMTP_HOST` / `SMTP_USER` / `SMTP_PASSWORD` — Gmail SMTP alternative for FastAPI (use a Google App Password)
 
 ## Tests
 

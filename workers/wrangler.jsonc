@@ -17,7 +17,8 @@
     "BILLING_VERIFICATION_DISABLED": "true",
     "FIREBASE_AUTH_DISABLED": "false",
     "FREE_DAILY_SCAN_LIMIT": "3",
-    "DEV_AUTH_UID": "dev-user"
+    "DEV_AUTH_UID": "dev-user",
+    "REPORT_NOTIFICATION_EMAIL": "elijahjmaxwell43@gmail.com"
   },
   "d1_databases": [
     {

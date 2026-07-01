@@ -65,7 +65,17 @@ npx wrangler d1 migrations apply learnerlm --local
 ```bash
 npx wrangler secret put OPENROUTER_API_KEY
 npx wrangler secret put FIREBASE_PROJECT_ID
+npx wrangler secret put RESEND_API_KEY
 ```
+
+Report emails go to **elijahjmaxwell43@gmail.com** by default. Optional overrides in `wrangler.jsonc` vars:
+
+```jsonc
+"REPORT_NOTIFICATION_EMAIL": "elijahjmaxwell43@gmail.com",
+"REPORT_EMAIL_FROM": "LearnerLM Reports <onboarding@resend.dev>"
+```
+
+Sign up at [resend.com](https://resend.com) (free tier), create an API key, and set `RESEND_API_KEY`. Verify your domain in Resend for production `from` addresses.
 
 Optional — dev without Firebase (edit `wrangler.jsonc` vars instead):
 

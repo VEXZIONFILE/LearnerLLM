@@ -28,6 +28,16 @@ class Settings(BaseSettings):
 
     free_daily_scan_limit: int = 3
 
+    report_notification_email: str = "elijahjmaxwell43@gmail.com"
+    report_email_from: str = ""
+    report_email_disabled: bool = False
+    resend_api_key: str = ""
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_use_tls: bool = True
+
 
 @lru_cache
 def get_settings() -> Settings:
