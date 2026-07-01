@@ -43,13 +43,17 @@ Northflank paths **must start with `/`**. Do **not** use `.` or `backend` alone.
 
 ---
 
-## 2. Create a combined service
+## 2. Create a combined service (use this — not a pipeline)
+
+> **Important:** For LearnerLM, use a **Combined service** only.  
+> Do **not** use Pipelines / Release flows — they cause errors like `stageId "__unstaged"` and are meant for separate build + deploy services.
 
 1. In your project: **Create new → Service**
 2. Choose **Combined service** (build + deploy in one step)
 3. **Name:** `learnerlm-api`
 4. **Repository:** `VEXZIONFILE/LearnerLLM`
 5. **Branch:** **`LearnerLM`** (not `main`)
+6. **Stage:** leave **empty**, or type **`production`** (letters/numbers/hyphens only — no underscores)
 
 ### Build settings — copy exactly
 
@@ -206,6 +210,7 @@ Push to GitHub → Northflank builds and redeploys automatically.
 
 | Problem | Fix |
 |---------|-----|
+| **`stageId "__unstaged"` error** | You are in a **Pipeline** or **Release flow**. Delete that setup. Create a **Combined service** instead (no pipeline). If Stage is required, use `production` — not `__unstaged` |
 | **Could not find working directory** | Build context must be **`/`** (root) or **`/backend`** — not `.` or `backend` |
 | **No Dockerfile found** | Branch = **`LearnerLM`**. Dockerfile path = **`/Dockerfile`** with context **`/`** |
 | Build failed | Check **Logs**; confirm branch has `backend/` folder |
@@ -226,3 +231,18 @@ Service → **Logs** — useful for Firebase or OpenRouter errors on startup.
 ## Optional: custom domain
 
 Northflank → your service → **Domains** → add your domain and follow DNS instructions.
+
+---
+
+## Start fresh (if errors keep happening)
+
+1. **Delete** the broken service / pipeline / release flow
+2. **Create new → Service → Combined service** (not Pipeline, not Build + Deploy separately)
+3. Use settings from this guide:
+   - Branch: `LearnerLM`
+   - Dockerfile: `/Dockerfile`
+   - Working directory: `/`
+   - Stage: `production` or leave blank
+   - Port: `8080`
+   - Volume: `/app/data`
+4. Add env vars → **Create**
