@@ -33,17 +33,20 @@ class ProgressViewModel(application: Application) : AndroidViewModel(application
     init {
         viewModelScope.launch {
             tutorRepository.observeTopics().collect { topics ->
-                _uiState.update { it.copy(topics = topics) }
+                _uiState.update {
+                    it.copy(
+                        topics = topics,
+                        weakTopics = topics
+                            .filter { topic -> topic.strengthScore < 0.5f }
+                            .sortedBy { topic -> topic.strengthScore }
+                    )
+                }
             }
         }
         viewModelScope.launch {
             tutorRepository.observeStreak().collect { streak ->
                 _uiState.update { it.copy(streak = streak) }
             }
-        }
-        viewModelScope.launch {
-            val weak = tutorRepository.getWeakTopics()
-            _uiState.update { it.copy(weakTopics = weak) }
         }
     }
 }
