@@ -53,6 +53,10 @@ docker compose up --build
 
 See **[NORTHFLANK_DEPLOY.md](NORTHFLANK_DEPLOY.md)** — GitHub deploy, HTTPS, volume for SQLite. Good balance of ease and production fit.
 
+## Cloudflare Workers (no Docker)
+
+See **[../workers/CLOUDFLARE_DEPLOY.md](../workers/CLOUDFLARE_DEPLOY.md)** — FastAPI on Workers + D1, `wrangler deploy`, free global HTTPS.
+
 ## Oracle Cloud (Always Free VM)
 
 See **[ORACLE_DEPLOY.md](ORACLE_DEPLOY.md)** — free 24/7 VM, persistent data, Docker. Best long-term $0 option if you’re OK with SSH setup.

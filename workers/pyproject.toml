@@ -1,0 +1,17 @@
+[project]
+name = "learnerlm-workers"
+version = "1.0.0"
+description = "LearnerLM API on Cloudflare Workers (FastAPI + D1)"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "pydantic>=2.10.0",
+    "pyjwt>=2.10.0",
+]
+
+[dependency-groups]
+dev = [
+    "workers-py",
+    "workers-runtime-sdk",
+]
