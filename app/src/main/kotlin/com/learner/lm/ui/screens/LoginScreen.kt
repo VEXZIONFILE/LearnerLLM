@@ -125,10 +125,12 @@ fun LoginScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = AppSpacing.lg),
-                shape = RoundedCornerShape(AppRadii.xl),
+                shape = RoundedCornerShape(AppRadii.lg),
                 color = MaterialTheme.colorScheme.surface,
-                shadowElevation = 6.dp,
-                tonalElevation = 2.dp
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    MaterialTheme.colorScheme.outline.copy(alpha = 0.22f)
+                )
             ) {
                 Column(modifier = Modifier.padding(AppSpacing.lg)) {
                     TabRow(
