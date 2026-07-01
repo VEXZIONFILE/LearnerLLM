@@ -49,6 +49,14 @@ cp .env.example .env
 docker compose up --build
 ```
 
+## Northflank (Docker + persistent volume, no SSH)
+
+See **[NORTHFLANK_DEPLOY.md](NORTHFLANK_DEPLOY.md)** — GitHub deploy, HTTPS, volume for SQLite. Good balance of ease and production fit.
+
+## Oracle Cloud (Always Free VM)
+
+See **[ORACLE_DEPLOY.md](ORACLE_DEPLOY.md)** — free 24/7 VM, persistent data, Docker. Best long-term $0 option if you’re OK with SSH setup.
+
 ## Vercel (free Hobby, no SSH)
 
 See **[VERCEL_DEPLOY.md](VERCEL_DEPLOY.md)** — GitHub import, Root Directory = `backend`, free HTTPS.  

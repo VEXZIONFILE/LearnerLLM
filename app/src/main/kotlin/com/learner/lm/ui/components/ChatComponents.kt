@@ -155,35 +155,3 @@ fun HintLevelIndicator(level: Int, modifier: Modifier = Modifier) {
         )
     }
 }
-
-@Composable
-fun StreakBadge(streak: Int, modifier: Modifier = Modifier) {
-    NotebookCard(modifier = modifier) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(AppRadii.md))
-                    .background(AppColors.ProGold.copy(alpha = 0.12f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "🔥", style = MaterialTheme.typography.titleMedium)
-            }
-            Column {
-                Text(
-                    text = "$streak day streak",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = "Keep your learning momentum",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
-}

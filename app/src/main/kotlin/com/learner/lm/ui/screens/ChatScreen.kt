@@ -18,14 +18,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Lightbulb
-import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -55,15 +51,12 @@ import com.learner.lm.ui.components.AppModePicker
 import com.learner.lm.ui.components.ChatBubble
 import com.learner.lm.ui.components.HintLevelIndicator
 import com.learner.lm.ui.components.LearnerLogo
-import com.learner.lm.ui.components.NotebookCard
 import com.learner.lm.ui.components.PremiumUpgradeBanner
-import com.learner.lm.ui.components.StreakBadge
 import com.learner.lm.ui.components.SubjectPicker
 import com.learner.lm.ui.components.TypingIndicator
 import com.learner.lm.ui.theme.AppRadii
 import com.learner.lm.ui.theme.AppSpacing
 import com.learner.lm.viewmodel.ChatViewModel
-import com.learner.lm.viewmodel.ProgressViewModel
 
 @Composable
 fun ChatScreen(
@@ -375,97 +368,4 @@ private fun inputPlaceholder(mode: AppMode): String = when (mode) {
     AppMode.TUTOR -> "Message Learner Tutor…"
     AppMode.STUDY -> "Message Learner Study…"
     AppMode.CODE -> "Message Learner Code…"
-}
-
-@Composable
-fun ProgressScreen(
-    modifier: Modifier = Modifier,
-    viewModel: ProgressViewModel = viewModel()
-) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(AppSpacing.lg),
-        verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
-    ) {
-        Text(
-            text = "Progress",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.SemiBold
-        )
-        Text(
-            text = "Track topics and spot areas to review.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        StreakBadge(streak = uiState.streak?.currentStreak ?: 0)
-
-        NotebookCard {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Lightbulb,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = "Studied topics",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                }
-                if (uiState.topics.isEmpty()) {
-                    Text(
-                        text = "Start chatting to track your learning topics.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                } else {
-                    uiState.topics.forEach { topic ->
-                        Text(
-                            text = "${topic.name} · ${topic.subject}",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
-            }
-        }
-
-        NotebookCard {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.WarningAmber,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.tertiary
-                    )
-                    Text(
-                        text = "Areas to review",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                }
-                if (uiState.weakTopics.isEmpty()) {
-                    Text(
-                        text = "No weaknesses detected yet — keep learning!",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                } else {
-                    uiState.weakTopics.forEach { topic ->
-                        Text(
-                            text = topic.name,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
-            }
-        }
-    }
 }
