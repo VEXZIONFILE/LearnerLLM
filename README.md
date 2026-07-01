@@ -58,8 +58,9 @@ It is: *"A thinking partner that helps students learn how to solve problems, not
 ```
 LearnerLM/
 ├── app/                    # Android app (Kotlin / Compose)
-├── workers/                # Production API (Cloudflare Workers + D1)
-├── backend/                # Local FastAPI dev + tests
+├── workers-vpc-proxy/      # Edge Worker → Tunnel + VPC → backend/
+├── workers/                # Full API on Cloudflare + D1 (no tunnel)
+├── backend/                # Private FastAPI (run on your PC with Tunnel)
 │   ├── learner_api/
 │   └── tests/
 ├── build.gradle.kts
