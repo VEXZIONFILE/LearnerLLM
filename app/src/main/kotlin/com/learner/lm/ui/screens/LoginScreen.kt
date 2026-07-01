@@ -323,59 +323,27 @@ fun LoginScreen(
 
 @Composable
 private fun AuthHeroHeader() {
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        AppColors.Accent.copy(alpha = 0.14f),
-                        MaterialTheme.colorScheme.background
-                    )
-                )
-            )
-            .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.xl)
+            .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.xl),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            BrandMark(iconSize = 48.dp, showWordmark = true)
-            Spacer(modifier = Modifier.height(AppSpacing.md))
-            Text(
-                text = "Your AI learning copilot",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
-            )
-            Text(
-                text = "Tutor · Study · Code — powered by frontier models",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 6.dp)
-            )
-
-            Spacer(modifier = Modifier.height(AppSpacing.lg))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                AuthFeatureChip(
-                    icon = Icons.Default.School,
-                    label = "Socratic tutor",
-                    modifier = Modifier.weight(1f)
-                )
-                AuthFeatureChip(
-                    icon = Icons.Default.AutoAwesome,
-                    label = "Study packs",
-                    modifier = Modifier.weight(1f)
-                )
-                AuthFeatureChip(
-                    icon = Icons.Default.Code,
-                    label = "Code help",
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
+        BrandMark(iconSize = 44.dp, showWordmark = true)
+        Spacer(modifier = Modifier.height(AppSpacing.md))
+        Text(
+            text = "LearnerLM",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = "Your AI tutor for grades 6–12",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 6.dp)
+        )
     }
 }
 

@@ -244,7 +244,7 @@ fun SubscriptionScreen(
                                 when (plan.productId) {
                                     SubscriptionProducts.PRO_MONTHLY -> "Subscribe — $9.99/mo"
                                     SubscriptionProducts.PREMIUM_MONTHLY -> "Subscribe — $14.99/mo"
-                                    SubscriptionProducts.MEGA_YEARLY -> "Subscribe — $190.00/yr"
+                                    SubscriptionProducts.MEGA_YEARLY -> "Subscribe — $99.99/yr"
                                     else -> "Subscribe"
                                 },
                                 fontWeight = FontWeight.SemiBold

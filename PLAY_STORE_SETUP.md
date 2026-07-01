@@ -12,7 +12,7 @@ Create these subscription products in [Google Play Console](https://play.google.
 
 - **Pro** monthly: **$9.99/month**
 - **Premium** monthly: **$14.99/month**
-- **Mega** yearly: **$190.00/year** ($19/mo × 10 months — 2 months free)
+- **Mega** yearly: **$99.99/year** ($9.99/mo × 10 months — 2 months free)
 
 ## AI modes (multi-model routing)
 

@@ -15,42 +15,49 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/** Premium SaaS LLM product palette — ChatGPT / Claude inspired. */
+/** ChatGPT-inspired palette */
 object AppColors {
     val Accent = Color(0xFF10A37F)
     val AccentHover = Color(0xFF0D8C6D)
-    val AccentLight = Color(0xFFE6F7F2)
+    val AccentLight = Color(0xFFE8F5F1)
     val AccentMuted = Color(0xFFB8E8DA)
 
-    val Background = Color(0xFFF7F7F8)
+    val Background = Color(0xFFFFFFFF)
     val Surface = Color(0xFFFFFFFF)
-    val SurfaceElevated = Color(0xFFFFFFFF)
-    val SurfaceMuted = Color(0xFFF0F0F0)
-    val Border = Color(0xFFE3E3E8)
-    val BorderSubtle = Color(0xFFEDEDF0)
+    val SurfaceElevated = Color(0xFFF7F7F8)
+    val SurfaceMuted = Color(0xFFF4F4F4)
+    val Border = Color(0xFFE5E5E5)
+    val BorderSubtle = Color(0xFFEFEFEF)
 
     val TextPrimary = Color(0xFF0D0D0D)
-    val TextSecondary = Color(0xFF676767)
-    val TextTertiary = Color(0xFF9B9B9B)
+    val TextSecondary = Color(0xFF6E6E80)
+    val TextTertiary = Color(0xFF8E8EA0)
 
     val UserBubble = Color(0xFFF4F4F4)
     val AssistantBubble = Color(0xFFFFFFFF)
+    val MessageStripe = Color(0xFFF7F7F8)
 
     val DarkBackground = Color(0xFF212121)
-    val DarkSurface = Color(0xFF2F2F2F)
-    val DarkSurfaceElevated = Color(0xFF3A3A3A)
-    val DarkBorder = Color(0xFF4A4A4A)
-    val DarkTextPrimary = Color(0xFFECECEC)
-    val DarkTextSecondary = Color(0xFFB4B4B4)
+    val DarkSurface = Color(0xFF212121)
+    val DarkSurfaceElevated = Color(0xFF2F2F2F)
+    val DarkBorder = Color(0xFF424242)
+    val DarkTextPrimary = Color(0xFFECECF1)
+    val DarkTextSecondary = Color(0xFFC5C5D2)
+    val DarkUserBubble = Color(0xFF2F2F2F)
+    val DarkMessageStripe = Color(0xFF2A2A2A)
 
     val AccentDark = Color(0xFF19C37D)
     val AccentDarkContainer = Color(0xFF1A4D3E)
     val ProGold = Color(0xFFF59E0B)
-    val Error = Color(0xFFDC2626)
-    val Success = Color(0xFF059669)
+    val Error = Color(0xFFEF4146)
+    val Success = Color(0xFF10A37F)
+
+    val ComposerBackground = Color(0xFFFFFFFF)
+    val ComposerBorder = Color(0xFFD9D9E3)
+    val DarkComposerBackground = Color(0xFF2F2F2F)
+    val DarkComposerBorder = Color(0xFF565869)
 }
 
-/** @deprecated Use [AppColors] — kept for gradual migration. */
 object NotebookColors {
     val GoogleBlue = AppColors.Accent
     val GoogleBlueDark = AppColors.AccentDark
@@ -61,7 +68,7 @@ object NotebookColors {
     val NotebookOutline = AppColors.Border
     val NotebookTextPrimary = AppColors.TextPrimary
     val NotebookTextSecondary = AppColors.TextSecondary
-    val NotebookChipSelected = AppColors.AccentLight
+    val NotebookChipSelected = AppColors.SurfaceMuted
     val NotebookDarkBackground = AppColors.DarkBackground
     val NotebookDarkSurface = AppColors.DarkSurface
     val NotebookDarkSurfaceVariant = AppColors.DarkSurfaceElevated
@@ -75,14 +82,16 @@ object AppSpacing {
     val md = 16.dp
     val lg = 24.dp
     val xl = 32.dp
+    val chatMaxWidth = 768.dp
 }
 
 object AppRadii {
     val sm = 8.dp
     val md = 12.dp
-    val lg = 16.dp
-    val xl = 20.dp
+    val lg = 18.dp
+    val xl = 24.dp
     val pill = 999.dp
+    val composer = 26.dp
 }
 
 private val LightColorScheme = lightColorScheme(
@@ -90,7 +99,7 @@ private val LightColorScheme = lightColorScheme(
     onPrimary = Color.White,
     primaryContainer = AppColors.AccentLight,
     onPrimaryContainer = AppColors.AccentHover,
-    secondary = AppColors.Accent,
+    secondary = AppColors.TextSecondary,
     onSecondary = Color.White,
     secondaryContainer = AppColors.SurfaceMuted,
     onSecondaryContainer = AppColors.TextPrimary,
@@ -111,7 +120,7 @@ private val DarkColorScheme = darkColorScheme(
     onPrimary = AppColors.DarkBackground,
     primaryContainer = AppColors.AccentDarkContainer,
     onPrimaryContainer = AppColors.AccentLight,
-    secondary = AppColors.AccentDark,
+    secondary = AppColors.DarkTextSecondary,
     background = AppColors.DarkBackground,
     onBackground = AppColors.DarkTextPrimary,
     surface = AppColors.DarkSurface,
@@ -127,28 +136,27 @@ private val AppTypography = Typography(
     headlineLarge = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 30.sp,
-        lineHeight = 36.sp,
+        fontSize = 28.sp,
+        lineHeight = 34.sp,
         letterSpacing = (-0.5).sp
     ),
     headlineMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 24.sp,
-        lineHeight = 30.sp,
-        letterSpacing = (-0.25).sp
+        fontSize = 22.sp,
+        lineHeight = 28.sp
     ),
     headlineSmall = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 20.sp,
-        lineHeight = 26.sp
+        fontSize = 18.sp,
+        lineHeight = 24.sp
     ),
     titleLarge = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 18.sp,
-        lineHeight = 24.sp
+        fontSize = 17.sp,
+        lineHeight = 22.sp
     ),
     titleMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,
@@ -160,19 +168,19 @@ private val AppTypography = Typography(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
-        lineHeight = 24.sp
+        lineHeight = 26.sp
     ),
     bodyMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.Normal,
-        fontSize = 14.sp,
-        lineHeight = 21.sp
+        fontSize = 15.sp,
+        lineHeight = 24.sp
     ),
     bodySmall = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.Normal,
         fontSize = 13.sp,
-        lineHeight = 18.sp
+        lineHeight = 20.sp
     ),
     labelLarge = TextStyle(
         fontFamily = FontFamily.SansSerif,
@@ -184,15 +192,13 @@ private val AppTypography = Typography(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.Medium,
         fontSize = 12.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.2.sp
+        lineHeight = 16.sp
     ),
     labelSmall = TextStyle(
         fontFamily = FontFamily.SansSerif,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.Normal,
         fontSize = 11.sp,
-        lineHeight = 14.sp,
-        letterSpacing = 0.3.sp
+        lineHeight = 14.sp
     )
 )
 
@@ -201,7 +207,7 @@ private val AppShapes = Shapes(
     small = RoundedCornerShape(AppRadii.md),
     medium = RoundedCornerShape(AppRadii.lg),
     large = RoundedCornerShape(AppRadii.xl),
-    extraLarge = RoundedCornerShape(28.dp)
+    extraLarge = RoundedCornerShape(AppRadii.composer)
 )
 
 @Composable
