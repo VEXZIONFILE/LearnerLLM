@@ -45,7 +45,7 @@ FIREBASE_AUTH_DISABLED=true uvicorn learner_api.main:app --host 0.0.0.0 --port 8
 ```
 
 See [backend/README.md](backend/README.md) for local API setup.  
-**Production hosting:** [backend/FLY_DEPLOY.md](backend/FLY_DEPLOY.md) (Fly.io) · [workers/CLOUDFLARE_DEPLOY.md](workers/CLOUDFLARE_DEPLOY.md) (Cloudflare — free).
+**Production hosting:** [backend/CLOUDFLARE_TUNNEL_DEPLOY.md](backend/CLOUDFLARE_TUNNEL_DEPLOY.md) (Cloudflare Tunnel — run API on your PC) · [backend/FLY_DEPLOY.md](backend/FLY_DEPLOY.md) (Fly.io) · [workers/CLOUDFLARE_DEPLOY.md](workers/CLOUDFLARE_DEPLOY.md) (Workers).
 
 ## 5. Configure the Android app
 
