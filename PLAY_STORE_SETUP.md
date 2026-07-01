@@ -39,7 +39,7 @@ LEARNER_API_BASE_URL=https://api.yourdomain.com/
 
 ## Backend
 
-Deploy **`workers/`** to Cloudflare Workers — see [workers/CLOUDFLARE_DEPLOY.md](workers/CLOUDFLARE_DEPLOY.md). Set `OPENROUTER_API_KEY` and `RESEND_API_KEY` as Worker secrets. The Android app never receives the OpenRouter key.
+Deploy **`backend/`** to [Render](https://render.com) — see [backend/RENDER_DEPLOY.md](backend/RENDER_DEPLOY.md). Set `OPENROUTER_API_KEY` and `RESEND_API_KEY` as environment variables. The Android app never receives the OpenRouter key.
 
 After a purchase, the app calls `POST /v1/billing/verify` so subscription tier is enforced server-side.
 

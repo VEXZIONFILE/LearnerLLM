@@ -45,7 +45,7 @@ FIREBASE_AUTH_DISABLED=true uvicorn learner_api.main:app --host 0.0.0.0 --port 8
 ```
 
 See [backend/README.md](backend/README.md) for local API setup.  
-**Production hosting:** [backend/RENDER_DEPLOY.md](backend/RENDER_DEPLOY.md) (Render — recommended) · [workers/CLOUDFLARE_DEPLOY.md](workers/CLOUDFLARE_DEPLOY.md) (Cloudflare Workers).
+**Production hosting:** [backend/RENDER_DEPLOY.md](backend/RENDER_DEPLOY.md) (Render).
 
 ## 5. Configure the Android app
 

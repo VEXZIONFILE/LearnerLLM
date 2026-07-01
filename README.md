@@ -45,7 +45,7 @@ It is: *"A thinking partner that helps students learn how to solve problems, not
 | Layer | Technology |
 |-------|------------|
 | **Android** | Kotlin, Jetpack Compose, MVVM, Room |
-| **Backend (production)** | Fly.io or Cloudflare Workers, FastAPI |
+| **Backend (production)** | Render — FastAPI (`backend/`) |
 | **Backend (local dev)** | FastAPI, SQLite (`backend/`) |
 | Image Processing | ML Kit OCR (on-device) |
 | Networking | Retrofit → LearnerLM API |
@@ -58,11 +58,10 @@ It is: *"A thinking partner that helps students learn how to solve problems, not
 ```
 LearnerLM/
 ├── app/                    # Android app (Kotlin / Compose)
-├── workers-vpc-proxy/      # Edge Worker → Tunnel + VPC → backend/
-├── workers/                # Full API on Cloudflare + D1 (no tunnel)
-├── backend/                # Private FastAPI (run on your PC with Tunnel)
+├── backend/                # FastAPI API (local dev + Render production)
 │   ├── learner_api/
 │   └── tests/
+├── render.yaml             # Render blueprint
 ├── build.gradle.kts
 ├── settings.gradle.kts
 └── README.md
@@ -99,7 +98,7 @@ cd LearnerLM
 
 ### Backend + Android setup
 
-1. **Production:** deploy [`workers/`](workers/CLOUDFLARE_DEPLOY.md) to Cloudflare Workers.
+1. **Production:** deploy [`backend/`](backend/RENDER_DEPLOY.md) to [Render](https://render.com) (see `render.yaml`).
 
 2. **Local dev** (see [backend/README.md](backend/README.md)):
 

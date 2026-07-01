@@ -57,6 +57,7 @@ data class ChatUiState(
         get() = ModelRegistry.displayLabel(selectedMode, subscriptionTier)
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val app = application as LearnerLMApplication
     private val database = app.database
@@ -88,7 +89,6 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     init {
         viewModelScope.launch {
             _sessionId.flatMapLatest { id ->
