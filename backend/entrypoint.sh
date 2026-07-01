@@ -13,4 +13,5 @@ if [ -n "$GOOGLE_PLAY_CREDENTIALS_JSON" ]; then
   export GOOGLE_PLAY_CREDENTIALS_PATH=/app/secrets/google-play.json
 fi
 
-exec uvicorn learner_api.main:app --host 0.0.0.0 --port 8080
+PORT="${PORT:-8080}"
+exec uvicorn learner_api.main:app --host 0.0.0.0 --port "$PORT"

@@ -49,6 +49,11 @@ cp .env.example .env
 docker compose up --build
 ```
 
+## Render (free tier, no SSH)
+
+See **[RENDER_DEPLOY.md](RENDER_DEPLOY.md)** — connect GitHub, deploy Docker, free HTTPS URL.  
+Sleeps after 15 min idle; first request may take ~1 min to wake.
+
 ## Fly.io (optional cloud hosting)
 
 See **[FLY_DEPLOY.md](FLY_DEPLOY.md)** if you want a public cloud URL.
