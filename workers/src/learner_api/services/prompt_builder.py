@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from learner_api.schemas import AppMode, BuiltinSubject, HintLevel, SubjectCategory
-from learner_api.services.model_registry import is_premium_tier
+from learner_api.services.model_registry import is_premium_tier, is_pro_tier
 
 
 @dataclass
@@ -47,16 +47,17 @@ class PromptBuilder:
         return self._build_code_system_prompt(context, premium)
 
     def build_user_prompt(self, context: TutorContext) -> str:
-        history = "\n".join(f"{role}: {content}" for role, content in context.conversation_history[-8:])
+        history_limit = 16 if is_pro_tier(context.subscription_tier) else (
+            12 if is_premium_tier(context.subscription_tier) else 8
+        )
+        history = "\n".join(
+            f"{role}: {content}" for role, content in context.conversation_history[-history_limit:]
+        )
         scanned = f"\n\nScanned material:\n{context.scanned_text}" if context.scanned_text else ""
         subject_line = f"Subject: {context.subject_display_name}"
         if context.subject_category:
             subject_line += f" ({context.subject_category})"
-        tier_note = (
-            "Subscription: Premium — provide richer examples and more detail."
-            if is_premium_tier(context.subscription_tier)
-            else "Subscription: Standard — keep responses concise but correct."
-        )
+        tier_note = when_tier_note(context.subscription_tier)
 
         if context.app_mode == AppMode.TUTOR:
             return (
@@ -78,7 +79,7 @@ class PromptBuilder:
                 f"Topic / request: {context.student_message}\n\n"
                 f"Produce structured study materials for this topic at grade {context.grade_level} level."
             )
-        code_lines = 40 if is_premium_tier(context.subscription_tier) else 20
+        code_lines = code_line_limit(context.subscription_tier)
         return (
             f"Grade level: {context.grade_level}\n"
             f"{subject_line}\n"
@@ -90,7 +91,7 @@ class PromptBuilder:
         )
 
     def _build_tutor_system_prompt(self, context: TutorContext, premium: bool) -> str:
-        examples = 3 if premium else 1
+        examples = tutor_example_count(context.subscription_tier)
         return (
             "You are Learner LM Tutor Mode — powered by gpt-oss-120b for grades 6–12.\n\n"
             "ROLE: Primary Socratic tutor. Guide learning step-by-step. Never be a homework solver.\n\n"
@@ -112,15 +113,25 @@ class PromptBuilder:
         )
 
     def _build_study_system_prompt(self, context: TutorContext, premium: bool) -> str:
-        sections = (
-            "REQUIRED OUTPUT SECTIONS (use these exact headings):\n"
-            "## Summary\n## Key Concepts\n## Flashcards\n(Format each as Q: ... / A: ...)\n"
-            "## Quiz Questions\n(Number each question; include answer key at the end)"
-            if premium
-            else
-            "REQUIRED OUTPUT SECTIONS (use these exact headings):\n"
-            "## Summary\n## Key Concepts\n## Flashcards\n(Format each as Q: ... / A: ... — include at least 3 cards)"
-        )
+        pro = is_pro_tier(context.subscription_tier)
+        if pro:
+            sections = (
+                "REQUIRED OUTPUT SECTIONS (use these exact headings):\n"
+                "## Summary\n## Key Concepts\n## Flashcards\n(Format each as Q: ... / A: ...)\n"
+                "## Quiz Questions\n(Number each question; include answer key at the end)\n"
+                "## Practice Problems\n(3–5 problems with hints — no full solutions)"
+            )
+        elif premium:
+            sections = (
+                "REQUIRED OUTPUT SECTIONS (use these exact headings):\n"
+                "## Summary\n## Key Concepts\n## Flashcards\n(Format each as Q: ... / A: ...)\n"
+                "## Quiz Questions\n(Number each question; include answer key at the end)"
+            )
+        else:
+            sections = (
+                "REQUIRED OUTPUT SECTIONS (use these exact headings):\n"
+                "## Summary\n## Key Concepts\n## Flashcards\n(Format each as Q: ... / A: ... — include at least 3 cards)"
+            )
         return (
             "You are Learner LM Study Mode — powered by NVIDIA Nemotron 3 Super.\n"
             f"Behave like a NotebookLM-style study generator for grade {context.grade_level} students.\n\n"
@@ -135,11 +146,15 @@ class PromptBuilder:
         )
 
     def _build_code_system_prompt(self, context: TutorContext, premium: bool) -> str:
-        line_limit = 40 if premium else 20
+        line_limit = code_line_limit(context.subscription_tier)
         depth = (
-            "Give detailed line-by-line explanations and multiple debugging strategies."
-            if premium
-            else "Give concise explanations focused on the immediate bug or concept."
+            "Give exhaustive line-by-line explanations, multiple debugging strategies, and edge-case notes."
+            if is_pro_tier(context.subscription_tier)
+            else (
+                "Give detailed line-by-line explanations and multiple debugging strategies."
+                if premium
+                else "Give concise explanations focused on the immediate bug or concept."
+            )
         )
         return (
             "You are Learner LM Code Help Mode — powered by Poolside Laguna M.1.\n"
@@ -189,3 +204,27 @@ class PromptBuilder:
             "GENERAL": "Break problems into smaller parts and ask guiding questions.",
         }
         return guidance.get(builtin, guidance["GENERAL"])
+
+
+def when_tier_note(tier: str) -> str:
+    if is_pro_tier(tier):
+        return "Subscription: Premium Pro — maximum depth, longest responses, richest examples."
+    if is_premium_tier(tier):
+        return "Subscription: Premium — provide richer examples and more detail."
+    return "Subscription: Standard — keep responses concise but correct."
+
+
+def tutor_example_count(tier: str) -> int:
+    if is_pro_tier(tier):
+        return 5
+    if is_premium_tier(tier):
+        return 3
+    return 1
+
+
+def code_line_limit(tier: str) -> int:
+    if is_pro_tier(tier):
+        return 60
+    if is_premium_tier(tier):
+        return 40
+    return 20

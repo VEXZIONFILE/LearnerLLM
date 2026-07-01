@@ -22,25 +22,30 @@ def is_premium_tier(tier: str) -> bool:
     return tier in PREMIUM_TIERS
 
 
+def is_pro_tier(tier: str) -> bool:
+    return tier == "PRO"
+
+
 def resolve_model(mode: AppMode, subscription_tier: str) -> ModelRoute:
+    pro = is_pro_tier(subscription_tier)
     premium = is_premium_tier(subscription_tier)
     if mode == AppMode.TUTOR:
         return ModelRoute(
             model_id=TUTOR_MODEL,
             display_name="Learner Tutor",
-            temperature=0.7 if premium else 0.65,
-            max_tokens=2048 if premium else 1024,
+            temperature=0.75 if pro else (0.7 if premium else 0.65),
+            max_tokens=3072 if pro else (2048 if premium else 1024),
         )
     if mode == AppMode.STUDY:
         return ModelRoute(
             model_id=STUDY_MODEL,
             display_name="Learner Study",
-            temperature=0.5 if premium else 0.45,
-            max_tokens=3072 if premium else 1536,
+            temperature=0.55 if pro else (0.5 if premium else 0.45),
+            max_tokens=4096 if pro else (3072 if premium else 1536),
         )
     return ModelRoute(
         model_id=CODE_MODEL,
         display_name="Learner Code",
-        temperature=0.4 if premium else 0.35,
-        max_tokens=2048 if premium else 1024,
+        temperature=0.45 if pro else (0.4 if premium else 0.35),
+        max_tokens=3072 if pro else (2048 if premium else 1024),
     )

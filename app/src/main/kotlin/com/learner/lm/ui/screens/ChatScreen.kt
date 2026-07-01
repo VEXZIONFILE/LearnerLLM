@@ -25,6 +25,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,10 +43,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -64,6 +69,7 @@ import com.learner.lm.ui.components.TypingIndicator
 import com.learner.lm.ui.theme.AppRadii
 import com.learner.lm.ui.theme.AppSpacing
 import com.learner.lm.viewmodel.ChatViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun ChatScreen(
@@ -78,6 +84,8 @@ fun ChatScreen(
     var showUpgradeBanner by remember { mutableStateOf(true) }
     val listState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val clipboardManager = LocalClipboardManager.current
+    val scope = rememberCoroutineScope()
     val isPremium = subscriptionTier == SubscriptionTier.BASIC.name ||
         subscriptionTier == SubscriptionTier.PRO.name
 
@@ -121,8 +129,19 @@ fun ChatScreen(
         ChatHeader(
             activeModelLabel = uiState.activeModelLabel,
             selectedMode = uiState.selectedMode,
-            hintLevel = uiState.hintLevel.level
+            hintLevel = uiState.hintLevel.level,
+            sessionLabel = uiState.sessionLabel,
+            hasMessages = uiState.messages.isNotEmpty(),
+            onNewChat = viewModel::newChat,
+            onClearChat = viewModel::clearChat
         )
+
+        if (uiState.messages.isNotEmpty()) {
+            ChatQuickActions(
+                mode = uiState.selectedMode,
+                onAction = viewModel::sendQuickAction
+            )
+        }
 
         HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
 
@@ -170,6 +189,16 @@ fun ChatScreen(
                 ChatBubble(
                     message = message.content,
                     isStudent = message.role == "student",
+                    onCopy = if (message.role == "tutor") {
+                        {
+                            clipboardManager.setText(AnnotatedString(message.content))
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Copied to clipboard")
+                            }
+                        }
+                    } else {
+                        null
+                    },
                     onReport = if (message.role == "tutor") {
                         {
                             viewModel.openReportDialog(
@@ -260,7 +289,11 @@ fun ChatScreen(
 private fun ChatHeader(
     activeModelLabel: String,
     selectedMode: AppMode,
-    hintLevel: Int
+    hintLevel: Int,
+    sessionLabel: String,
+    hasMessages: Boolean,
+    onNewChat: () -> Unit,
+    onClearChat: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -270,23 +303,73 @@ private fun ChatHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = activeModelLabel,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.Bold
             )
             Text(
-                text = selectedMode.description,
+                text = "$sessionLabel · ${selectedMode.label}",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1
             )
         }
-        if (selectedMode == AppMode.TUTOR) {
-            HintLevelIndicator(level = hintLevel)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (selectedMode == AppMode.TUTOR) {
+                HintLevelIndicator(level = hintLevel)
+                Spacer(modifier = Modifier.size(8.dp))
+            }
+            IconButton(onClick = onNewChat) {
+                Icon(Icons.Default.Add, contentDescription = "New chat")
+            }
+            if (hasMessages) {
+                IconButton(onClick = onClearChat) {
+                    Icon(Icons.Default.DeleteOutline, contentDescription = "Clear chat")
+                }
+            }
         }
     }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ChatQuickActions(
+    mode: AppMode,
+    onAction: (String) -> Unit
+) {
+    FlowRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = AppSpacing.md, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        quickActionsForMode(mode).forEach { action ->
+            SuggestionChip(text = action.label, onClick = { onAction(action.prompt) })
+        }
+    }
+}
+
+private data class QuickAction(val label: String, val prompt: String)
+
+private fun quickActionsForMode(mode: AppMode): List<QuickAction> = when (mode) {
+    AppMode.TUTOR -> listOf(
+        QuickAction("Explain simpler", "Explain that in simpler terms for my grade level."),
+        QuickAction("Give example", "Walk me through a similar example step by step."),
+        QuickAction("Quiz me", "Quiz me with 3 questions to check my understanding.")
+    )
+    AppMode.STUDY -> listOf(
+        QuickAction("More flashcards", "Add 5 more flashcards on this topic."),
+        QuickAction("Practice quiz", "Give me a short practice quiz with an answer key."),
+        QuickAction("Summarize", "Summarize the key points in bullet form.")
+    )
+    AppMode.CODE -> listOf(
+        QuickAction("Explain line by line", "Explain the code line by line."),
+        QuickAction("Find the bug", "Help me find the bug and explain why it happens."),
+        QuickAction("Suggest fix", "Suggest a small fix and explain each change.")
+    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)

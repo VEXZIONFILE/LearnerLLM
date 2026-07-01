@@ -45,6 +45,10 @@ class TutorRepository(
         updateStreak()
     }
 
+    suspend fun clearSession(sessionId: String) {
+        chatMessageDao.deleteSession(sessionId)
+    }
+
     fun observeTopics(): Flow<List<StudyTopicEntity>> = studyTopicDao.observeTopics()
 
     fun observeStreak(): Flow<LearningStreakEntity?> = learningStreakDao.observeStreak()

@@ -11,6 +11,7 @@ import com.learner.lm.ai.ModelRegistry
 import com.learner.lm.ai.StudySubject
 import com.learner.lm.ai.Subject
 import com.learner.lm.ai.SubjectCategory
+import com.learner.lm.ai.SubscriptionCapabilities
 import com.learner.lm.ai.TutorContext
 import com.learner.lm.billing.SubscriptionTier
 import com.learner.lm.database.ChatMessageEntity
@@ -21,9 +22,11 @@ import com.learner.lm.repository.SubjectRepository
 import com.learner.lm.repository.TutorRepository
 import com.learner.lm.utils.GradeLevelValidator
 import com.learner.lm.utils.SessionUtils
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -47,7 +50,8 @@ data class ChatUiState(
     val reportTarget: ReportTarget? = null,
     val isSubmittingReport: Boolean = false,
     val reportConfirmation: String? = null,
-    val reportError: String? = null
+    val reportError: String? = null,
+    val sessionLabel: String = "New chat"
 ) {
     val activeModelLabel: String
         get() = ModelRegistry.displayLabel(selectedMode, subscriptionTier)
@@ -56,7 +60,8 @@ data class ChatUiState(
 class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val app = application as LearnerLMApplication
     private val database = app.database
-    private val sessionId = SessionUtils.createSessionId()
+    private val _sessionId = MutableStateFlow(SessionUtils.createSessionId())
+    private var sessionCounter = 1
 
     private val tutorRepository = TutorRepository(
         chatMessageDao = database.chatMessageDao(),
@@ -83,9 +88,12 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     init {
         viewModelScope.launch {
-            tutorRepository.observeMessages(sessionId).collect { messages ->
+            _sessionId.flatMapLatest { id ->
+                tutorRepository.observeMessages(id)
+            }.collect { messages ->
                 _uiState.update { it.copy(messages = messages) }
             }
         }
@@ -121,6 +129,38 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setScannedText(text: String?) {
         _uiState.update { it.copy(scannedText = text) }
+    }
+
+    fun newChat() {
+        sessionCounter += 1
+        _sessionId.value = SessionUtils.createSessionId()
+        _uiState.update {
+            it.copy(
+                hintLevel = HintLevel.GENTLE_NUDGE,
+                scannedText = null,
+                error = null,
+                isLoading = false,
+                sessionLabel = "Chat $sessionCounter"
+            )
+        }
+    }
+
+    fun clearChat() {
+        viewModelScope.launch {
+            tutorRepository.clearSession(_sessionId.value)
+            _uiState.update {
+                it.copy(
+                    hintLevel = HintLevel.GENTLE_NUDGE,
+                    scannedText = null,
+                    error = null,
+                    isLoading = false
+                )
+            }
+        }
+    }
+
+    fun sendQuickAction(prompt: String) {
+        sendMessage(prompt)
     }
 
     fun showAddSubjectDialog() {
@@ -173,7 +213,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
             val state = _uiState.value
             tutorRepository.saveMessage(
-                sessionId,
+                _sessionId.value,
                 ChatMessage(
                     role = "student",
                     content = content,
@@ -183,9 +223,10 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
             )
 
             try {
-                val history = state.messages.map { entity ->
-                    entity.role to entity.content
-                }
+                val capabilities = SubscriptionCapabilities.forTier(state.subscriptionTier)
+                val history = state.messages
+                    .takeLast(capabilities.conversationHistoryLimit)
+                    .map { entity -> entity.role to entity.content }
                 val context = TutorContext(
                     gradeLevel = state.gradeLevel,
                     subject = state.selectedSubject,
@@ -200,10 +241,10 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     ?: throw IllegalStateException(
                         "Learner API not configured. Set LEARNER_API_BASE_URL in local.properties."
                     )
-                val response = chatRepository.sendMessage(sessionId, context)
+                val response = chatRepository.sendMessage(_sessionId.value, context)
 
                 tutorRepository.saveMessage(
-                    sessionId,
+                    _sessionId.value,
                     ChatMessage(
                         role = "tutor",
                         content = response.message,
@@ -263,7 +304,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                         "Learner API not configured. Set LEARNER_API_BASE_URL in local.properties."
                     )
                 chatRepository.reportContent(
-                    sessionId = sessionId,
+                    sessionId = _sessionId.value,
                     messageId = target.messageId,
                     content = target.content,
                     reason = reason,

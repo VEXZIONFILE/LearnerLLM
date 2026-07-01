@@ -38,6 +38,7 @@ import com.learner.lm.ui.components.ProfileStatCard
 import com.learner.lm.ui.components.SectionHeader
 import com.learner.lm.ui.components.SettingsRow
 import com.learner.lm.ui.theme.AppSpacing
+import com.learner.lm.utils.AccountDisplay
 
 @Composable
 fun ProfileScreen(
@@ -80,13 +81,22 @@ fun ProfileScreen(
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
-                        text = profile.email,
+                        text = AccountDisplay.handle(profile),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = AccountDisplay.memberSince(profile),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     if (isPremiumTier(profile.subscriptionTier)) {
                         Spacer(modifier = Modifier.height(8.dp))
-                        NotebookBadge(text = "Premium", highlighted = true)
+                        NotebookBadge(
+                            text = AccountDisplay.planLabel(profile.subscriptionTier),
+                            highlighted = true
+                        )
                     }
                 }
             }
@@ -104,7 +114,7 @@ fun ProfileScreen(
             if (isPremiumTier(profile.subscriptionTier)) {
                 ProfileStatCard(
                     label = "Plan",
-                    value = "Premium",
+                    value = AccountDisplay.planLabel(profile.subscriptionTier),
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -203,7 +213,9 @@ private fun isPremiumTier(tier: String): Boolean =
     tier == SubscriptionTier.BASIC.name || tier == SubscriptionTier.PRO.name
 
 private fun subscriptionDescription(tier: String): String = when (tier) {
-    SubscriptionTier.BASIC.name,
-    SubscriptionTier.PRO.name -> "Premium AI — deeper tutoring, full study packs, better code help"
-    else -> "Standard tutoring, study packs, and code help"
+    SubscriptionTier.PRO.name ->
+        "Premium Pro — longest answers, practice problems, priority-depth tutoring"
+    SubscriptionTier.BASIC.name ->
+        "Premium — unlimited scans, full study packs, deeper AI tutoring"
+    else -> "Standard — core tutoring, study packs, and code help"
 }

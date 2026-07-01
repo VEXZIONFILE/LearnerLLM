@@ -17,36 +17,61 @@ object SubscriptionFeatures {
         ),
         PlanComparisonRow(
             feature = "AI models",
-            standard = "Learner Tutor, Study & Code",
-            premium = "All models + deeper responses"
+            standard = "Tutor, Study & Code",
+            premium = "Frontier models + deeper reasoning"
         ),
         PlanComparisonRow(
-            feature = "Study packs",
-            standard = "Summary + basics",
-            premium = "Full packs with quizzes",
+            feature = "Response length",
+            standard = "Short & focused",
+            premium = "2–3× longer answers",
             premiumHighlight = true
         ),
         PlanComparisonRow(
-            feature = "Code help depth",
-            standard = "Short explanations",
-            premium = "Longer debugging walkthroughs"
+            feature = "Study packs",
+            standard = "Summary + flashcards",
+            premium = "Quizzes + practice problems (Pro)"
         ),
         PlanComparisonRow(
             feature = "Tutor examples",
-            standard = "1 example per reply",
-            premium = "Up to 3 examples per reply"
+            standard = "1 per reply",
+            premium = "Up to 5 per reply (Pro)"
         ),
         PlanComparisonRow(
-            feature = "Chat",
-            standard = "Unlimited",
-            premium = "Unlimited"
+            feature = "Code debugging",
+            standard = "~20 lines of help",
+            premium = "Up to 60 lines + strategies (Pro)"
+        ),
+        PlanComparisonRow(
+            feature = "Chat memory",
+            standard = "Last 8 messages",
+            premium = "Last 16 messages (Pro)"
+        ),
+        PlanComparisonRow(
+            feature = "Quick actions",
+            standard = "Basic suggestions",
+            premium = "Explain simpler · Quiz me · Examples"
+        ),
+        PlanComparisonRow(
+            feature = "Priority depth",
+            standard = "—",
+            premium = "Premium Pro only",
+            premiumHighlight = true
         )
     )
 
     val premiumReasons = listOf(
-        "Scan every worksheet without daily limits",
-        "Get richer study packs with flashcards and quizzes",
-        "Unlock deeper tutoring with more examples",
-        "Receive better step-by-step code debugging"
+        "Unlimited homework scans every day",
+        "Longer, smarter answers from frontier AI models",
+        "Full study packs with quizzes and flashcards",
+        "Premium Pro adds practice problems and max-depth tutoring",
+        "Quick-action buttons: explain simpler, quiz me, give examples"
+    )
+
+    val proExclusiveBenefits = listOf(
+        "Longest AI responses across Tutor, Study & Code",
+        "Practice problem sets in Study mode",
+        "Up to 5 worked examples per tutor reply",
+        "16-message conversation memory",
+        "60-line code debugging walkthroughs"
     )
 }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -75,7 +76,7 @@ fun SubscriptionScreen(
         verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
     ) {
         Text(
-            text = if (isPremium) "Your Premium plan" else "Upgrade to Premium",
+            text = if (isPremium) "Your plan" else "Upgrade your AI tutor",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold
         )
@@ -85,7 +86,7 @@ fun SubscriptionScreen(
             }
         }
         Text(
-            text = "Get unlimited homework scans, deeper AI tutoring, and full study packs.",
+            text = "Frontier AI models, unlimited scans, and deeper learning tools.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -93,6 +94,35 @@ fun SubscriptionScreen(
         PremiumValueProposition()
 
         PlanComparisonTable()
+
+        if (!isPremium) {
+            NotebookCard {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Premium Pro exclusive",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = AppColors.ProGold
+                    )
+                    com.learner.lm.billing.SubscriptionFeatures.proExclusiveBenefits.forEach { benefit ->
+                        Row(verticalAlignment = Alignment.Top) {
+                            Icon(
+                                Icons.Default.Check,
+                                contentDescription = null,
+                                tint = AppColors.ProGold,
+                                modifier = Modifier
+                                    .padding(top = 2.dp, end = 8.dp)
+                                    .size(18.dp)
+                            )
+                            Text(
+                                text = benefit,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
+                }
+            }
+        }
 
         if (billingState.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))

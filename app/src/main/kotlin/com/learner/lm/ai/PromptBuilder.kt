@@ -12,16 +12,16 @@ class PromptBuilder {
     }
 
     fun buildUserPrompt(context: TutorContext): String {
-        val history = context.conversationHistory.takeLast(8).joinToString("\n") { (role, content) ->
-            "$role: $content"
-        }
+        val capabilities = SubscriptionCapabilities.forTier(context.subscriptionTier)
+        val history = context.conversationHistory
+            .takeLast(capabilities.conversationHistoryLimit)
+            .joinToString("\n") { (role, content) -> "$role: $content" }
         val scanned = context.scannedText?.let { "\n\nScanned material:\n$it" }.orEmpty()
         val subjectLine = subjectLineFor(context.subject)
-        val capabilities = SubscriptionCapabilities.forTier(context.subscriptionTier)
-        val tierNote = if (capabilities.isPremium) {
-            "Subscription: Premium — provide richer examples and more detail."
-        } else {
-            "Subscription: Standard — keep responses concise but correct."
+        val tierNote = when {
+            capabilities.isPro -> "Subscription: Premium Pro — maximum depth, longest responses, richest examples."
+            capabilities.isPremium -> "Subscription: Premium — provide richer examples and more detail."
+            else -> "Subscription: Standard — keep responses concise but correct."
         }
 
         return when (context.appMode) {
@@ -114,8 +114,19 @@ class PromptBuilder {
         context: TutorContext,
         capabilities: SubscriptionCapabilities
     ): String {
-        val sections = if (capabilities.studySections == SubscriptionCapabilities.StudySectionDepth.FULL) {
-            """
+        val sections = when (capabilities.studySections) {
+            SubscriptionCapabilities.StudySectionDepth.PRO -> """
+            REQUIRED OUTPUT SECTIONS (use these exact headings):
+            ## Summary
+            ## Key Concepts
+            ## Flashcards
+            (Format each as Q: ... / A: ...)
+            ## Quiz Questions
+            (Number each question; include answer key at the end)
+            ## Practice Problems
+            (3–5 problems with hints — no full solutions)
+            """.trimIndent()
+            SubscriptionCapabilities.StudySectionDepth.FULL -> """
             REQUIRED OUTPUT SECTIONS (use these exact headings):
             ## Summary
             ## Key Concepts
@@ -124,8 +135,7 @@ class PromptBuilder {
             ## Quiz Questions
             (Number each question; include answer key at the end)
             """.trimIndent()
-        } else {
-            """
+            SubscriptionCapabilities.StudySectionDepth.BASIC -> """
             REQUIRED OUTPUT SECTIONS (use these exact headings):
             ## Summary
             ## Key Concepts
@@ -156,10 +166,12 @@ class PromptBuilder {
         capabilities: SubscriptionCapabilities
     ): String {
         val lineLimit = capabilities.codeMaxSuggestedLines
-        val depth = if (capabilities.isPremium) {
-            "Give detailed line-by-line explanations and multiple debugging strategies."
-        } else {
-            "Give concise explanations focused on the immediate bug or concept."
+        val depth = when {
+            capabilities.isPro ->
+                "Give exhaustive line-by-line explanations, multiple debugging strategies, and edge-case notes."
+            capabilities.isPremium ->
+                "Give detailed line-by-line explanations and multiple debugging strategies."
+            else -> "Give concise explanations focused on the immediate bug or concept."
         }
 
         return """

@@ -34,28 +34,46 @@ object SubscriptionCatalog {
             title = "Premium",
             price = "$9.99",
             period = "/ month",
-            description = "Deeper AI tutoring, richer study packs, and better code help.",
+            description = "Unlimited scans, deeper AI, and full study packs.",
             features = listOf(
                 "Unlimited homework scans",
-                "Deeper AI tutoring with more examples",
+                "2× longer AI responses",
                 "Full study packs with quizzes & flashcards",
-                "Advanced code debugging walkthroughs",
-                "Unlimited chat across all 3 models"
+                "Advanced code debugging (40 lines)",
+                "Up to 3 tutor examples per reply",
+                "12-message chat memory"
             ),
             isPopular = true
         ),
         SubscriptionPlan(
+            productId = SubscriptionProducts.PRO_MONTHLY,
+            tier = SubscriptionTier.PRO,
+            title = "Premium Pro",
+            price = "$14.99",
+            period = "/ month",
+            description = "Maximum AI depth for power learners.",
+            features = listOf(
+                "Everything in Premium",
+                "Longest responses — 3× Standard depth",
+                "Practice problem sets in Study mode",
+                "Up to 5 tutor examples per reply",
+                "16-message chat memory",
+                "60-line code walkthroughs"
+            ),
+            badge = "Best for daily use"
+        ),
+        SubscriptionPlan(
             productId = SubscriptionProducts.PREMIUM_YEARLY,
             tier = SubscriptionTier.BASIC,
-            title = "Premium",
+            title = "Premium Annual",
             price = "$99.90",
             period = "/ year",
-            description = "Best value — pay for 10 months, get 12 ($9.99 × 10).",
+            description = "Best value — pay for 10 months, get 12.",
             features = listOf(
                 "Everything in Premium monthly",
                 "Unlimited homework scans",
                 "Save $19.98 vs paying monthly",
-                "Best value for daily learners"
+                "Best value for committed learners"
             ),
             badge = "2 months free"
         )
