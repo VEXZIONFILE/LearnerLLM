@@ -18,7 +18,8 @@
     "FIREBASE_AUTH_DISABLED": "false",
     "FREE_DAILY_SCAN_LIMIT": "3",
     "DEV_AUTH_UID": "dev-user",
-    "REPORT_NOTIFICATION_EMAIL": "elijahjmaxwell43@gmail.com"
+    "REPORT_NOTIFICATION_EMAIL": "elijahjmaxwell43@gmail.com",
+    "REPORT_EMAIL_FROM": "LearnerLM Reports <onboarding@resend.dev>"
   },
   "d1_databases": [
     {
