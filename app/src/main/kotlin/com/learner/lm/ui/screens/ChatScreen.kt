@@ -26,6 +26,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -52,6 +55,7 @@ import com.learner.lm.ui.components.ChatBubble
 import com.learner.lm.ui.components.HintLevelIndicator
 import com.learner.lm.ui.components.LearnerLogo
 import com.learner.lm.ui.components.PremiumUpgradeBanner
+import com.learner.lm.ui.components.ReportAiContentDialog
 import com.learner.lm.ui.components.SubjectPicker
 import com.learner.lm.ui.components.TypingIndicator
 import com.learner.lm.ui.theme.AppRadii
@@ -70,8 +74,16 @@ fun ChatScreen(
     var input by remember { mutableStateOf("") }
     var showUpgradeBanner by remember { mutableStateOf(true) }
     val listState = rememberLazyListState()
+    val snackbarHostState = remember { SnackbarHostState() }
     val isPremium = subscriptionTier == SubscriptionTier.BASIC.name ||
         subscriptionTier == SubscriptionTier.PRO.name
+
+    LaunchedEffect(uiState.reportConfirmation) {
+        uiState.reportConfirmation?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.clearReportConfirmation()
+        }
+    }
 
     LaunchedEffect(gradeLevel) {
         viewModel.setGradeLevel(gradeLevel)
@@ -92,9 +104,15 @@ fun ChatScreen(
         }
     }
 
+    Scaffold(
+        modifier = modifier,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { innerPadding ->
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
+            .padding(innerPadding)
             .imePadding()
     ) {
         ChatHeader(
@@ -143,7 +161,17 @@ fun ChatScreen(
             items(uiState.messages, key = { it.id }) { message ->
                 ChatBubble(
                     message = message.content,
-                    isStudent = message.role == "student"
+                    isStudent = message.role == "student",
+                    onReport = if (message.role == "tutor") {
+                        {
+                            viewModel.openReportDialog(
+                                messageId = message.id,
+                                content = message.content
+                            )
+                        }
+                    } else {
+                        null
+                    }
                 )
             }
             if (uiState.isLoading) {
@@ -193,6 +221,7 @@ fun ChatScreen(
             }
         )
     }
+    }
 
     if (uiState.showAddSubjectDialog) {
         AddCustomSubjectDialog(
@@ -200,6 +229,22 @@ fun ChatScreen(
             onConfirm = viewModel::addCustomSubject,
             error = uiState.error
         )
+    }
+
+    uiState.reportTarget?.let { target ->
+        ReportAiContentDialog(
+            contentPreview = target.content,
+            onDismiss = viewModel::dismissReportDialog,
+            onSubmit = viewModel::submitReport,
+            isSubmitting = uiState.isSubmittingReport
+        )
+    }
+
+    uiState.reportError?.let { error ->
+        LaunchedEffect(error) {
+            snackbarHostState.showSnackbar(error)
+            viewModel.clearReportError()
+        }
     }
 }
 

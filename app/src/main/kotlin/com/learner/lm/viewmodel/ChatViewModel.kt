@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.learner.lm.LearnerLMApplication
+import com.learner.lm.ai.AiReportReason
 import com.learner.lm.ai.AppMode
 import com.learner.lm.ai.HintLevel
 import com.learner.lm.ai.ModelRegistry
@@ -26,6 +27,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+data class ReportTarget(
+    val messageId: Long,
+    val content: String
+)
+
 data class ChatUiState(
     val messages: List<ChatMessageEntity> = emptyList(),
     val isLoading: Boolean = false,
@@ -37,7 +43,11 @@ data class ChatUiState(
     val hintLevel: HintLevel = HintLevel.GENTLE_NUDGE,
     val scannedText: String? = null,
     val error: String? = null,
-    val showAddSubjectDialog: Boolean = false
+    val showAddSubjectDialog: Boolean = false,
+    val reportTarget: ReportTarget? = null,
+    val isSubmittingReport: Boolean = false,
+    val reportConfirmation: String? = null,
+    val reportError: String? = null
 ) {
     val activeModelLabel: String
         get() = ModelRegistry.displayLabel(selectedMode, subscriptionTier)
@@ -215,6 +225,65 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                 }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun openReportDialog(messageId: Long, content: String) {
+        _uiState.update {
+            it.copy(
+                reportTarget = ReportTarget(messageId = messageId, content = content),
+                reportError = null
+            )
+        }
+    }
+
+    fun dismissReportDialog() {
+        if (_uiState.value.isSubmittingReport) return
+        _uiState.update { it.copy(reportTarget = null, reportError = null) }
+    }
+
+    fun clearReportConfirmation() {
+        _uiState.update { it.copy(reportConfirmation = null) }
+    }
+
+    fun clearReportError() {
+        _uiState.update { it.copy(reportError = null) }
+    }
+
+    fun submitReport(reason: AiReportReason, details: String?) {
+        val target = _uiState.value.reportTarget ?: return
+        if (_uiState.value.isSubmittingReport) return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSubmittingReport = true, reportError = null) }
+            try {
+                val chatRepository = learnerChatRepository
+                    ?: throw IllegalStateException(
+                        "Learner API not configured. Set LEARNER_API_BASE_URL in local.properties."
+                    )
+                chatRepository.reportContent(
+                    sessionId = sessionId,
+                    messageId = target.messageId,
+                    content = target.content,
+                    reason = reason,
+                    details = details,
+                    appMode = _uiState.value.selectedMode
+                )
+                _uiState.update {
+                    it.copy(
+                        reportTarget = null,
+                        isSubmittingReport = false,
+                        reportConfirmation = "Thanks — your report was submitted. We'll review it shortly."
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isSubmittingReport = false,
+                        reportError = e.message ?: "Could not submit report. Try again."
+                    )
+                }
             }
         }
     }

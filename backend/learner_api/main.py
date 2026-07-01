@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from learner_api.config import get_settings
 from learner_api.database import init_db
-from learner_api.routers import billing, chat, me, progress, scans, subjects
+from learner_api.routers import billing, chat, me, progress, reports, scans, subjects
 
 
 @asynccontextmanager
@@ -33,6 +33,7 @@ def create_app() -> FastAPI:
     app.include_router(billing.router)
     app.include_router(subjects.router)
     app.include_router(progress.router)
+    app.include_router(reports.router)
     return app
 
 

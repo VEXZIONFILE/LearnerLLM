@@ -163,3 +163,25 @@ class ProgressResponse(BaseModel):
 class HealthResponse(BaseModel):
     status: str
     app: str
+
+
+class ReportReason(str, Enum):
+    OFFENSIVE = "OFFENSIVE"
+    HARMFUL = "HARMFUL"
+    INACCURATE = "INACCURATE"
+    SPAM = "SPAM"
+    OTHER = "OTHER"
+
+
+class ReportContentRequest(BaseModel):
+    session_id: str | None = None
+    message_id: int | None = None
+    content: str = Field(min_length=1, max_length=8000)
+    reason: ReportReason
+    details: str | None = Field(default=None, max_length=1000)
+    app_mode: str | None = None
+
+
+class ReportContentResponse(BaseModel):
+    report_id: int
+    status: str = "received"

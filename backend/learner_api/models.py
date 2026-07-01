@@ -121,3 +121,18 @@ class SubscriptionRecord(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
     user: Mapped[User] = relationship(back_populates="subscriptions")
+
+
+class ContentReport(Base):
+    __tablename__ = "content_reports"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_uid: Mapped[str] = mapped_column(ForeignKey("users.uid"), index=True)
+    session_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    message_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    content: Mapped[str] = mapped_column(Text)
+    reason: Mapped[str] = mapped_column(String(32))
+    details: Mapped[str | None] = mapped_column(Text, nullable=True)
+    app_mode: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    status: Mapped[str] = mapped_column(String(16), default="open")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

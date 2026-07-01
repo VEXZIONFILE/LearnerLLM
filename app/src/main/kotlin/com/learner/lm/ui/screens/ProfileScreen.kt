@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Grade
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ButtonDefaults
@@ -160,6 +161,15 @@ fun ProfileScreen(
                     subtitle = "How advanced explanations should be"
                 )
             }
+        }
+
+        SectionHeader(title = "Safety & AI")
+        NotebookCard {
+            SettingsRow(
+                icon = Icons.Default.Flag,
+                title = "Report AI content",
+                subtitle = "Tap the flag on any AI reply in chat to report offensive, harmful, or inaccurate responses — without leaving the app."
+            )
         }
 
         OutlinedButton(

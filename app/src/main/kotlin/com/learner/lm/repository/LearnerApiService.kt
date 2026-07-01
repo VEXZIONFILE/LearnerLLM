@@ -110,6 +110,20 @@ data class LearningStreakDto(
     val last_active_date: String
 )
 
+data class ReportContentRequestDto(
+    val session_id: String? = null,
+    val message_id: Long? = null,
+    val content: String,
+    val reason: String,
+    val details: String? = null,
+    val app_mode: String? = null
+)
+
+data class ReportContentResponseDto(
+    val report_id: Long,
+    val status: String
+)
+
 interface LearnerApiService {
     @GET("v1/me")
     suspend fun getMe(): UserProfileDto
@@ -140,4 +154,7 @@ interface LearnerApiService {
 
     @GET("v1/progress")
     suspend fun getProgress(): ProgressResponseDto
+
+    @POST("v1/reports")
+    suspend fun reportContent(@Body body: ReportContentRequestDto): ReportContentResponseDto
 }
