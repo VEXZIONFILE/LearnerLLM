@@ -1,6 +1,6 @@
 # LearnerLM API — Cloudflare Workers
 
-FastAPI backend for LearnerLM, deployed on **Cloudflare Workers** with **D1** (no Docker).
+FastAPI backend for LearnerLM, deployed on **Cloudflare Workers** with **D1**.
 
 Same REST API as `backend/` — the Android app uses the same endpoints and JSON shapes.
 
@@ -11,8 +11,9 @@ Same REST API as `backend/` — the Android app uses the same endpoints and JSON
 | Runtime | Cloudflare Workers (Python) |
 | Framework | FastAPI via `asgi.fetch` |
 | Database | Cloudflare D1 (SQLite at the edge) |
-| Auth | Firebase ID tokens (JWT verify, no `firebase-admin`) |
+| Auth | Firebase ID tokens (JWT verify) |
 | AI | OpenRouter proxy |
+| Report emails | Resend |
 
 ## Quick deploy
 
@@ -23,17 +24,15 @@ cd workers
 npm install
 uv tool install workers-py
 
-# Create D1 database
 npx wrangler d1 create learnerlm
 # Copy database_id into wrangler.jsonc
 
 npx wrangler d1 migrations apply learnerlm --remote
 
-# Secrets
 npx wrangler secret put OPENROUTER_API_KEY
 npx wrangler secret put FIREBASE_PROJECT_ID
+npx wrangler secret put RESEND_API_KEY
 
-# Deploy
 uv run pywrangler deploy
 ```
 
@@ -56,12 +55,12 @@ Dev auth: set `FIREBASE_AUTH_DISABLED=true` in `wrangler.jsonc` vars, use `Autho
 | GET | `/health` |
 | GET/PATCH | `/v1/me` |
 | POST | `/v1/chat/messages` |
-| GET | `/v1/chat/sessions` |
 | GET | `/v1/scans/quota` |
 | POST | `/v1/scans` |
 | POST | `/v1/billing/verify` |
 | GET/POST/DELETE | `/v1/subjects` |
 | GET | `/v1/progress` |
+| POST | `/v1/reports` |
 
 ## Android app
 
@@ -69,14 +68,6 @@ Dev auth: set `FIREBASE_AUTH_DISABLED=true` in `wrangler.jsonc` vars, use `Autho
 LEARNER_API_BASE_URL=https://learnerlm-api.YOUR_SUBDOMAIN.workers.dev/
 ```
 
-## vs `backend/` (Docker)
+## `backend/` folder
 
-| | **Workers** (`workers/`) | **Docker** (`backend/`) |
-|---|--------------------------|-------------------------|
-| Hosting | Cloudflare Workers | Docker / VM / Render / Fly |
-| Database | D1 | SQLite file |
-| Deploy | `pywrangler deploy` | `docker compose` |
-| Cold starts | Edge, fast | Always-on server |
-
-Use **Workers** for simple global HTTPS with no server management.  
-Use **Docker backend** if you need long-running jobs or full Python package ecosystem.
+Use `backend/` only for **local development and pytest**. Production runs from this `workers/` directory.

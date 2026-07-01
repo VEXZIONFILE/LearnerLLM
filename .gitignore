@@ -48,6 +48,8 @@ backend/data/
 backend/.venv/
 backend/**/__pycache__/
 backend/**/*.pyc
+backend/**/*.egg-info/
+workers/node_modules/
 *.keystore
 
 # OS

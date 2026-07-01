@@ -45,7 +45,8 @@ It is: *"A thinking partner that helps students learn how to solve problems, not
 | Layer | Technology |
 |-------|------------|
 | **Android** | Kotlin, Jetpack Compose, MVVM, Room |
-| **Backend** | FastAPI, SQLAlchemy, Firebase Admin |
+| **Backend (production)** | Cloudflare Workers, FastAPI, D1 |
+| **Backend (local dev)** | FastAPI, SQLite (`backend/`) |
 | Image Processing | ML Kit OCR (on-device) |
 | Networking | Retrofit → LearnerLM API |
 | AI Models | gpt-oss-120b, Nemotron 3 Super, Laguna M.1 (via OpenRouter on server) |
@@ -57,10 +58,10 @@ It is: *"A thinking partner that helps students learn how to solve problems, not
 ```
 LearnerLM/
 ├── app/                    # Android app (Kotlin / Compose)
-├── backend/                # FastAPI server (AI, quotas, billing, sync)
+├── workers/                # Production API (Cloudflare Workers + D1)
+├── backend/                # Local FastAPI dev + tests
 │   ├── learner_api/
-│   ├── tests/
-│   └── docker-compose.yml
+│   └── tests/
 ├── build.gradle.kts
 ├── settings.gradle.kts
 └── README.md
@@ -97,17 +98,18 @@ cd LearnerLM
 
 ### Backend + Android setup
 
-1. **Start the backend** (see [backend/README.md](backend/README.md)):
+1. **Production:** deploy [`workers/`](workers/CLOUDFLARE_DEPLOY.md) to Cloudflare Workers.
+
+2. **Local dev** (see [backend/README.md](backend/README.md)):
 
 ```bash
 cd backend
 cp .env.example .env
-# Add OPENROUTER_API_KEY to .env
 pip install -r requirements.txt
 uvicorn learner_api.main:app --host 0.0.0.0 --port 8080
 ```
 
-2. **Configure the Android app** in `local.properties`:
+3. **Configure the Android app** in `local.properties`:
 
 ```properties
 LEARNER_API_BASE_URL=http://10.0.2.2:8080/

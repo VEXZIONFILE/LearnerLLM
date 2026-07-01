@@ -39,7 +39,7 @@ LEARNER_API_BASE_URL=https://api.yourdomain.com/
 
 ## Backend
 
-Deploy the `backend/` FastAPI service and set `OPENROUTER_API_KEY` in the server environment. The Android app never receives the OpenRouter key.
+Deploy **`workers/`** to Cloudflare Workers — see [workers/CLOUDFLARE_DEPLOY.md](workers/CLOUDFLARE_DEPLOY.md). Set `OPENROUTER_API_KEY` and `RESEND_API_KEY` as Worker secrets. The Android app never receives the OpenRouter key.
 
 After a purchase, the app calls `POST /v1/billing/verify` so subscription tier is enforced server-side.
 
@@ -56,4 +56,4 @@ LearnerLM includes:
 
 When filling out the Play Console **AI-generated content** declaration, state that users can report content via the in-chat flag button.
 
-Report submissions are stored in the backend and emailed to **elijahjmaxwell43@gmail.com**. Set `RESEND_API_KEY` (or Gmail `SMTP_*` vars on FastAPI) — see `backend/.env.example`.
+Report submissions are stored in the backend and emailed to **elijahjmaxwell43@gmail.com**. Set `RESEND_API_KEY` as a Cloudflare Worker secret.

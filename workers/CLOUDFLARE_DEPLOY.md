@@ -175,7 +175,14 @@ cd workers
 uv run pywrangler deploy
 ```
 
-Or connect GitHub to Cloudflare Workers for auto-deploy (optional).
+### Optional: GitHub auto-deploy
+
+1. Cloudflare dashboard → **Workers & Pages** → **Create** → **Workers**
+2. **Connect to Git** → select `VEXZIONFILE/LearnerLLM`
+3. Branch: `cursor/cloudflare-workers-backend-6bf2` (or your main backend branch)
+4. **Root directory:** `workers`
+5. Build command: `npm install && uv run pywrangler deploy` (or use Workers Builds)
+6. Add secrets in **Settings → Variables** (same as `wrangler secret put`)
 
 ---
 
@@ -200,4 +207,4 @@ Or connect GitHub to Cloudflare Workers for auto-deploy (optional).
 | Global edge | Single region |
 | `wrangler deploy` | `docker compose up` |
 
-Perfect if you want **simple hosting** without Northflank/Oracle/SSH pain.
+Perfect for **simple hosting** with no Docker or SSH.
