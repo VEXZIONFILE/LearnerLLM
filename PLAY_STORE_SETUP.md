@@ -6,7 +6,7 @@ Create these subscription products in [Google Play Console](https://play.google.
 |------------|-------|------|
 | `learnerlm_basic_monthly` | $9.99 | Pro (monthly) |
 | `learnerlm_pro_monthly` | $14.99 | Premium (monthly) |
-| `learnerlm_pro_yearly` | $190.00 | Mega (yearly — 2 months free) |
+| `learnerlm_pro_yearly` | $99.99 | Mega (yearly — 2 months free) |
 
 ## Plan pricing
 

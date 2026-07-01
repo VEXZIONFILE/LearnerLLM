@@ -202,7 +202,7 @@ fun SubscriptionScreen(
 
                     if (plan.productId == SubscriptionProducts.MEGA_YEARLY) {
                         Text(
-                            text = "$19/mo × 10 months = $190.00/yr — 2 months free",
+                            text = "$9.99/mo × 10 months = $99.99/yr — 2 months free",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary
                         )

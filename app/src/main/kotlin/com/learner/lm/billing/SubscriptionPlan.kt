@@ -69,7 +69,7 @@ object SubscriptionCatalog {
             productId = SubscriptionProducts.MEGA_YEARLY,
             tier = SubscriptionTier.BASIC,
             title = "Mega",
-            price = "$190.00",
+            price = "$99.99",
             period = "/ year",
             description = "Best value — pay for 10 months, get 12 (2 months free).",
             features = listOf(

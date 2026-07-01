@@ -142,7 +142,7 @@ Custom subjects are saved locally and tailor the AI tutor's guidance to that con
 - **Subscriptions** via Google Play Billing:
   - **Pro** — **$9.99/month** (`learnerlm_basic_monthly`)
   - **Premium** — **$14.99/month** (`learnerlm_pro_monthly`)
-  - **Mega** — **$190.00/year** (`learnerlm_pro_yearly` — pay for 10 months, get 12; 2 months free)
+  - **Mega** — **$99.99/year** (`learnerlm_pro_yearly` — pay for 10 months, get 12; 2 months free)
 
 ## AI Tutor Engine
 
