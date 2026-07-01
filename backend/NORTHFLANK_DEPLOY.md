@@ -6,6 +6,35 @@ Northflank is a strong fit for this backend: **Docker from GitHub**, **HTTPS URL
 
 ---
 
+## FIX: `stageId "__unstaged"` error
+
+If you see:
+
+```text
+spec.stageId "stageId" with value "__unstaged" fails to match the required pattern
+```
+
+You are in the **wrong Northflank screen**. Northflank is trying to use a pipeline stage called `__unstaged` (invalid).
+
+### Do this now
+
+1. **Stop** — close Pipeline, Release flow, or Template editor
+2. **Delete** any broken pipeline, release flow, or half-created service in the project
+3. Go to your **project** → top-right **Create new** → **Service** → **Combined**
+4. **Do not** click: Pipeline, Release flow, Template, or “Add to pipeline”
+5. If you see a **Stage** field:
+   - Clear it completely, **or**
+   - Type exactly: `production` (no underscores)
+6. Finish with these build settings:
+   - Branch: `LearnerLM`
+   - Dockerfile: `/Dockerfile`
+   - Working directory: `/`
+7. Click **Create service**
+
+**Combined service = no pipeline = no `__unstaged` error.**
+
+---
+
 ## Important: pick the right branch
 
 The backend is **not on `main`**. Use a branch that includes the `backend/` folder:
