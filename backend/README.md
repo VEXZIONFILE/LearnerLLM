@@ -49,6 +49,10 @@ cp .env.example .env
 docker compose up --build
 ```
 
+## Oracle Cloud (Always Free VM)
+
+See **[ORACLE_DEPLOY.md](ORACLE_DEPLOY.md)** — free 24/7 VM, persistent data, Docker. Best long-term $0 option if you’re OK with SSH setup.
+
 ## Vercel (free Hobby, no SSH)
 
 See **[VERCEL_DEPLOY.md](VERCEL_DEPLOY.md)** — GitHub import, Root Directory = `backend`, free HTTPS.  
