@@ -5,12 +5,12 @@ enum class AppDestination(
     val shortLabel: String,
     val route: String
 ) {
-    Login("Account", "Account", "login"),
-    Chat("Study Chat", "Chat", "chat"),
-    Scanner("Scanner", "Scan", "scanner"),
+    Login("Sign In", "Auth", "login"),
+    Chat("Learner", "Chat", "chat"),
+    Scanner("Homework Scan", "Scan", "scanner"),
     Progress("Progress", "Progress", "progress"),
-    Profile("Profile", "Profile", "profile"),
-    Subscription("Upgrade", "Plans", "subscription");
+    Profile("My Account", "Account", "profile"),
+    Subscription("Premium", "Plans", "subscription");
 
     val showsBottomNav: Boolean
         get() = this in bottomNavDestinations

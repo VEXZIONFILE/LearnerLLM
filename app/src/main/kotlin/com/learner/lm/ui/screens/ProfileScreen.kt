@@ -55,12 +55,12 @@ fun ProfileScreen(
         verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
     ) {
         Text(
-            text = "Settings",
+            text = "My Account",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.SemiBold
         )
         Text(
-            text = "Manage your account and learning preferences.",
+            text = "Manage your profile, plan, and learning preferences.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -176,7 +176,7 @@ fun ProfileScreen(
             onClick = onSignOut,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp),
+                .height(52.dp),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.outlinedButtonColors(
                 contentColor = MaterialTheme.colorScheme.error
@@ -187,8 +187,15 @@ fun ProfileScreen(
                 contentDescription = null,
                 modifier = Modifier.padding(end = 8.dp)
             )
-            Text("Sign out", fontWeight = FontWeight.SemiBold)
+            Text("Sign out & switch account", fontWeight = FontWeight.SemiBold)
         }
+
+        Text(
+            text = "Signing out returns you to the Sign In / Sign Up screen.",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp)
+        )
     }
 }
 

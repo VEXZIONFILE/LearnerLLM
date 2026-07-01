@@ -3,7 +3,10 @@ package com.learner.lm.ui.screens
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -155,7 +158,12 @@ fun ChatScreen(
         ) {
             if (uiState.messages.isEmpty() && !uiState.isLoading) {
                 item {
-                    ChatEmptyState(mode = uiState.selectedMode)
+                    ChatEmptyState(
+                        mode = uiState.selectedMode,
+                        onSuggestionClick = { suggestion ->
+                            viewModel.sendMessage(suggestion)
+                        }
+                    )
                 }
             }
             items(uiState.messages, key = { it.id }) { message ->
@@ -281,23 +289,36 @@ private fun ChatHeader(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ChatEmptyState(mode: AppMode) {
+private fun ChatEmptyState(
+    mode: AppMode,
+    onSuggestionClick: (String) -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 48.dp, horizontal = AppSpacing.lg),
+            .padding(vertical = 40.dp, horizontal = AppSpacing.lg),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
     ) {
-        LearnerLogo(
-            showWordmark = false,
-            modifier = Modifier.size(56.dp)
-        )
+        Surface(
+            shape = RoundedCornerShape(AppRadii.xl),
+            color = MaterialTheme.colorScheme.surface,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
+            modifier = Modifier.padding(bottom = 4.dp)
+        ) {
+            LearnerLogo(
+                showWordmark = false,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .size(48.dp)
+            )
+        }
         Text(
             text = emptyStateTitle(mode),
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
         Text(
@@ -306,6 +327,41 @@ private fun ChatEmptyState(mode: AppMode) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = AppSpacing.md)
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            suggestionsForMode(mode).forEach { suggestion ->
+                SuggestionChip(
+                    text = suggestion,
+                    onClick = { onSuggestionClick(suggestion) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SuggestionChip(
+    text: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.clickable(onClick = onClick),
+        shape = RoundedCornerShape(AppRadii.pill),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.45f))
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -339,7 +395,7 @@ private fun ChatComposer(
                         .weight(1f)
                         .border(
                             width = 1.dp,
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.55f),
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
                             shape = RoundedCornerShape(AppRadii.xl)
                         ),
                     placeholder = {
@@ -410,7 +466,25 @@ private fun emptyStateMessage(mode: AppMode): String = when (mode) {
 }
 
 private fun inputPlaceholder(mode: AppMode): String = when (mode) {
-    AppMode.TUTOR -> "Message Learner Tutor…"
-    AppMode.STUDY -> "Message Learner Study…"
-    AppMode.CODE -> "Message Learner Code…"
+    AppMode.TUTOR -> "Ask LearnerLM anything…"
+    AppMode.STUDY -> "Enter a topic to study…"
+    AppMode.CODE -> "Paste code or describe your bug…"
+}
+
+private fun suggestionsForMode(mode: AppMode): List<String> = when (mode) {
+    AppMode.TUTOR -> listOf(
+        "Explain photosynthesis simply",
+        "Help me with quadratic equations",
+        "What caused World War I?"
+    )
+    AppMode.STUDY -> listOf(
+        "Cell biology summary",
+        "US history flashcards",
+        "Spanish verb conjugation"
+    )
+    AppMode.CODE -> listOf(
+        "Debug my Python loop",
+        "Explain recursion",
+        "Fix this Java error"
+    )
 }
