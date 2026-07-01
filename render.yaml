@@ -1,0 +1,33 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: learnerlm-api
+    runtime: docker
+    rootDir: backend
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: DEBUG
+        value: "false"
+      - key: DATABASE_URL
+        value: sqlite+aiosqlite:///./data/learnerlm.db
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: BILLING_VERIFICATION_DISABLED
+        value: "true"
+      - key: GOOGLE_PLAY_PACKAGE_NAME
+        value: com.learnerlm
+      - key: FREE_DAILY_SCAN_LIMIT
+        value: "3"
+      - key: REPORT_NOTIFICATION_EMAIL
+        value: elijahjmaxwell43@gmail.com
+      - key: REPORT_EMAIL_FROM
+        value: "LearnerLM Reports <onboarding@resend.dev>"
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_CREDENTIALS_JSON
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
