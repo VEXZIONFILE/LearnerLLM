@@ -1,5 +1,6 @@
 package com.learner.lm.repository
 
+import com.learner.lm.ai.AiReportReason
 import com.learner.lm.ai.AppMode
 import com.learner.lm.ai.HintLevel
 import com.learner.lm.ai.StudySubject
@@ -50,6 +51,26 @@ class LearnerChatRepository(
             }),
             detectedMistake = response.detected_mistake,
             encouragesAttempt = response.encourages_attempt
+        )
+    }
+
+    suspend fun reportContent(
+        sessionId: String,
+        messageId: Long,
+        content: String,
+        reason: AiReportReason,
+        details: String?,
+        appMode: AppMode
+    ): ReportContentResponseDto {
+        return apiService.reportContent(
+            ReportContentRequestDto(
+                session_id = sessionId,
+                message_id = messageId,
+                content = content,
+                reason = reason.apiValue,
+                details = details,
+                app_mode = appMode.name
+            )
         )
     }
 }

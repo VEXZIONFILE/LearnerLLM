@@ -39,6 +39,21 @@ LEARNER_API_BASE_URL=https://api.yourdomain.com/
 
 ## Backend
 
-Deploy the `backend/` FastAPI service and set `OPENROUTER_API_KEY` in the server environment. The Android app never receives the OpenRouter key.
+Deploy **`workers/`** to Cloudflare Workers — see [workers/CLOUDFLARE_DEPLOY.md](workers/CLOUDFLARE_DEPLOY.md). Set `OPENROUTER_API_KEY` and `RESEND_API_KEY` as Worker secrets. The Android app never receives the OpenRouter key.
 
 After a purchase, the app calls `POST /v1/billing/verify` so subscription tier is enforced server-side.
+
+## Generative AI content reporting (Google Play requirement)
+
+Apps that use generative AI must let users **flag or report offensive AI output inside the app** (no external browser required).
+
+LearnerLM includes:
+
+- A **flag icon** on every AI tutor reply in chat → opens an in-app report dialog
+- Reasons: offensive, harmful, inaccurate, spam, or other (optional details)
+- Reports are sent to `POST /v1/reports` on your Learner API backend
+- **Settings → Safety & AI** explains how reporting works
+
+When filling out the Play Console **AI-generated content** declaration, state that users can report content via the in-chat flag button.
+
+Report submissions are stored in the backend and emailed to **elijahjmaxwell43@gmail.com**. Set `RESEND_API_KEY` as a Cloudflare Worker secret.
