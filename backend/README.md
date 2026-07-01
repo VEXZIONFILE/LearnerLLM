@@ -2,7 +2,7 @@
 
 FastAPI reference implementation for [LearnerLM](https://github.com/VEXZIONFILE/LearnerLLM). Use this folder for **local development and tests**.
 
-**Production hosting:** **[FLY_DEPLOY.md](FLY_DEPLOY.md)** (Fly.io — import GitHub from dashboard) · **[../workers/CLOUDFLARE_DEPLOY.md](../workers/CLOUDFLARE_DEPLOY.md)** (Cloudflare Workers — free tier).
+**Production hosting:** **[CLOUDFLARE_TUNNEL_VPC_DEPLOY.md](CLOUDFLARE_TUNNEL_VPC_DEPLOY.md)** (Tunnel + VPC — private API on your PC, public Worker) · [CLOUDFLARE_TUNNEL_DEPLOY.md](CLOUDFLARE_TUNNEL_DEPLOY.md) (Tunnel only) · [FLY_DEPLOY.md](FLY_DEPLOY.md) (Fly.io) · [../workers/CLOUDFLARE_DEPLOY.md](../workers/CLOUDFLARE_DEPLOY.md) (Workers + D1).
 
 ## Features
 
