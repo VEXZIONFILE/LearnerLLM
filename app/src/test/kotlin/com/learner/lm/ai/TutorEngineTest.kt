@@ -21,6 +21,13 @@ class AiConfigTest {
     fun `code model uses laguna m1`() {
         assertEquals("poolside/laguna-m.1", AiConfig.CODE_MODEL_ID)
     }
+
+    @Test
+    fun `free models use openrouter free variants`() {
+        assertEquals("openai/gpt-oss-120b:free", AiConfig.FREE_TUTOR_MODEL_ID)
+        assertEquals("nvidia/nemotron-3-super-120b-a12b:free", AiConfig.FREE_STUDY_MODEL_ID)
+        assertEquals("poolside/laguna-m.1:free", AiConfig.FREE_CODE_MODEL_ID)
+    }
 }
 
 class ModelRegistryTest {
@@ -54,6 +61,26 @@ class ModelRegistryTest {
         assertEquals("Learner Tutor", ModelRegistry.displayLabel(AppMode.TUTOR, SubscriptionTier.FREE.name))
         assertEquals("Learner Study", ModelRegistry.displayLabel(AppMode.STUDY, SubscriptionTier.FREE.name))
         assertEquals("Learner Code", ModelRegistry.displayLabel(AppMode.CODE, SubscriptionTier.BASIC.name))
+        assertEquals(
+            "Learner Free Study",
+            ModelRegistry.displayLabel(
+                AppMode.FREE,
+                SubscriptionTier.FREE.name,
+                FreeModelVariant.STUDY
+            )
+        )
+    }
+
+    @Test
+    fun `free mode routes to openrouter free models`() {
+        assertEquals(
+            ModelRegistry.FREE_TUTOR_MODEL,
+            ModelRegistry.resolve(AppMode.FREE, SubscriptionTier.FREE.name, FreeModelVariant.TUTOR).modelId
+        )
+        assertEquals(
+            ModelRegistry.FREE_CODE_MODEL,
+            ModelRegistry.resolve(AppMode.FREE, SubscriptionTier.BASIC.name, FreeModelVariant.CODE).modelId
+        )
     }
 }
 

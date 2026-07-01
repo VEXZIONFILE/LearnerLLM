@@ -37,6 +37,7 @@ data class ChatRequestDto(
     val session_id: String? = null,
     val grade_level: Int,
     val app_mode: String,
+    val free_model_variant: String? = null,
     val hint_level: Int,
     val subject: StudySubjectInputDto? = null,
     val student_message: String,

@@ -56,10 +56,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.learner.lm.ai.AppMode
+import com.learner.lm.ai.FreeModelVariant
+import com.learner.lm.ai.learningBehavior
 import com.learner.lm.billing.SubscriptionTier
 import com.learner.lm.ui.components.AddCustomSubjectDialog
 import com.learner.lm.ui.components.AppModePicker
 import com.learner.lm.ui.components.ChatBubble
+import com.learner.lm.ui.components.FreeModelPicker
 import com.learner.lm.ui.components.HintLevelIndicator
 import com.learner.lm.ui.components.LearnerLogo
 import com.learner.lm.ui.components.PremiumUpgradeBanner
@@ -88,6 +91,7 @@ fun ChatScreen(
     val scope = rememberCoroutineScope()
     val isPremium = subscriptionTier == SubscriptionTier.BASIC.name ||
         subscriptionTier == SubscriptionTier.PRO.name
+    val behaviorMode = uiState.selectedMode.learningBehavior(uiState.selectedFreeModel)
 
     LaunchedEffect(uiState.reportConfirmation) {
         uiState.reportConfirmation?.let { message ->
@@ -129,6 +133,7 @@ fun ChatScreen(
         ChatHeader(
             activeModelLabel = uiState.activeModelLabel,
             selectedMode = uiState.selectedMode,
+            behaviorMode = behaviorMode,
             hintLevel = uiState.hintLevel.level,
             sessionLabel = uiState.sessionLabel,
             hasMessages = uiState.messages.isNotEmpty(),
@@ -138,7 +143,7 @@ fun ChatScreen(
 
         if (uiState.messages.isNotEmpty()) {
             ChatQuickActions(
-                mode = uiState.selectedMode,
+                mode = behaviorMode,
                 onAction = viewModel::sendQuickAction
             )
         }
@@ -156,6 +161,13 @@ fun ChatScreen(
             selectedMode = uiState.selectedMode,
             onModeSelected = viewModel::selectMode
         )
+
+        if (uiState.selectedMode == AppMode.FREE) {
+            FreeModelPicker(
+                selectedVariant = uiState.selectedFreeModel,
+                onVariantSelected = viewModel::selectFreeModel
+            )
+        }
 
         SubjectPicker(
             selectedSubject = uiState.selectedSubject,
@@ -179,6 +191,7 @@ fun ChatScreen(
                 item {
                     ChatEmptyState(
                         mode = uiState.selectedMode,
+                        freeModelVariant = uiState.selectedFreeModel,
                         onSuggestionClick = { suggestion ->
                             viewModel.sendMessage(suggestion)
                         }
@@ -250,7 +263,7 @@ fun ChatScreen(
         ChatComposer(
             value = input,
             onValueChange = { input = it },
-            placeholder = inputPlaceholder(uiState.selectedMode),
+            placeholder = inputPlaceholder(behaviorMode),
             enabled = !uiState.isLoading,
             onSend = {
                 viewModel.sendMessage(input)
@@ -289,6 +302,7 @@ fun ChatScreen(
 private fun ChatHeader(
     activeModelLabel: String,
     selectedMode: AppMode,
+    behaviorMode: AppMode,
     hintLevel: Int,
     sessionLabel: String,
     hasMessages: Boolean,
@@ -317,7 +331,7 @@ private fun ChatHeader(
             )
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if (selectedMode == AppMode.TUTOR) {
+            if (behaviorMode == AppMode.TUTOR) {
                 HintLevelIndicator(level = hintLevel)
                 Spacer(modifier = Modifier.size(8.dp))
             }
@@ -370,14 +384,17 @@ private fun quickActionsForMode(mode: AppMode): List<QuickAction> = when (mode) 
         QuickAction("Find the bug", "Help me find the bug and explain why it happens."),
         QuickAction("Suggest fix", "Suggest a small fix and explain each change.")
     )
+    AppMode.FREE -> quickActionsForMode(AppMode.TUTOR)
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ChatEmptyState(
     mode: AppMode,
+    freeModelVariant: FreeModelVariant,
     onSuggestionClick: (String) -> Unit
 ) {
+    val behaviorMode = mode.learningBehavior(freeModelVariant)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -399,13 +416,13 @@ private fun ChatEmptyState(
             )
         }
         Text(
-            text = emptyStateTitle(mode),
+            text = emptyStateTitle(mode, behaviorMode),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
         Text(
-            text = emptyStateMessage(mode),
+            text = emptyStateMessage(mode, behaviorMode),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -419,7 +436,7 @@ private fun ChatEmptyState(
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            suggestionsForMode(mode).forEach { suggestion ->
+            suggestionsForMode(behaviorMode).forEach { suggestion ->
                 SuggestionChip(
                     text = suggestion,
                     onClick = { onSuggestionClick(suggestion) }
@@ -536,22 +553,35 @@ private fun ChatComposer(
     }
 }
 
-private fun emptyStateTitle(mode: AppMode): String = when (mode) {
-    AppMode.TUTOR -> "How can I help you learn?"
-    AppMode.STUDY -> "What do you want to study?"
-    AppMode.CODE -> "What are you working on?"
+private fun emptyStateTitle(mode: AppMode, behaviorMode: AppMode): String {
+    val base = when (behaviorMode) {
+        AppMode.TUTOR -> "How can I help you learn?"
+        AppMode.STUDY -> "What do you want to study?"
+        AppMode.CODE -> "What are you working on?"
+        AppMode.FREE -> "What can I help you with?"
+    }
+    return if (mode == AppMode.FREE) "Free · $base" else base
 }
 
-private fun emptyStateMessage(mode: AppMode): String = when (mode) {
-    AppMode.TUTOR -> "Ask about homework or concepts. I'll guide you with hints and questions — never just the answer."
-    AppMode.STUDY -> "Enter a topic to get a summary, key concepts, flashcards, and quiz questions."
-    AppMode.CODE -> "Paste a snippet, error, or question. I'll help you debug and understand step by step."
+private fun emptyStateMessage(mode: AppMode, behaviorMode: AppMode): String {
+    val base = when (behaviorMode) {
+        AppMode.TUTOR -> "Ask about homework or concepts. I'll guide you with hints and questions — never just the answer."
+        AppMode.STUDY -> "Enter a topic to get a summary, key concepts, flashcards, and quiz questions."
+        AppMode.CODE -> "Paste a snippet, error, or question. I'll help you debug and understand step by step."
+        AppMode.FREE -> "Pick a free OpenRouter model above and start chatting."
+    }
+    return if (mode == AppMode.FREE) {
+        "$base No subscription required — powered by OpenRouter free models."
+    } else {
+        base
+    }
 }
 
 private fun inputPlaceholder(mode: AppMode): String = when (mode) {
     AppMode.TUTOR -> "Ask LearnerLM anything…"
     AppMode.STUDY -> "Enter a topic to study…"
     AppMode.CODE -> "Paste code or describe your bug…"
+    AppMode.FREE -> "Message the free model…"
 }
 
 private fun suggestionsForMode(mode: AppMode): List<String> = when (mode) {
@@ -569,5 +599,10 @@ private fun suggestionsForMode(mode: AppMode): List<String> = when (mode) {
         "Debug my Python loop",
         "Explain recursion",
         "Fix this Java error"
+    )
+    AppMode.FREE -> listOf(
+        "Explain photosynthesis simply",
+        "Cell biology summary",
+        "Debug my Python loop"
     )
 }

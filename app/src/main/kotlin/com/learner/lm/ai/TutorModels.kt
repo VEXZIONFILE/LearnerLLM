@@ -69,6 +69,7 @@ data class TutorContext(
     val gradeLevel: Int,
     val subject: StudySubject,
     val appMode: AppMode = AppMode.TUTOR,
+    val freeModelVariant: FreeModelVariant = FreeModelVariant.TUTOR,
     val subscriptionTier: String = "FREE",
     val hintLevel: HintLevel = HintLevel.GENTLE_NUDGE,
     val studentMessage: String,

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from learner_api.schemas import AppMode
+from learner_api.schemas import AppMode, FreeModelVariant
 
 
 @dataclass(frozen=True)
@@ -15,6 +15,10 @@ TUTOR_MODEL = "openai/gpt-oss-120b"
 STUDY_MODEL = "nvidia/nemotron-3-super-120b-a12b"
 CODE_MODEL = "poolside/laguna-m.1"
 
+FREE_TUTOR_MODEL = "openai/gpt-oss-120b:free"
+FREE_STUDY_MODEL = "nvidia/nemotron-3-super-120b-a12b:free"
+FREE_CODE_MODEL = "poolside/laguna-m.1:free"
+
 PREMIUM_TIERS = {"BASIC", "PRO"}
 
 
@@ -26,9 +30,35 @@ def is_pro_tier(tier: str) -> bool:
     return tier == "PRO"
 
 
-def resolve_model(mode: AppMode, subscription_tier: str) -> ModelRoute:
+def resolve_model(
+    mode: AppMode,
+    subscription_tier: str,
+    free_model_variant: FreeModelVariant | None = None,
+) -> ModelRoute:
     pro = is_pro_tier(subscription_tier)
     premium = is_premium_tier(subscription_tier)
+    if mode == AppMode.FREE:
+        variant = free_model_variant or FreeModelVariant.TUTOR
+        if variant == FreeModelVariant.STUDY:
+            return ModelRoute(
+                model_id=FREE_STUDY_MODEL,
+                display_name="Learner Free Study",
+                temperature=0.45,
+                max_tokens=1536,
+            )
+        if variant == FreeModelVariant.CODE:
+            return ModelRoute(
+                model_id=FREE_CODE_MODEL,
+                display_name="Learner Free Code",
+                temperature=0.35,
+                max_tokens=1024,
+            )
+        return ModelRoute(
+            model_id=FREE_TUTOR_MODEL,
+            display_name="Learner Free Tutor",
+            temperature=0.65,
+            max_tokens=1024,
+        )
     if mode == AppMode.TUTOR:
         return ModelRoute(
             model_id=TUTOR_MODEL,

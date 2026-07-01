@@ -34,6 +34,11 @@ class LearnerChatRepository(
                 session_id = sessionId,
                 grade_level = context.gradeLevel,
                 app_mode = context.appMode.name,
+                free_model_variant = if (context.appMode == AppMode.FREE) {
+                    context.freeModelVariant.name
+                } else {
+                    null
+                },
                 hint_level = context.hintLevel.level,
                 subject = subjectInput,
                 student_message = context.studentMessage,

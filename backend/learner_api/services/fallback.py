@@ -19,6 +19,11 @@ def offline_fallback(route: ModelRoute) -> str:
             "Q: What is the main idea of your topic?\n"
             "A: (Write your answer from your notes)"
         )
+    if ":free" in route.model_id:
+        return (
+            "Free mode is offline — the server could not reach OpenRouter.\n\n"
+            "Try again in a moment, or switch to Tutor, Study, or Code mode."
+        )
     return (
         "I'm here to help you think through this step by step.\n\n"
         "Let's start with what you already know about the problem. Can you tell me:\n"

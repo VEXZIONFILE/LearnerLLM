@@ -49,7 +49,7 @@ It is: *"A thinking partner that helps students learn how to solve problems, not
 | **Backend (local dev)** | FastAPI, SQLite (`backend/`) |
 | Image Processing | ML Kit OCR (on-device) |
 | Networking | Retrofit → LearnerLM API |
-| AI Models | gpt-oss-120b, Nemotron 3 Super, Laguna M.1 (via OpenRouter on server) |
+| AI Models | gpt-oss-120b, Nemotron 3 Super, Laguna M.1 + **Free mode** (`:free` variants via OpenRouter) |
 | Authentication | Firebase Auth + server token verification |
 | Billing | Google Play + server purchase verification |
 

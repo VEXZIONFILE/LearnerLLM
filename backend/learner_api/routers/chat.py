@@ -71,6 +71,7 @@ async def send_message(
         student_message=body.student_message,
         conversation_history=history,
         scanned_text=body.scanned_text,
+        free_model_variant=body.free_model_variant,
     )
     response = await engine.respond(context, tier)
 

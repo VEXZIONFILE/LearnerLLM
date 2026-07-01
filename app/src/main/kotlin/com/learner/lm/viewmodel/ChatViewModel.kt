@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.learner.lm.LearnerLMApplication
 import com.learner.lm.ai.AiReportReason
 import com.learner.lm.ai.AppMode
+import com.learner.lm.ai.FreeModelVariant
 import com.learner.lm.ai.HintLevel
 import com.learner.lm.ai.ModelRegistry
 import com.learner.lm.ai.StudySubject
@@ -40,6 +41,7 @@ data class ChatUiState(
     val isLoading: Boolean = false,
     val gradeLevel: Int = 8,
     val selectedMode: AppMode = AppMode.TUTOR,
+    val selectedFreeModel: FreeModelVariant = FreeModelVariant.TUTOR,
     val subscriptionTier: String = SubscriptionTier.FREE.name,
     val selectedSubject: StudySubject = StudySubject.Builtin(Subject.GENERAL),
     val customSubjects: List<StudySubject.Custom> = emptyList(),
@@ -54,7 +56,7 @@ data class ChatUiState(
     val sessionLabel: String = "New chat"
 ) {
     val activeModelLabel: String
-        get() = ModelRegistry.displayLabel(selectedMode, subscriptionTier)
+        get() = ModelRegistry.displayLabel(selectedMode, subscriptionTier, selectedFreeModel)
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -121,6 +123,10 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     fun selectMode(mode: AppMode) {
         _uiState.update { it.copy(selectedMode = mode, error = null) }
+    }
+
+    fun selectFreeModel(variant: FreeModelVariant) {
+        _uiState.update { it.copy(selectedFreeModel = variant, error = null) }
     }
 
     fun selectSubject(subject: StudySubject) {
@@ -231,6 +237,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     gradeLevel = state.gradeLevel,
                     subject = state.selectedSubject,
                     appMode = state.selectedMode,
+                    freeModelVariant = state.selectedFreeModel,
                     subscriptionTier = state.subscriptionTier,
                     hintLevel = state.hintLevel,
                     studentMessage = content,
@@ -256,7 +263,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        hintLevel = if (state.selectedMode == AppMode.TUTOR) {
+                        hintLevel = if (state.selectedMode.learningBehavior(state.selectedFreeModel) == AppMode.TUTOR) {
                             response.hintLevel
                         } else {
                             HintLevel.GENTLE_NUDGE

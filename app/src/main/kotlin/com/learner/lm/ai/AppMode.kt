@@ -22,5 +22,10 @@ enum class AppMode(
         label = "Code Help",
         shortLabel = "Code",
         description = "Debug and explain code in small, teachable pieces"
+    ),
+    FREE(
+        label = "Free Models",
+        shortLabel = "Free",
+        description = "OpenRouter free models for tutor, study, and code help"
     )
 }

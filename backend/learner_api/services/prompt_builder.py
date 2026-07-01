@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from learner_api.schemas import AppMode, BuiltinSubject, HintLevel, SubjectCategory
+from learner_api.schemas import AppMode, BuiltinSubject, FreeModelVariant, HintLevel, SubjectCategory
 from learner_api.services.model_registry import is_premium_tier, is_pro_tier
 
 
@@ -16,6 +16,20 @@ class TutorContext:
     student_message: str
     conversation_history: list[tuple[str, str]]
     scanned_text: str | None = None
+    free_model_variant: FreeModelVariant | None = None
+
+
+def effective_learning_mode(
+    mode: AppMode,
+    free_model_variant: FreeModelVariant | None = None,
+) -> AppMode:
+    if mode != AppMode.FREE:
+        return mode
+    if free_model_variant == FreeModelVariant.STUDY:
+        return AppMode.STUDY
+    if free_model_variant == FreeModelVariant.CODE:
+        return AppMode.CODE
+    return AppMode.TUTOR
 
 
 BUILTIN_LABELS = {
@@ -40,11 +54,12 @@ CATEGORY_LABELS = {
 class PromptBuilder:
     def build_system_prompt(self, context: TutorContext) -> str:
         premium = is_premium_tier(context.subscription_tier)
-        if context.app_mode == AppMode.TUTOR:
-            return self._build_tutor_system_prompt(context, premium)
-        if context.app_mode == AppMode.STUDY:
-            return self._build_study_system_prompt(context, premium)
-        return self._build_code_system_prompt(context, premium)
+        learning_mode = effective_learning_mode(context.app_mode, context.free_model_variant)
+        if learning_mode == AppMode.TUTOR:
+            return self._build_tutor_system_prompt(context, premium, free_mode=context.app_mode == AppMode.FREE)
+        if learning_mode == AppMode.STUDY:
+            return self._build_study_system_prompt(context, premium, free_mode=context.app_mode == AppMode.FREE)
+        return self._build_code_system_prompt(context, premium, free_mode=context.app_mode == AppMode.FREE)
 
     def build_user_prompt(self, context: TutorContext) -> str:
         history_limit = 16 if is_pro_tier(context.subscription_tier) else (
@@ -58,11 +73,18 @@ class PromptBuilder:
         if context.subject_category:
             subject_line += f" ({context.subject_category})"
         tier_note = when_tier_note(context.subscription_tier)
+        learning_mode = effective_learning_mode(context.app_mode, context.free_model_variant)
+        free_note = (
+            "Mode: Free Models (OpenRouter free tier — concise but helpful).\n"
+            if context.app_mode == AppMode.FREE
+            else ""
+        )
 
-        if context.app_mode == AppMode.TUTOR:
+        if learning_mode == AppMode.TUTOR:
             return (
                 f"Grade level: {context.grade_level}\n"
                 f"{subject_line}\n"
+                f"{free_note}"
                 f"Mode: Tutor (Socratic, step-by-step)\n"
                 f"Hint level: {context.hint_level.value}\n"
                 f"{tier_note}{scanned}\n\n"
@@ -70,10 +92,11 @@ class PromptBuilder:
                 f"Student message: {context.student_message}\n\n"
                 "Guide the student step-by-step. Ask a question back. Do not give the final answer."
             )
-        if context.app_mode == AppMode.STUDY:
+        if learning_mode == AppMode.STUDY:
             return (
                 f"Grade level: {context.grade_level}\n"
                 f"{subject_line}\n"
+                f"{free_note}"
                 f"Mode: Study pack generator\n"
                 f"{tier_note}{scanned}\n\n"
                 f"Topic / request: {context.student_message}\n\n"
@@ -83,6 +106,7 @@ class PromptBuilder:
         return (
             f"Grade level: {context.grade_level}\n"
             f"{subject_line}\n"
+            f"{free_note}"
             f"Mode: Code help (debug & teach only)\n"
             f"{tier_note}{scanned}\n\n"
             f"Recent conversation:\n{history}\n\n"
@@ -90,10 +114,15 @@ class PromptBuilder:
             f"Explain and debug in small teachable pieces. Max ~{code_lines} lines of suggested code."
         )
 
-    def _build_tutor_system_prompt(self, context: TutorContext, premium: bool) -> str:
+    def _build_tutor_system_prompt(self, context: TutorContext, premium: bool, free_mode: bool = False) -> str:
         examples = tutor_example_count(context.subscription_tier)
+        model_note = (
+            "You are Learner LM Free Tutor — powered by gpt-oss-120b (free) for grades 6–12.\n\n"
+            if free_mode
+            else "You are Learner LM Tutor Mode — powered by gpt-oss-120b for grades 6–12.\n\n"
+        )
         return (
-            "You are Learner LM Tutor Mode — powered by gpt-oss-120b for grades 6–12.\n\n"
+            f"{model_note}"
             "ROLE: Primary Socratic tutor. Guide learning step-by-step. Never be a homework solver.\n\n"
             "NON-NEGOTIABLE RULES:\n"
             "- NEVER give final answers without prior guided steps\n"
@@ -112,7 +141,7 @@ class PromptBuilder:
             "Celebrate reasoning, not just results. When you spot an error, guide discovery — don't correct outright."
         )
 
-    def _build_study_system_prompt(self, context: TutorContext, premium: bool) -> str:
+    def _build_study_system_prompt(self, context: TutorContext, premium: bool, free_mode: bool = False) -> str:
         pro = is_pro_tier(context.subscription_tier)
         if pro:
             sections = (
@@ -132,8 +161,13 @@ class PromptBuilder:
                 "REQUIRED OUTPUT SECTIONS (use these exact headings):\n"
                 "## Summary\n## Key Concepts\n## Flashcards\n(Format each as Q: ... / A: ... — include at least 3 cards)"
             )
+        model_note = (
+            "You are Learner LM Free Study Mode — powered by NVIDIA Nemotron 3 Super (free).\n"
+            if free_mode
+            else "You are Learner LM Study Mode — powered by NVIDIA Nemotron 3 Super.\n"
+        )
         return (
-            "You are Learner LM Study Mode — powered by NVIDIA Nemotron 3 Super.\n"
+            f"{model_note}"
             f"Behave like a NotebookLM-style study generator for grade {context.grade_level} students.\n\n"
             "ROLE: Convert topics into structured, study-ready materials.\n\n"
             "RULES:\n"
@@ -145,7 +179,7 @@ class PromptBuilder:
             f"{sections}"
         )
 
-    def _build_code_system_prompt(self, context: TutorContext, premium: bool) -> str:
+    def _build_code_system_prompt(self, context: TutorContext, premium: bool, free_mode: bool = False) -> str:
         line_limit = code_line_limit(context.subscription_tier)
         depth = (
             "Give exhaustive line-by-line explanations, multiple debugging strategies, and edge-case notes."
@@ -156,8 +190,13 @@ class PromptBuilder:
                 else "Give concise explanations focused on the immediate bug or concept."
             )
         )
+        model_note = (
+            "You are Learner LM Free Code Help — powered by Poolside Laguna M.1 (free).\n"
+            if free_mode
+            else "You are Learner LM Code Help Mode — powered by Poolside Laguna M.1.\n"
+        )
         return (
-            "You are Learner LM Code Help Mode — powered by Poolside Laguna M.1.\n"
+            f"{model_note}"
             f"Programming tutor for grade {context.grade_level} students learning to code.\n\n"
             "ROLE: Debug and explain code step-by-step. Teach programming — do not build projects for students.\n\n"
             "NON-NEGOTIABLE RULES:\n"

@@ -11,7 +11,11 @@ class TutorEngine(
     suspend fun respond(context: TutorContext): TutorResponse {
         val subject = resolveSubject(context)
         val enriched = context.copy(subject = subject)
-        val route = ModelRegistry.resolve(enriched.appMode, enriched.subscriptionTier)
+        val route = ModelRegistry.resolve(
+            enriched.appMode,
+            enriched.subscriptionTier,
+            enriched.freeModelVariant
+        )
 
         val systemPrompt = promptBuilder.buildSystemPrompt(enriched)
         val userPrompt = promptBuilder.buildUserPrompt(enriched)
@@ -22,8 +26,9 @@ class TutorEngine(
             route = route
         )
 
-        val sanitized = sanitizeResponse(message, enriched.appMode)
-        val nextHintLevel = when (enriched.appMode) {
+        val behaviorMode = enriched.appMode.learningBehavior(enriched.freeModelVariant)
+        val sanitized = sanitizeResponse(message, behaviorMode)
+        val nextHintLevel = when (behaviorMode) {
             AppMode.TUTOR -> determineNextHintLevel(enriched, sanitized)
             else -> enriched.hintLevel
         }
@@ -41,7 +46,9 @@ class TutorEngine(
         if (context.subject is StudySubject.Custom) return context.subject
         val builtin = context.subject as? StudySubject.Builtin ?: return StudySubject.Builtin(Subject.GENERAL)
         if (builtin.subject != Subject.GENERAL) return builtin
-        if (context.appMode == AppMode.CODE) return StudySubject.Builtin(Subject.GENERAL)
+        if (context.appMode.learningBehavior(context.freeModelVariant) == AppMode.CODE) {
+            return StudySubject.Builtin(Subject.GENERAL)
+        }
         val classified = subjectClassifier.classify(
             listOfNotNull(context.studentMessage, context.scannedText).joinToString(" ")
         )
@@ -70,14 +77,14 @@ class TutorEngine(
     }
 
     private fun detectMistakeSeeking(context: TutorContext): String? {
-        return when (context.appMode) {
+        return when (context.appMode.learningBehavior(context.freeModelVariant)) {
             AppMode.TUTOR -> if (isAnswerSeeking(context.studentMessage)) {
                 "It looks like you're asking for a direct answer. Let's work through this step by step instead."
             } else null
             AppMode.CODE -> if (isAnswerSeeking(context.studentMessage)) {
                 "I can't build full apps or projects — let's focus on one function or bug at a time."
             } else null
-            AppMode.STUDY -> null
+            AppMode.STUDY, AppMode.FREE -> null
         }
     }
 

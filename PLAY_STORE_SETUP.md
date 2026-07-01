@@ -21,6 +21,15 @@ Create these subscription products in [Google Play Console](https://play.google.
 | Tutor | `openai/gpt-oss-120b` | Socratic tutoring grades 6–12 |
 | Study | `nvidia/nemotron-3-super-120b-a12b` | Summaries, flashcards, quizzes |
 | Code Help | `poolside/laguna-m.1` | Debug & explain code (small pieces only) |
+| **Free** | *(pick one below)* | OpenRouter **:free** models — no extra cost |
+
+### Free mode models (`:free` on OpenRouter)
+
+| Variant | OpenRouter model | Purpose |
+|---------|------------------|---------|
+| Free Tutor | `openai/gpt-oss-120b:free` | Socratic tutoring |
+| Free Study | `nvidia/nemotron-3-super-120b-a12b:free` | Study packs |
+| Free Code | `poolside/laguna-m.1:free` | Code help |
 
 **Free users:** standard depth, limited study pack sections, basic code help.  
 **Pro & Premium users:** deeper explanations, full study packs with quizzes, richer code debugging.
