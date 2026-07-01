@@ -16,7 +16,20 @@ The backend is **not on `main`**. Use a branch that includes the `backend/` fold
 | **`cursor/learner-lm-android-scaffold-6bf2`** | Yes (latest) |
 | `main` | **No** — Android app only |
 
-If Northflank says **“No Dockerfile found”**, you are usually on **`main`** or the Dockerfile path is wrong.
+If Northflank says **“No Dockerfile found”** or **“Could not find working directory”**, you are usually on **`main`**, or the paths are wrong (Northflank needs **leading slashes** — see below).
+
+---
+
+## Northflank path format (read this)
+
+Northflank paths **must start with `/`**. Do **not** use `.` or `backend` alone.
+
+| Wrong | Correct |
+|-------|---------|
+| `.` | `/` |
+| `Dockerfile` | `/Dockerfile` |
+| `backend` | `/backend` |
+| `backend/Dockerfile` | `/backend/Dockerfile` |
 
 ---
 
@@ -38,25 +51,23 @@ If Northflank says **“No Dockerfile found”**, you are usually on **`main`** 
 4. **Repository:** `VEXZIONFILE/LearnerLLM`
 5. **Branch:** **`LearnerLM`** (not `main`)
 
-### Build settings — Option A (easiest)
+### Build settings — copy exactly
 
-Use the **root** `Dockerfile` at the repo root:
-
-| Field | Value |
-|-------|--------|
-| **Build type** | Dockerfile |
-| **Dockerfile path** | `Dockerfile` |
-| **Build context** | `.` (repository root) |
-
-### Build settings — Option B (backend folder)
+**Option A — root Dockerfile (recommended)**
 
 | Field | Value |
 |-------|--------|
 | **Build type** | Dockerfile |
-| **Dockerfile path** | `backend/Dockerfile` |
-| **Build context** | `backend` |
+| **Dockerfile path** | `/Dockerfile` |
+| **Build context / working directory** | `/` |
 
-Do **not** use a leading slash unless Northflank requires it — try `Dockerfile` or `backend/Dockerfile` first.
+**Option B — backend folder only**
+
+| Field | Value |
+|-------|--------|
+| **Build type** | Dockerfile |
+| **Dockerfile path** | `/backend/Dockerfile` |
+| **Build context / working directory** | `/backend` |
 
 Northflank should detect **port 8080** from the Dockerfile.
 
@@ -195,7 +206,8 @@ Push to GitHub → Northflank builds and redeploys automatically.
 
 | Problem | Fix |
 |---------|-----|
-| **No Dockerfile found** | Branch must be **`LearnerLM`** (not `main`). Use Dockerfile path `Dockerfile` + context `.` **or** `backend/Dockerfile` + context `backend` |
+| **Could not find working directory** | Build context must be **`/`** (root) or **`/backend`** — not `.` or `backend` |
+| **No Dockerfile found** | Branch = **`LearnerLM`**. Dockerfile path = **`/Dockerfile`** with context **`/`** |
 | Build failed | Check **Logs**; confirm branch has `backend/` folder |
 | `/health` fails | Check logs; confirm port **8080** |
 | `401` on API | Set `FIREBASE_CREDENTIALS_JSON` + `FIREBASE_PROJECT_ID` |
