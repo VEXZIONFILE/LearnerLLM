@@ -1,17 +1,15 @@
 package com.learner.lm.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -19,7 +17,6 @@ import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,9 +24,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -40,12 +34,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.learner.lm.auth.UserProfile
 import com.learner.lm.billing.SubscriptionTier
 import com.learner.lm.ui.navigation.AppDestination
-import com.learner.lm.ui.theme.AppColors
 import com.learner.lm.ui.theme.AppRadii
 import com.learner.lm.ui.theme.AppSpacing
 import com.learner.lm.utils.AccountDisplay
@@ -60,12 +52,10 @@ fun NotebookScaffold(
     onBack: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    val isChat = currentDestination == AppDestination.Chat && !showBack
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            if (!isChat) {
             Surface(color = MaterialTheme.colorScheme.background) {
                 Column {
                     TopAppBar(
@@ -76,13 +66,10 @@ fun NotebookScaffold(
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.SemiBold
                                 )
-                                else -> Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = currentDestination.title,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
-                                }
+                                else -> BrandMark(
+                                    iconSize = 28.dp,
+                                    showWordmark = true
+                                )
                             }
                         },
                         navigationIcon = {
@@ -115,26 +102,15 @@ fun NotebookScaffold(
                             scrolledContainerColor = MaterialTheme.colorScheme.background
                         )
                     )
-                    if (!isChat) {
-                        HorizontalDivider(
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f),
-                            thickness = 0.5.dp
+                    if (!showBack && currentDestination.showsBottomNav) {
+                        LearnerTopNav(
+                            currentDestination = currentDestination,
+                            onNavigate = onNavigate
                         )
                     }
-                }
-            }
-            }
-        },
-        bottomBar = {
-            if (currentDestination.showsBottomNav) {
-                Column {
                     HorizontalDivider(
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f),
                         thickness = 0.5.dp
-                    )
-                    LearnerBottomNav(
-                        currentDestination = currentDestination,
-                        onNavigate = onNavigate
                     )
                 }
             }
@@ -152,42 +128,66 @@ fun NotebookScaffold(
 }
 
 @Composable
-private fun LearnerBottomNav(
+private fun LearnerTopNav(
     currentDestination: AppDestination,
     onNavigate: (AppDestination) -> Unit
 ) {
-    NavigationBar(
-        containerColor = MaterialTheme.colorScheme.background,
-        tonalElevation = 0.dp,
-        modifier = Modifier.height(56.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = AppSpacing.md, vertical = 6.dp),
+        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp)
     ) {
         AppDestination.bottomNavDestinations.forEach { destination ->
             val selected = currentDestination == destination
-            NavigationBarItem(
-                selected = selected,
+            Surface(
                 onClick = { onNavigate(destination) },
-                icon = {
+                modifier = Modifier
+                    .weight(1f)
+                    .height(40.dp),
+                shape = RoundedCornerShape(AppRadii.md),
+                color = if (selected) {
+                    MaterialTheme.colorScheme.surfaceVariant
+                } else {
+                    MaterialTheme.colorScheme.background
+                },
+                border = BorderStroke(
+                    1.dp,
+                    if (selected) {
+                        MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)
+                    } else {
+                        MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                    }
+                )
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+                ) {
                     Icon(
                         destination.icon(),
                         contentDescription = destination.shortLabel,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(18.dp),
+                        tint = if (selected) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
                     )
-                },
-                label = {
                     Text(
-                        destination.shortLabel,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
+                        text = destination.shortLabel,
+                        modifier = Modifier.padding(start = 6.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                        color = if (selected) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
                     )
-                },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.onSurface,
-                    selectedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    indicatorColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            )
+                }
+            }
         }
     }
 }
