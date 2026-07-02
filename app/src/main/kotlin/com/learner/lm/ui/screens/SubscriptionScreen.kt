@@ -200,14 +200,6 @@ fun SubscriptionScreen(
                         )
                     }
 
-                    if (plan.productId == SubscriptionProducts.MEGA_YEARLY) {
-                        Text(
-                            text = "$9.99/mo × 10 months = $99.99/yr — 2 months free",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-
                     plan.features.forEach { feature ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
@@ -243,8 +235,8 @@ fun SubscriptionScreen(
                             Text(
                                 when (plan.productId) {
                                     SubscriptionProducts.PRO_MONTHLY -> "Subscribe — $9.99/mo"
-                                    SubscriptionProducts.PREMIUM_MONTHLY -> "Subscribe — $14.99/mo"
-                                    SubscriptionProducts.MEGA_YEARLY -> "Subscribe — $190.00/yr"
+                                    SubscriptionProducts.PREMIUM_MONTHLY -> "Subscribe — $19.99/mo"
+                                    SubscriptionProducts.MEGA_YEARLY -> "Subscribe — $99.99/yr"
                                     else -> "Subscribe"
                                 },
                                 fontWeight = FontWeight.SemiBold

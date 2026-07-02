@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class ScannerUiState(
+    val isCameraActive: Boolean = false,
     val hasCameraPermission: Boolean = false,
     val isProcessing: Boolean = false,
     val isQuotaLoading: Boolean = false,
@@ -46,6 +47,15 @@ class ScannerViewModel(application: Application) : AndroidViewModel(application)
 
     fun setCameraPermission(granted: Boolean) {
         _uiState.update { it.copy(hasCameraPermission = granted) }
+    }
+
+    fun openCamera() {
+        _uiState.update { it.copy(isCameraActive = true, error = null) }
+    }
+
+    fun closeCamera() {
+        imageCapture = null
+        _uiState.update { it.copy(isCameraActive = false) }
     }
 
     fun bindImageCapture(capture: ImageCapture) {

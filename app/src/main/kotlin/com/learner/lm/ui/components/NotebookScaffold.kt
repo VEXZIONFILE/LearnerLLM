@@ -1,6 +1,7 @@
 package com.learner.lm.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.learner.lm.auth.UserProfile
 import com.learner.lm.billing.SubscriptionTier
@@ -58,35 +60,28 @@ fun NotebookScaffold(
     onBack: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
+    val isChat = currentDestination == AppDestination.Chat && !showBack
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Surface(
-                color = MaterialTheme.colorScheme.surface,
-                shadowElevation = 0.dp
-            ) {
+            if (!isChat) {
+            Surface(color = MaterialTheme.colorScheme.background) {
                 Column {
                     TopAppBar(
                         title = {
-                            if (showBack) {
-                                Text(
+                            when {
+                                showBack -> Text(
                                     text = currentDestination.title,
-                                    style = MaterialTheme.typography.titleLarge,
+                                    style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.SemiBold
                                 )
-                            } else {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    BrandMark(iconSize = 28.dp, showWordmark = true)
-                                    if (currentDestination != AppDestination.Chat) {
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text(
-                                            text = "· ${currentDestination.title}",
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            fontWeight = FontWeight.Medium
-                                        )
-                                    }
+                                else -> Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = currentDestination.title,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
                                 }
                             }
                         },
@@ -98,59 +93,49 @@ fun NotebookScaffold(
                             }
                         },
                         actions = {
-                            if (userProfile != null && isPremiumTier(userProfile.subscriptionTier)) {
-                                Surface(
-                                    shape = RoundedCornerShape(AppRadii.pill),
-                                    color = AppColors.ProGold.copy(alpha = 0.12f),
-                                    border = BorderStroke(1.dp, AppColors.ProGold.copy(alpha = 0.35f)),
-                                    modifier = Modifier.padding(end = 8.dp)
-                                ) {
-                                    Text(
-                                        text = AccountDisplay.planLabel(userProfile.subscriptionTier),
-                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = AppColors.ProGold,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
+                            if (!showBack && userProfile != null && isPremiumTier(userProfile.subscriptionTier)) {
+                                Text(
+                                    text = AccountDisplay.planLabel(userProfile.subscriptionTier),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(end = AppSpacing.md)
+                                )
                             }
                             if (currentDestination == AppDestination.Profile && userProfile != null) {
                                 ProfileAvatar(
                                     name = userProfile.displayName,
                                     photoUrl = userProfile.photoUrl,
-                                    size = 34.dp,
+                                    size = 32.dp,
                                     modifier = Modifier.padding(end = AppSpacing.md)
                                 )
                             }
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            scrolledContainerColor = MaterialTheme.colorScheme.surface
+                            containerColor = MaterialTheme.colorScheme.background,
+                            scrolledContainerColor = MaterialTheme.colorScheme.background
                         )
                     )
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
-                        thickness = 0.5.dp
-                    )
+                    if (!isChat) {
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f),
+                            thickness = 0.5.dp
+                        )
+                    }
                 }
+            }
             }
         },
         bottomBar = {
             if (currentDestination.showsBottomNav) {
-                Surface(
-                    color = MaterialTheme.colorScheme.surface,
-                    shadowElevation = 0.dp
-                ) {
-                    Column {
-                        HorizontalDivider(
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
-                            thickness = 0.5.dp
-                        )
-                        LearnerBottomNav(
-                            currentDestination = currentDestination,
-                            onNavigate = onNavigate
-                        )
-                    }
+                Column {
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                        thickness = 0.5.dp
+                    )
+                    LearnerBottomNav(
+                        currentDestination = currentDestination,
+                        onNavigate = onNavigate
+                    )
                 }
             }
         }
@@ -172,9 +157,9 @@ private fun LearnerBottomNav(
     onNavigate: (AppDestination) -> Unit
 ) {
     NavigationBar(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = MaterialTheme.colorScheme.background,
         tonalElevation = 0.dp,
-        modifier = Modifier.height(64.dp)
+        modifier = Modifier.height(56.dp)
     ) {
         AppDestination.bottomNavDestinations.forEach { destination ->
             val selected = currentDestination == destination
@@ -192,15 +177,15 @@ private fun LearnerBottomNav(
                     Text(
                         destination.shortLabel,
                         style = MaterialTheme.typography.labelSmall,
-                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.primary,
-                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                    selectedIconColor = MaterialTheme.colorScheme.onSurface,
+                    selectedTextColor = MaterialTheme.colorScheme.onSurface,
                     unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    indicatorColor = AppColors.AccentLight.copy(alpha = 0.65f)
+                    indicatorColor = MaterialTheme.colorScheme.surfaceVariant
                 )
             )
         }
@@ -228,12 +213,10 @@ fun NotebookCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(AppRadii.lg),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = if (elevated) 1.dp else 0.dp
-        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         border = BorderStroke(
             1.dp,
-            MaterialTheme.colorScheme.outline.copy(alpha = if (elevated) 0.25f else 0.5f)
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.22f)
         )
     ) {
         Box(modifier = Modifier.padding(AppSpacing.lg)) {
@@ -251,23 +234,18 @@ fun NotebookBadge(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(AppRadii.pill),
-        color = if (highlighted) {
-            AppColors.ProGold.copy(alpha = 0.12f)
-        } else {
-            MaterialTheme.colorScheme.surfaceVariant
-        },
+        color = MaterialTheme.colorScheme.surfaceVariant,
         border = BorderStroke(
             1.dp,
-            if (highlighted) AppColors.ProGold.copy(alpha = 0.35f)
-            else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
         )
     ) {
         Text(
             text = text,
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
             style = MaterialTheme.typography.labelMedium,
-            color = if (highlighted) AppColors.ProGold else MaterialTheme.colorScheme.onSurfaceVariant,
-            fontWeight = FontWeight.SemiBold
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = FontWeight.Medium
         )
     }
 }
@@ -281,9 +259,7 @@ fun NotebookPanel(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(AppRadii.lg),
         color = MaterialTheme.colorScheme.surface,
-        shadowElevation = 0.dp,
-        tonalElevation = 0.dp,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.22f))
     ) {
         content()
     }

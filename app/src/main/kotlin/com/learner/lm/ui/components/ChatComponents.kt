@@ -6,7 +6,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -43,34 +44,40 @@ fun ChatBubble(
     onReport: (() -> Unit)? = null,
     onCopy: (() -> Unit)? = null
 ) {
+    val dark = isSystemInDarkTheme()
     if (isStudent) {
         Row(
-            modifier = modifier.fillMaxWidth(),
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
             horizontalArrangement = Arrangement.End
         ) {
             Surface(
-                modifier = Modifier.fillMaxWidth(0.82f),
+                modifier = Modifier.widthIn(max = 320.dp),
                 shape = RoundedCornerShape(
                     topStart = AppRadii.lg,
                     topEnd = AppRadii.lg,
                     bottomStart = AppRadii.lg,
                     bottomEnd = AppRadii.sm
                 ),
-                color = MaterialTheme.colorScheme.primary,
+                color = if (dark) AppColors.DarkUserBubble else AppColors.UserBubble,
                 shadowElevation = 0.dp
             ) {
                 Text(
                     text = message,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimary
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
     } else {
+        val stripeColor = if (dark) AppColors.DarkMessageStripe else AppColors.MessageStripe
         Row(
-            modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start
+            modifier = modifier
+                .fillMaxWidth()
+                .background(stripeColor)
+                .padding(horizontal = AppSpacing.md, vertical = 16.dp)
         ) {
             LearnerLogo(
                 showWordmark = false,
@@ -85,12 +92,29 @@ fun ChatBubble(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "LearnerLM",
+                        text = "L",
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.SemiBold
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold
                     )
-                    Row {
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .padding(start = 14.dp)
+                    .weight(1f)
+            ) {
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    lineHeight = MaterialTheme.typography.bodyLarge.lineHeight
+                )
+                if (onCopy != null || onReport != null) {
+                    Row(
+                        modifier = Modifier.padding(top = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
                         if (onCopy != null) {
                             IconButton(
                                 onClick = onCopy,
@@ -98,9 +122,9 @@ fun ChatBubble(
                             ) {
                                 Icon(
                                     Icons.Outlined.ContentCopy,
-                                    contentDescription = "Copy message",
+                                    contentDescription = "Copy",
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(16.dp)
                                 )
                             }
                         }
@@ -111,20 +135,14 @@ fun ChatBubble(
                             ) {
                                 Icon(
                                     Icons.Outlined.Flag,
-                                    contentDescription = "Report AI content",
+                                    contentDescription = "Report",
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(16.dp)
                                 )
                             }
                         }
                     }
                 }
-                Text(
-                    text = message,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    lineHeight = MaterialTheme.typography.bodyMedium.lineHeight
-                )
             }
         }
     }
@@ -132,9 +150,13 @@ fun ChatBubble(
 
 @Composable
 fun TypingIndicator(modifier: Modifier = Modifier) {
+    val dark = isSystemInDarkTheme()
+    val stripeColor = if (dark) AppColors.DarkMessageStripe else AppColors.MessageStripe
     Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Start,
+        modifier = modifier
+            .fillMaxWidth()
+            .background(stripeColor)
+            .padding(horizontal = AppSpacing.md, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         LearnerLogo(
@@ -146,10 +168,7 @@ fun TypingIndicator(modifier: Modifier = Modifier) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .clip(RoundedCornerShape(AppRadii.pill))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .padding(horizontal = 14.dp, vertical = 10.dp)
+            modifier = Modifier.padding(start = 14.dp)
         ) {
             repeat(3) { index ->
                 TypingDot(delayMillis = index * 150)
@@ -162,7 +181,7 @@ fun TypingIndicator(modifier: Modifier = Modifier) {
 private fun TypingDot(delayMillis: Int) {
     val transition = rememberInfiniteTransition(label = "typing")
     val alpha by transition.animateFloat(
-        initialValue = 0.3f,
+        initialValue = 0.25f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
             animation = tween(600, delayMillis = delayMillis),
@@ -172,7 +191,7 @@ private fun TypingDot(delayMillis: Int) {
     )
     Box(
         modifier = Modifier
-            .size(7.dp)
+            .size(8.dp)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha))
     )
@@ -183,14 +202,13 @@ fun HintLevelIndicator(level: Int, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(AppRadii.pill),
-        color = AppColors.AccentLight.copy(alpha = 0.65f)
+        color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Text(
-            text = "Hint level $level",
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.SemiBold
+            text = "Hint $level",
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

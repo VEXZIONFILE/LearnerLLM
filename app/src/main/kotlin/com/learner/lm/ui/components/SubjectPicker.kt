@@ -43,15 +43,8 @@ fun SubjectPicker(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = AppSpacing.md)
+            .padding(horizontal = AppSpacing.md, vertical = 4.dp)
     ) {
-        Text(
-            text = "Subject",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(bottom = AppSpacing.sm, start = 2.dp)
-        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -100,16 +93,16 @@ private fun SubjectChip(
         onClick = onClick,
         shape = RoundedCornerShape(AppRadii.pill),
         color = if (selected) {
-            MaterialTheme.colorScheme.primaryContainer
+            MaterialTheme.colorScheme.surfaceVariant
         } else {
             MaterialTheme.colorScheme.surface
         },
         border = BorderStroke(
             1.dp,
             if (selected) {
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+                MaterialTheme.colorScheme.outline.copy(alpha = 0.8f)
             } else {
-                MaterialTheme.colorScheme.outline.copy(alpha = 0.55f)
+                MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)
             }
         )
     ) {
@@ -121,12 +114,8 @@ private fun SubjectChip(
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium,
-                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-                color = if (selected) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                }
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }
