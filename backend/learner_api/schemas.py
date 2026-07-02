@@ -132,6 +132,16 @@ class ScanQuotaResponse(BaseModel):
     quota_label: str
 
 
+class MessageQuotaResponse(BaseModel):
+    used_today: int
+    daily_limit: int | None
+    remaining: int | None
+    is_premium: bool
+    can_send: bool
+    quota_label: str
+    max_message_length: int
+
+
 class RecordScanRequest(BaseModel):
     extracted_text_length: int | None = Field(default=None, ge=0)
 

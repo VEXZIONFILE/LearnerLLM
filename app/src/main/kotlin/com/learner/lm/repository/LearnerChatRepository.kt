@@ -1,11 +1,13 @@
 package com.learner.lm.repository
 
+import com.learner.lm.billing.MessageQuotaExceededException
 import com.learner.lm.ai.AiReportReason
 import com.learner.lm.ai.AppMode
 import com.learner.lm.ai.HintLevel
 import com.learner.lm.ai.StudySubject
 import com.learner.lm.ai.TutorContext
 import com.learner.lm.ai.TutorResponse
+import retrofit2.HttpException
 
 class LearnerChatRepository(
     private val apiService: LearnerApiService = LearnerApiClient.createService()
@@ -29,23 +31,27 @@ class LearnerChatRepository(
             ChatMessageInputDto(role = role, content = content)
         }
 
-        val response = apiService.sendChatMessage(
-            ChatRequestDto(
-                session_id = sessionId,
-                grade_level = context.gradeLevel,
-                app_mode = context.appMode.name,
-                free_model_variant = if (context.appMode == AppMode.FREE) {
-                    context.freeModelVariant.name
-                } else {
-                    null
-                },
-                hint_level = context.hintLevel.level,
-                subject = subjectInput,
-                student_message = context.studentMessage,
-                conversation_history = history,
-                scanned_text = context.scannedText
+        val response = try {
+            apiService.sendChatMessage(
+                ChatRequestDto(
+                    session_id = sessionId,
+                    grade_level = context.gradeLevel,
+                    app_mode = context.appMode.name,
+                    free_model_variant = if (context.appMode == AppMode.FREE) {
+                        context.freeModelVariant.name
+                    } else {
+                        null
+                    },
+                    hint_level = context.hintLevel.level,
+                    subject = subjectInput,
+                    student_message = context.studentMessage,
+                    conversation_history = history,
+                    scanned_text = context.scannedText
+                )
             )
-        )
+        } catch (error: HttpException) {
+            throw mapChatHttpError(error)
+        }
 
         return TutorResponse(
             message = response.message,
@@ -76,6 +82,16 @@ class LearnerChatRepository(
                 details = details,
                 app_mode = appMode.name
             )
+        )
+    }
+
+    private fun mapChatHttpError(error: HttpException): Exception = when (error.code()) {
+        429 -> MessageQuotaExceededException()
+        400 -> IllegalArgumentException(
+            error.message() ?: "Message could not be sent."
+        )
+        else -> IllegalStateException(
+            error.message() ?: "Could not send message. Check your connection and try again."
         )
     }
 }

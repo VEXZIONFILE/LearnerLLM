@@ -12,8 +12,10 @@ from learner_api.schemas import (
     ChatRequest,
     ChatResponse,
     ChatSessionResponse,
+    MessageQuotaResponse,
 )
 from learner_api.services.billing import BillingService
+from learner_api.services.message_quota import MessageQuotaService
 from learner_api.services.openrouter import OpenRouterClient
 from learner_api.services.progress import record_study_activity, resolve_subject_fields, update_streak
 from learner_api.services.prompt_builder import TutorContext
@@ -28,6 +30,15 @@ def _get_engine() -> TutorEngine:
     return TutorEngine(openrouter=OpenRouterClient(settings))
 
 
+@router.get("/quota", response_model=MessageQuotaResponse)
+async def get_message_quota(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> MessageQuotaResponse:
+    service = MessageQuotaService(get_settings())
+    return await service.get_status(db, user)
+
+
 @router.post("/messages", response_model=ChatResponse)
 async def send_message(
     body: ChatRequest,
@@ -37,6 +48,8 @@ async def send_message(
     settings = get_settings()
     billing = BillingService(settings)
     tier = await billing.refresh_user_tier(db, user)
+    message_quota = MessageQuotaService(settings)
+    await message_quota.ensure_can_send(db, user, tier, body.student_message)
 
     session_id = body.session_id or str(uuid.uuid4())
     result = await db.execute(select(ChatSession).where(ChatSession.id == session_id, ChatSession.user_uid == user.uid))
@@ -58,6 +71,7 @@ async def send_message(
     )
     db.add(student_message)
     await db.commit()
+    await message_quota.record_message(db, user)
 
     engine = _get_engine()
     context = TutorContext(

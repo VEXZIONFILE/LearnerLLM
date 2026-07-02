@@ -13,6 +13,7 @@ FastAPI reference implementation for [LearnerLM](https://github.com/VEXZIONFILE/
 | `POST /v1/chat/messages` | Socratic tutor, study packs, and code help |
 | `GET /v1/scans/quota` | Daily homework scan quota |
 | `POST /v1/scans` | Record a successful scan |
+| `GET /v1/chat/quota` | Daily chat message quota |
 | `POST /v1/billing/verify` | Verify Google Play purchase |
 | `GET/POST/DELETE /v1/subjects` | Custom subjects CRUD |
 | `GET /v1/progress` | Study topics + learning streak |
@@ -82,4 +83,4 @@ FIREBASE_AUTH_DISABLED=true pytest -q
 
 - All `/v1/*` routes require a valid Firebase ID token (except dev mode).
 - OpenRouter API key stays on the server.
-- Subscription tier is enforced server-side for AI depth and scan limits.
+- Subscription tier is enforced server-side for AI depth, scan limits, and message limits.

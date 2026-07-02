@@ -65,6 +65,16 @@ data class ScanQuotaResponseDto(
     val quota_label: String
 )
 
+data class MessageQuotaResponseDto(
+    val used_today: Int,
+    val daily_limit: Int? = null,
+    val remaining: Int? = null,
+    val is_premium: Boolean,
+    val can_send: Boolean,
+    val quota_label: String,
+    val max_message_length: Int
+)
+
 data class BillingVerifyRequestDto(
     val product_id: String,
     val purchase_token: String,
@@ -134,6 +144,9 @@ interface LearnerApiService {
 
     @POST("v1/chat/messages")
     suspend fun sendChatMessage(@Body body: ChatRequestDto): ChatResponseDto
+
+    @GET("v1/chat/quota")
+    suspend fun getMessageQuota(): MessageQuotaResponseDto
 
     @GET("v1/scans/quota")
     suspend fun getScanQuota(): ScanQuotaResponseDto

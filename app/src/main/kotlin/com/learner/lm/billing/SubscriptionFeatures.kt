@@ -16,6 +16,17 @@ object SubscriptionFeatures {
             premiumHighlight = true
         ),
         PlanComparisonRow(
+            feature = "Chat messages",
+            standard = "25 per day",
+            premium = "Unlimited",
+            premiumHighlight = true
+        ),
+        PlanComparisonRow(
+            feature = "Message length",
+            standard = "2,000 characters",
+            premium = "8,000 characters"
+        ),
+        PlanComparisonRow(
             feature = "AI models",
             standard = "Tutor, Study & Code",
             premium = "Frontier models + deeper reasoning"

@@ -12,10 +12,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,6 +30,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -49,6 +53,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -65,6 +70,8 @@ import com.learner.lm.ui.components.ChatBubble
 import com.learner.lm.ui.components.FreeModelPicker
 import com.learner.lm.ui.components.HintLevelIndicator
 import com.learner.lm.ui.components.LearnerLogo
+import com.learner.lm.ui.components.NotebookBadge
+import com.learner.lm.ui.components.NotebookCard
 import com.learner.lm.ui.components.PremiumUpgradeBanner
 import com.learner.lm.ui.components.ReportAiContentDialog
 import com.learner.lm.ui.components.SubjectPicker
@@ -92,6 +99,19 @@ fun ChatScreen(
     val isPremium = subscriptionTier == SubscriptionTier.BASIC.name ||
         subscriptionTier == SubscriptionTier.PRO.name
     val behaviorMode = uiState.selectedMode.learningBehavior(uiState.selectedFreeModel)
+    val density = LocalDensity.current
+    val imeBottom = WindowInsets.ime.getBottom(density)
+
+    LaunchedEffect(imeBottom, uiState.messages.size, uiState.isLoading) {
+        if (uiState.messages.isNotEmpty() || uiState.isLoading) {
+            val target = if (uiState.isLoading) {
+                uiState.messages.size
+            } else {
+                uiState.messages.lastIndex
+            }
+            listState.animateScrollToItem(target.coerceAtLeast(0))
+        }
+    }
 
     LaunchedEffect(uiState.reportConfirmation) {
         uiState.reportConfirmation?.let { message ->
@@ -108,27 +128,97 @@ fun ChatScreen(
         viewModel.setSubscriptionTier(subscriptionTier)
     }
 
-    LaunchedEffect(uiState.messages.size, uiState.isLoading) {
-        if (uiState.messages.isNotEmpty() || uiState.isLoading) {
-            val target = if (uiState.isLoading) {
-                uiState.messages.size
-            } else {
-                uiState.messages.lastIndex
-            }
-            listState.animateScrollToItem(target.coerceAtLeast(0))
-        }
-    }
-
     Scaffold(
-        modifier = modifier,
+        modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
+        bottomBar = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .imePadding()
+            ) {
+                uiState.scannedText?.let { scanned ->
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = AppSpacing.md, vertical = AppSpacing.xs),
+                        shape = RoundedCornerShape(AppRadii.md),
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                        )
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text(
+                                text = "Homework attached",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = scanned.take(120) + if (scanned.length > 120) "…" else "",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
+                    }
+                }
+
+                if (!isPremium && !uiState.canSendMessage) {
+                    NotebookCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = AppSpacing.md, vertical = AppSpacing.xs),
+                        elevated = true
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                text = "Daily message limit reached",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                text = "Standard includes 25 chat messages per day. Upgrade for unlimited messaging.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Button(
+                                onClick = onNavigateToUpgrade,
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(AppRadii.md)
+                            ) {
+                                Text("Upgrade for unlimited messages")
+                            }
+                        }
+                    }
+                }
+
+                ChatComposer(
+                    value = input,
+                    onValueChange = { value ->
+                        if (value.length <= uiState.maxMessageLength) {
+                            input = value
+                        }
+                    },
+                    placeholder = inputPlaceholder(behaviorMode),
+                    enabled = !uiState.isLoading && uiState.canSendMessage,
+                    characterCount = if (!isPremium) "${input.length}/${uiState.maxMessageLength}" else null,
+                    onSend = {
+                        viewModel.sendMessage(input)
+                        input = ""
+                    }
+                )
+            }
+        }
     ) { innerPadding ->
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)
-            .imePadding()
     ) {
         ChatHeader(
             activeModelLabel = uiState.activeModelLabel,
@@ -136,6 +226,9 @@ fun ChatScreen(
             behaviorMode = behaviorMode,
             hintLevel = uiState.hintLevel.level,
             sessionLabel = uiState.sessionLabel,
+            messageQuotaLabel = uiState.messageQuotaLabel,
+            isQuotaLoading = uiState.isQuotaLoading,
+            isPremiumMessaging = uiState.isPremiumMessaging,
             hasMessages = uiState.messages.isNotEmpty(),
             onNewChat = viewModel::newChat,
             onClearChat = viewModel::clearChat
@@ -230,47 +323,14 @@ fun ChatScreen(
                 }
             }
         }
-
-        uiState.scannedText?.let { scanned ->
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = AppSpacing.md, vertical = AppSpacing.xs),
-                shape = RoundedCornerShape(AppRadii.md),
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                border = androidx.compose.foundation.BorderStroke(
-                    1.dp,
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                )
-            ) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Text(
-                        text = "Homework attached",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = scanned.take(120) + if (scanned.length > 120) "…" else "",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
-            }
-        }
-
-        ChatComposer(
-            value = input,
-            onValueChange = { input = it },
-            placeholder = inputPlaceholder(behaviorMode),
-            enabled = !uiState.isLoading,
-            onSend = {
-                viewModel.sendMessage(input)
-                input = ""
-            }
-        )
     }
+    }
+
+    uiState.error?.let { error ->
+        LaunchedEffect(error) {
+            snackbarHostState.showSnackbar(error)
+            viewModel.clearError()
+        }
     }
 
     if (uiState.showAddSubjectDialog) {
@@ -305,6 +365,9 @@ private fun ChatHeader(
     behaviorMode: AppMode,
     hintLevel: Int,
     sessionLabel: String,
+    messageQuotaLabel: String,
+    isQuotaLoading: Boolean,
+    isPremiumMessaging: Boolean,
     hasMessages: Boolean,
     onNewChat: () -> Unit,
     onClearChat: () -> Unit
@@ -329,6 +392,21 @@ private fun ChatHeader(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1
             )
+            if (!isPremiumMessaging && messageQuotaLabel.isNotBlank()) {
+                if (isQuotaLoading) {
+                    Text(
+                        text = "Checking message quota…",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else {
+                    NotebookBadge(
+                        text = messageQuotaLabel,
+                        highlighted = false,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+            }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (behaviorMode == AppMode.TUTOR) {
@@ -472,6 +550,7 @@ private fun ChatComposer(
     onValueChange: (String) -> Unit,
     placeholder: String,
     enabled: Boolean,
+    characterCount: String? = null,
     onSend: () -> Unit
 ) {
     val canSend = value.isNotBlank() && enabled
@@ -541,7 +620,8 @@ private fun ChatComposer(
                 }
             }
             Text(
-                text = "LearnerLM can make mistakes. Verify important answers with your teacher.",
+                text = characterCount?.let { "$it · LearnerLM can make mistakes. Verify important answers with your teacher." }
+                    ?: "LearnerLM can make mistakes. Verify important answers with your teacher.",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
