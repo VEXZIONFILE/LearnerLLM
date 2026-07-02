@@ -52,7 +52,7 @@ object SubscriptionCatalog {
             productId = SubscriptionProducts.PREMIUM_MONTHLY,
             tier = SubscriptionTier.PRO,
             title = "Premium",
-            price = "$14.99",
+            price = "$19.99",
             period = "/ month",
             description = "Maximum AI depth for power learners.",
             features = listOf(
@@ -71,14 +71,14 @@ object SubscriptionCatalog {
             title = "Mega",
             price = "$99.99",
             period = "/ year",
-            description = "Best value — pay for 10 months, get 12 (2 months free).",
+            description = "Annual Pro plan for committed learners.",
             features = listOf(
                 "Everything in Pro monthly",
                 "Unlimited homework scans",
-                "2 months free vs paying monthly",
+                "Full year of deeper AI tutoring",
                 "Best value for committed learners"
             ),
-            badge = "2 months free"
+            badge = "Annual"
         )
     )
 }

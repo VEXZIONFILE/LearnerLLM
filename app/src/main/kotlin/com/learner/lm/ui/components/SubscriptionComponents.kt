@@ -1,35 +1,24 @@
 package com.learner.lm.ui.components
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.learner.lm.billing.PlanComparisonRow
 import com.learner.lm.billing.SubscriptionFeatures
-import com.learner.lm.ui.theme.AppColors
 import com.learner.lm.ui.theme.AppRadii
 import com.learner.lm.ui.theme.AppSpacing
 
@@ -42,38 +31,34 @@ fun PremiumUpgradeBanner(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = AppSpacing.md, vertical = AppSpacing.sm),
-        shape = RoundedCornerShape(AppRadii.lg),
-        color = AppColors.AccentLight.copy(alpha = 0.55f),
-        border = BorderStroke(1.dp, AppColors.Accent.copy(alpha = 0.2f))
+            .padding(horizontal = AppSpacing.md, vertical = 4.dp)
+            .clickable(onClick = onUpgrade),
+        shape = RoundedCornerShape(AppRadii.md),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
     ) {
         Row(
-            modifier = Modifier.padding(AppSpacing.md),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Go Pro",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    text = "Upgrade to Pro",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = "Unlimited homework scans, deeper AI, and full study packs.",
+                    text = "Unlimited scans and deeper AI responses",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Button(
-                onClick = onUpgrade,
-                shape = RoundedCornerShape(AppRadii.pill),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp, vertical = 6.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-            ) {
-                Text("Upgrade", style = MaterialTheme.typography.labelMedium)
-            }
-            IconButton(onClick = onDismiss) {
-                Icon(Icons.Default.Close, contentDescription = "Dismiss")
+            androidx.compose.material3.IconButton(onClick = onDismiss) {
+                androidx.compose.material3.Icon(
+                    Icons.Default.Close,
+                    contentDescription = "Dismiss",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
@@ -85,12 +70,12 @@ fun PlanComparisonTable(
     modifier: Modifier = Modifier
 ) {
     NotebookCard(modifier = modifier, elevated = false) {
-        Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+        Column {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = AppSpacing.sm),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween
             ) {
                 Text(
                     text = "Feature",
@@ -99,24 +84,26 @@ fun PlanComparisonTable(
                     modifier = Modifier.weight(1.2f)
                 )
                 Text(
-                    text = "Standard",
+                    text = "Free",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f)
                 )
                 Text(
-                    text = "Premium",
+                    text = "Paid",
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.weight(1f)
                 )
             }
-            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
+            androidx.compose.material3.HorizontalDivider(
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+            )
             rows.forEachIndexed { index, row ->
                 if (index > 0) {
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                    androidx.compose.material3.HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.12f),
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
                 }
@@ -137,7 +124,6 @@ private fun ComparisonRow(row: PlanComparisonRow) {
         Text(
             text = row.feature,
             style = MaterialTheme.typography.bodySmall,
-            fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1.2f)
         )
         Text(
@@ -149,11 +135,7 @@ private fun ComparisonRow(row: PlanComparisonRow) {
         Text(
             text = row.premium,
             style = MaterialTheme.typography.bodySmall,
-            color = if (row.premiumHighlight) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            },
+            color = MaterialTheme.colorScheme.onSurface,
             fontWeight = if (row.premiumHighlight) FontWeight.SemiBold else FontWeight.Normal,
             modifier = Modifier.weight(1f)
         )
@@ -167,50 +149,24 @@ fun PremiumValueProposition(
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(AppRadii.lg),
-        color = MaterialTheme.colorScheme.surface
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
     ) {
         Column(
-            modifier = Modifier
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(
-                            AppColors.AccentLight.copy(alpha = 0.45f),
-                            MaterialTheme.colorScheme.surface
-                        )
-                    )
-                )
-                .padding(AppSpacing.lg),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            modifier = Modifier.padding(AppSpacing.lg),
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    Icons.Default.Star,
-                    contentDescription = null,
-                    tint = AppColors.ProGold,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
-                Text(
-                    text = "Why upgrade?",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            Text(
+                text = "Why upgrade?",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
             SubscriptionFeatures.premiumReasons.forEach { reason ->
-                Row(verticalAlignment = Alignment.Top) {
-                    Icon(
-                        Icons.Default.Check,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .padding(end = 8.dp, top = 2.dp)
-                            .size(16.dp)
-                    )
-                    Text(
-                        text = reason,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                Text(
+                    text = "• $reason",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

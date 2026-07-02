@@ -5,14 +5,14 @@ Create these subscription products in [Google Play Console](https://play.google.
 | Product ID | Price | Plan |
 |------------|-------|------|
 | `learnerlm_basic_monthly` | $9.99 | Pro (monthly) |
-| `learnerlm_pro_monthly` | $14.99 | Premium (monthly) |
-| `learnerlm_pro_yearly` | $99.99 | Mega (yearly — 2 months free) |
+| `learnerlm_pro_monthly` | $19.99 | Premium (monthly) |
+| `learnerlm_pro_yearly` | $99.99 | Mega (yearly) |
 
 ## Plan pricing
 
 - **Pro** monthly: **$9.99/month**
-- **Premium** monthly: **$14.99/month**
-- **Mega** yearly: **$190.00/year** ($19/mo × 10 months — 2 months free)
+- **Premium** monthly: **$19.99/month**
+- **Mega** yearly: **$99.99/year**
 
 ## AI modes (multi-model routing)
 

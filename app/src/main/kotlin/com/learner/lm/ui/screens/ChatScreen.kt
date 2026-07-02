@@ -2,12 +2,11 @@ package com.learner.lm.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -18,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -27,7 +27,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteOutline
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -61,11 +60,11 @@ import com.learner.lm.ui.components.AddCustomSubjectDialog
 import com.learner.lm.ui.components.AppModePicker
 import com.learner.lm.ui.components.ChatBubble
 import com.learner.lm.ui.components.HintLevelIndicator
-import com.learner.lm.ui.components.LearnerLogo
 import com.learner.lm.ui.components.PremiumUpgradeBanner
 import com.learner.lm.ui.components.ReportAiContentDialog
 import com.learner.lm.ui.components.SubjectPicker
 import com.learner.lm.ui.components.TypingIndicator
+import com.learner.lm.ui.theme.AppColors
 import com.learner.lm.ui.theme.AppRadii
 import com.learner.lm.ui.theme.AppSpacing
 import com.learner.lm.viewmodel.ChatViewModel
@@ -130,27 +129,10 @@ fun ChatScreen(
             activeModelLabel = uiState.activeModelLabel,
             selectedMode = uiState.selectedMode,
             hintLevel = uiState.hintLevel.level,
-            sessionLabel = uiState.sessionLabel,
             hasMessages = uiState.messages.isNotEmpty(),
             onNewChat = viewModel::newChat,
             onClearChat = viewModel::clearChat
         )
-
-        if (uiState.messages.isNotEmpty()) {
-            ChatQuickActions(
-                mode = uiState.selectedMode,
-                onAction = viewModel::sendQuickAction
-            )
-        }
-
-        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
-
-        if (!isPremium && showUpgradeBanner) {
-            PremiumUpgradeBanner(
-                onUpgrade = onNavigateToUpgrade,
-                onDismiss = { showUpgradeBanner = false }
-            )
-        }
 
         AppModePicker(
             selectedMode = uiState.selectedMode,
@@ -164,16 +146,27 @@ fun ChatScreen(
             onAddCustomSubject = viewModel::showAddSubjectDialog
         )
 
+        if (!isPremium && showUpgradeBanner) {
+            PremiumUpgradeBanner(
+                onUpgrade = onNavigateToUpgrade,
+                onDismiss = { showUpgradeBanner = false }
+            )
+        }
+
+        if (uiState.messages.isNotEmpty()) {
+            ChatQuickActions(
+                mode = uiState.selectedMode,
+                onAction = viewModel::sendQuickAction
+            )
+        }
+
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
             state = listState,
-            contentPadding = PaddingValues(
-                horizontal = AppSpacing.md,
-                vertical = AppSpacing.md
-            ),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            contentPadding = PaddingValues(vertical = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
             if (uiState.messages.isEmpty() && !uiState.isLoading) {
                 item {
@@ -290,7 +283,6 @@ private fun ChatHeader(
     activeModelLabel: String,
     selectedMode: AppMode,
     hintLevel: Int,
-    sessionLabel: String,
     hasMessages: Boolean,
     onNewChat: () -> Unit,
     onClearChat: () -> Unit
@@ -298,37 +290,35 @@ private fun ChatHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(horizontal = AppSpacing.md, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .padding(horizontal = 4.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(modifier = Modifier.weight(1f)) {
+        IconButton(onClick = onNewChat) {
+            Icon(Icons.Default.Add, contentDescription = "New chat", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Column(
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Text(
                 text = activeModelLabel,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.SemiBold
             )
             Text(
-                text = "$sessionLabel · ${selectedMode.label}",
+                text = selectedMode.label,
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            if (selectedMode == AppMode.TUTOR) {
-                HintLevelIndicator(level = hintLevel)
-                Spacer(modifier = Modifier.size(8.dp))
+        if (hasMessages) {
+            IconButton(onClick = onClearChat) {
+                Icon(Icons.Default.DeleteOutline, contentDescription = "Clear chat", tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            IconButton(onClick = onNewChat) {
-                Icon(Icons.Default.Add, contentDescription = "New chat")
-            }
-            if (hasMessages) {
-                IconButton(onClick = onClearChat) {
-                    Icon(Icons.Default.DeleteOutline, contentDescription = "Clear chat")
-                }
-            }
+        } else if (selectedMode == AppMode.TUTOR) {
+            HintLevelIndicator(level = hintLevel)
+        } else {
+            Spacer(modifier = Modifier.size(48.dp))
         }
     }
 }
@@ -381,49 +371,44 @@ private fun ChatEmptyState(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 40.dp, horizontal = AppSpacing.lg),
+            .padding(vertical = 56.dp, horizontal = AppSpacing.lg),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
     ) {
         Surface(
-            shape = RoundedCornerShape(AppRadii.xl),
-            color = MaterialTheme.colorScheme.surface,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
-            modifier = Modifier.padding(bottom = 4.dp)
+            modifier = Modifier.size(56.dp),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primary
         ) {
-            LearnerLogo(
-                showWordmark = false,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .size(48.dp)
-            )
+            Box(contentAlignment = Alignment.Center) {
+                Text(
+                    text = "L",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
         Text(
             text = emptyStateTitle(mode),
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center
         )
         Text(
             text = emptyStateMessage(mode),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = AppSpacing.md)
+            textAlign = TextAlign.Center
         )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
+        Spacer(modifier = Modifier.height(12.dp))
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             suggestionsForMode(mode).forEach { suggestion ->
-                SuggestionChip(
-                    text = suggestion,
-                    onClick = { onSuggestionClick(suggestion) }
-                )
+                SuggestionChip(text = suggestion, onClick = { onSuggestionClick(suggestion) })
             }
         }
     }
@@ -438,7 +423,7 @@ private fun SuggestionChip(
         modifier = Modifier.clickable(onClick = onClick),
         shape = RoundedCornerShape(AppRadii.pill),
         color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.45f))
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
     ) {
         Text(
             text = text,
@@ -458,100 +443,102 @@ private fun ChatComposer(
     onSend: () -> Unit
 ) {
     val canSend = value.isNotBlank() && enabled
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
-        shadowElevation = 12.dp
+    val dark = isSystemInDarkTheme()
+    val borderColor = if (dark) AppColors.DarkComposerBorder else AppColors.ComposerBorder
+    val fillColor = if (dark) AppColors.DarkComposerBackground else AppColors.ComposerBackground
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = AppSpacing.md, vertical = AppSpacing.sm)
     ) {
-        Column {
-            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(AppRadii.composer),
+            color = fillColor,
+            border = BorderStroke(1.dp, borderColor),
+            shadowElevation = 0.dp
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = AppSpacing.md, vertical = AppSpacing.sm),
+                    .padding(start = 16.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.Bottom
             ) {
                 TextField(
                     value = value,
                     onValueChange = onValueChange,
-                    modifier = Modifier
-                        .weight(1f)
-                        .border(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
-                            shape = RoundedCornerShape(AppRadii.xl)
-                        ),
+                    modifier = Modifier.weight(1f),
                     placeholder = {
                         Text(
                             placeholder,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
                     },
-                    maxLines = 5,
-                    shape = RoundedCornerShape(AppRadii.xl),
+                    maxLines = 6,
+                    enabled = enabled,
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                         disabledIndicatorColor = Color.Transparent
                     )
                 )
-                Spacer(modifier = Modifier.size(AppSpacing.sm))
                 Surface(
                     shape = CircleShape,
                     color = if (canSend) {
-                        MaterialTheme.colorScheme.primary
+                        MaterialTheme.colorScheme.onSurface
                     } else {
                         MaterialTheme.colorScheme.surfaceVariant
                     },
-                    modifier = Modifier.size(44.dp)
+                    modifier = Modifier.size(36.dp)
                 ) {
-                    IconButton(
-                        onClick = onSend,
-                        enabled = canSend
-                    ) {
+                    IconButton(onClick = onSend, enabled = canSend) {
                         Icon(
                             Icons.AutoMirrored.Filled.Send,
                             contentDescription = "Send",
                             tint = if (canSend) {
-                                MaterialTheme.colorScheme.onPrimary
+                                MaterialTheme.colorScheme.surface
                             } else {
                                 MaterialTheme.colorScheme.onSurfaceVariant
-                            }
+                            },
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
             }
-            Text(
-                text = "LearnerLM can make mistakes. Verify important answers with your teacher.",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm)
-            )
         }
+        Text(
+            text = "LearnerLM can make mistakes. Check important work with your teacher.",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp, bottom = 4.dp)
+        )
     }
 }
 
 private fun emptyStateTitle(mode: AppMode): String = when (mode) {
-    AppMode.TUTOR -> "How can I help you learn?"
-    AppMode.STUDY -> "What do you want to study?"
-    AppMode.CODE -> "What are you working on?"
+    AppMode.TUTOR -> "What can I help you learn?"
+    AppMode.STUDY -> "What should we study?"
+    AppMode.CODE -> "What are you building?"
 }
 
 private fun emptyStateMessage(mode: AppMode): String = when (mode) {
-    AppMode.TUTOR -> "Ask about homework or concepts. I'll guide you with hints and questions — never just the answer."
-    AppMode.STUDY -> "Enter a topic to get a summary, key concepts, flashcards, and quiz questions."
-    AppMode.CODE -> "Paste a snippet, error, or question. I'll help you debug and understand step by step."
+    AppMode.TUTOR -> "Ask about homework or concepts. I'll guide you step by step."
+    AppMode.STUDY -> "Get summaries, flashcards, and quiz questions on any topic."
+    AppMode.CODE -> "Paste code or describe a bug — I'll help you understand it."
 }
 
 private fun inputPlaceholder(mode: AppMode): String = when (mode) {
-    AppMode.TUTOR -> "Ask LearnerLM anything…"
-    AppMode.STUDY -> "Enter a topic to study…"
-    AppMode.CODE -> "Paste code or describe your bug…"
+    AppMode.TUTOR -> "Ask anything"
+    AppMode.STUDY -> "Enter a topic"
+    AppMode.CODE -> "Paste code or describe the issue"
 }
 
 private fun suggestionsForMode(mode: AppMode): List<String> = when (mode) {
