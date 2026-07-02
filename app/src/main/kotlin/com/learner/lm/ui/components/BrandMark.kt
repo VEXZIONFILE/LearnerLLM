@@ -2,12 +2,9 @@ package com.learner.lm.ui.components
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,7 +13,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.learner.lm.ui.theme.AppColors
-import com.learner.lm.ui.theme.AppRadii
 
 @Composable
 fun BrandMark(
@@ -29,22 +25,10 @@ fun BrandMark(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Surface(
-            shape = RoundedCornerShape(AppRadii.sm),
-            color = if (onSurface) {
-                AppColors.AccentLight.copy(alpha = 0.8f)
-            } else {
-                MaterialTheme.colorScheme.surface
-            },
-            shadowElevation = if (onSurface) 0.dp else 2.dp
-        ) {
-            LearnerLogo(
-                showWordmark = false,
-                modifier = Modifier
-                    .padding(4.dp)
-                    .size(iconSize - 8.dp)
-            )
-        }
+        LearnerLogo(
+            showWordmark = false,
+            modifier = Modifier.size(iconSize)
+        )
         if (showWordmark) {
             Spacer(modifier = Modifier.width(10.dp))
             Text(

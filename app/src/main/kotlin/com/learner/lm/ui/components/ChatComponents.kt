@@ -77,7 +77,6 @@ fun ChatBubble(
                 modifier = Modifier
                     .padding(top = 2.dp, end = AppSpacing.sm)
                     .size(30.dp)
-                    .clip(RoundedCornerShape(AppRadii.sm))
             )
             Column(modifier = Modifier.fillMaxWidth(0.88f)) {
                 Row(
@@ -143,7 +142,6 @@ fun TypingIndicator(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .padding(end = AppSpacing.sm)
                 .size(30.dp)
-                .clip(RoundedCornerShape(AppRadii.sm))
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
