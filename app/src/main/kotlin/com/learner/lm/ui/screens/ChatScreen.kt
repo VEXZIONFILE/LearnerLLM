@@ -326,9 +326,10 @@ fun ChatScreen(
     }
     }
 
-    uiState.error?.let { error ->
-        LaunchedEffect(error) {
-            snackbarHostState.showSnackbar(error)
+    val errorMessage = uiState.error
+    if (errorMessage != null) {
+        LaunchedEffect(errorMessage) {
+            snackbarHostState.showSnackbar(errorMessage)
             viewModel.clearError()
         }
     }
@@ -341,18 +342,20 @@ fun ChatScreen(
         )
     }
 
-    uiState.reportTarget?.let { target ->
+    val reportTarget = uiState.reportTarget
+    if (reportTarget != null) {
         ReportAiContentDialog(
-            contentPreview = target.content,
+            contentPreview = reportTarget.content,
             onDismiss = viewModel::dismissReportDialog,
             onSubmit = viewModel::submitReport,
             isSubmitting = uiState.isSubmittingReport
         )
     }
 
-    uiState.reportError?.let { error ->
-        LaunchedEffect(error) {
-            snackbarHostState.showSnackbar(error)
+    val reportError = uiState.reportError
+    if (reportError != null) {
+        LaunchedEffect(reportError) {
+            snackbarHostState.showSnackbar(reportError)
             viewModel.clearReportError()
         }
     }
