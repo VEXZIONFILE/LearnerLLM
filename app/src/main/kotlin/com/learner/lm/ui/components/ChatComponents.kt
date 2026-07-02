@@ -79,13 +79,18 @@ fun ChatBubble(
                 .background(stripeColor)
                 .padding(horizontal = AppSpacing.md, vertical = 16.dp)
         ) {
-            Surface(
-                modifier = Modifier.size(28.dp),
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.primary,
-                shadowElevation = 0.dp
-            ) {
-                Box(contentAlignment = Alignment.Center) {
+            LearnerLogo(
+                showWordmark = false,
+                modifier = Modifier
+                    .padding(top = 2.dp, end = AppSpacing.sm)
+                    .size(30.dp)
+            )
+            Column(modifier = Modifier.fillMaxWidth(0.88f)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
                         text = "L",
                         style = MaterialTheme.typography.labelMedium,
@@ -154,20 +159,12 @@ fun TypingIndicator(modifier: Modifier = Modifier) {
             .padding(horizontal = AppSpacing.md, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Surface(
-            modifier = Modifier.size(28.dp),
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.primary
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Text(
-                    text = "L",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
+        LearnerLogo(
+            showWordmark = false,
+            modifier = Modifier
+                .padding(end = AppSpacing.sm)
+                .size(30.dp)
+        )
         Row(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
