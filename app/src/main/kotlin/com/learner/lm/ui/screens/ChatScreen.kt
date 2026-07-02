@@ -406,9 +406,10 @@ private fun ChatHeader(
                 fontWeight = FontWeight.SemiBold
             )
             Text(
-                text = selectedMode.label,
+                text = "$sessionLabel · ${selectedMode.label}",
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
             )
             if (!isPremiumMessaging && messageQuotaLabel.isNotBlank()) {
                 if (isQuotaLoading) {
@@ -426,20 +427,15 @@ private fun ChatHeader(
                 }
             }
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            if (behaviorMode == AppMode.TUTOR) {
-                HintLevelIndicator(level = hintLevel)
-                Spacer(modifier = Modifier.size(8.dp))
+        if (hasMessages) {
+            IconButton(onClick = onClearChat) {
+                Icon(
+                    Icons.Default.DeleteOutline,
+                    contentDescription = "Clear chat",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-            IconButton(onClick = onNewChat) {
-                Icon(Icons.Default.Add, contentDescription = "New chat")
-            }
-            if (hasMessages) {
-                IconButton(onClick = onClearChat) {
-                    Icon(Icons.Default.DeleteOutline, contentDescription = "Clear chat")
-                }
-            }
-        } else if (selectedMode == AppMode.TUTOR) {
+        } else if (behaviorMode == AppMode.TUTOR) {
             HintLevelIndicator(level = hintLevel)
         } else {
             Spacer(modifier = Modifier.size(48.dp))
