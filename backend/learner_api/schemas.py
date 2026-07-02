@@ -139,7 +139,7 @@ class MessageQuotaResponse(BaseModel):
     is_premium: bool
     can_send: bool
     quota_label: str
-    max_message_length: int
+    app_mode: AppMode
 
 
 class RecordScanRequest(BaseModel):

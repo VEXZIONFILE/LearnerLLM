@@ -110,11 +110,19 @@ class ScanUsage(Base):
 
 class MessageUsage(Base):
     __tablename__ = "message_usage"
-    __table_args__ = (UniqueConstraint("user_uid", "usage_date", name="uq_user_message_date"),)
+    __table_args__ = (
+        UniqueConstraint(
+            "user_uid",
+            "usage_date",
+            "app_mode",
+            name="uq_user_message_mode_date",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_uid: Mapped[str] = mapped_column(ForeignKey("users.uid"), index=True)
     usage_date: Mapped[str] = mapped_column(String(10))
+    app_mode: Mapped[str] = mapped_column(String(16), default="TUTOR")
     count: Mapped[int] = mapped_column(Integer, default=0)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 

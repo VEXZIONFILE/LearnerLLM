@@ -86,7 +86,9 @@ class LearnerChatRepository(
     }
 
     private fun mapChatHttpError(error: HttpException): Exception = when (error.code()) {
-        429 -> MessageQuotaExceededException()
+        429 -> MessageQuotaExceededException(
+            error.message() ?: "Daily message limit reached for this mode. Upgrade for more messages."
+        )
         400 -> IllegalArgumentException(
             error.message() ?: "Message could not be sent."
         )

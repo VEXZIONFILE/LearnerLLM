@@ -17,14 +17,9 @@ object SubscriptionFeatures {
         ),
         PlanComparisonRow(
             feature = "Chat messages",
-            standard = "25 per day",
-            premium = "Unlimited",
+            standard = "60 per mode / day",
+            premium = "500 per mode (Pro) · Unlimited (Premium & Mega)",
             premiumHighlight = true
-        ),
-        PlanComparisonRow(
-            feature = "Message length",
-            standard = "2,000 characters",
-            premium = "8,000 characters"
         ),
         PlanComparisonRow(
             feature = "AI models",

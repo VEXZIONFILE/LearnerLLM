@@ -1,9 +1,9 @@
 package com.learner.lm.repository
 
 import android.content.Context
+import com.learner.lm.ai.AppMode
 import com.learner.lm.billing.MessageQuotaExceededException
 import com.learner.lm.billing.MessageQuotaStatus
-import com.learner.lm.billing.SubscriptionTier
 import retrofit2.HttpException
 
 class MessageQuotaRepository(@Suppress("UNUSED_PARAMETER") context: Context) {
@@ -17,10 +17,7 @@ class MessageQuotaRepository(@Suppress("UNUSED_PARAMETER") context: Context) {
         }
     }
 
-    fun isPremiumTier(tierName: String): Boolean =
-        tierName == SubscriptionTier.BASIC.name || tierName == SubscriptionTier.PRO.name
-
-    suspend fun fetchStatus(tierName: String): Result<MessageQuotaStatus> {
+    suspend fun fetchStatus(appMode: AppMode): Result<MessageQuotaStatus> {
         val service = apiService
             ?: return Result.failure(
                 IllegalStateException(
@@ -29,7 +26,7 @@ class MessageQuotaRepository(@Suppress("UNUSED_PARAMETER") context: Context) {
             )
 
         return try {
-            val dto = service.getMessageQuota()
+            val dto = service.getMessageQuota(appMode.name)
             Result.success(dto.toStatus())
         } catch (error: Exception) {
             Result.failure(
@@ -42,9 +39,8 @@ class MessageQuotaRepository(@Suppress("UNUSED_PARAMETER") context: Context) {
     }
 
     fun mapHttpError(error: HttpException): Exception = when (error.code()) {
-        429 -> MessageQuotaExceededException()
-        400 -> IllegalArgumentException(
-            error.message() ?: "Message could not be sent."
+        429 -> MessageQuotaExceededException(
+            error.message() ?: "Daily message limit reached for this mode. Upgrade for more messages."
         )
         else -> IllegalStateException(
             error.message() ?: "Could not send message. Check your connection and try again."
@@ -57,6 +53,6 @@ class MessageQuotaRepository(@Suppress("UNUSED_PARAMETER") context: Context) {
         canSend = can_send,
         remainingMessages = remaining,
         quotaLabel = quota_label,
-        maxMessageLength = max_message_length
+        appMode = AppMode.entries.firstOrNull { it.name == app_mode } ?: AppMode.TUTOR
     )
 }

@@ -62,8 +62,7 @@ data class ChatUiState(
     val isQuotaLoading: Boolean = false,
     val messageQuotaLabel: String = "",
     val canSendMessage: Boolean = true,
-    val isPremiumMessaging: Boolean = false,
-    val maxMessageLength: Int = MessageQuotaPolicy.FREE_MAX_MESSAGE_LENGTH
+    val isPremiumMessaging: Boolean = false
 ) {
     val activeModelLabel: String
         get() = ModelRegistry.displayLabel(selectedMode, subscriptionTier, selectedFreeModel)
@@ -127,16 +126,17 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun refreshMessageQuota() {
-        val tier = _uiState.value.subscriptionTier
-        val premium = tier == SubscriptionTier.BASIC.name || tier == SubscriptionTier.PRO.name
-        if (premium) {
+        val state = _uiState.value
+        val tier = state.subscriptionTier
+        val appMode = state.selectedMode
+
+        if (tier == SubscriptionTier.PRO.name) {
             _uiState.update {
                 it.copy(
                     isQuotaLoading = false,
                     isPremiumMessaging = true,
                     canSendMessage = true,
-                    messageQuotaLabel = MessageQuotaPolicy.quotaLabel(0, true),
-                    maxMessageLength = MessageQuotaPolicy.maxMessageLength(true)
+                    messageQuotaLabel = MessageQuotaPolicy.quotaLabel(0, tier, appMode)
                 )
             }
             return
@@ -144,27 +144,25 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             _uiState.update { it.copy(isQuotaLoading = true) }
-            messageQuotaRepository.fetchStatus(tier)
+            messageQuotaRepository.fetchStatus(appMode)
                 .onSuccess { status ->
                     _uiState.update {
                         it.copy(
                             isQuotaLoading = false,
                             isPremiumMessaging = status.isPremium,
                             canSendMessage = status.canSend,
-                            messageQuotaLabel = status.quotaLabel,
-                            maxMessageLength = status.maxMessageLength
+                            messageQuotaLabel = status.quotaLabel
                         )
                     }
                 }
                 .onFailure {
-                    val fallback = MessageQuotaStatus.forTier(0, tier)
+                    val fallback = MessageQuotaStatus.forTier(0, tier, appMode)
                     _uiState.update {
                         it.copy(
                             isQuotaLoading = false,
                             isPremiumMessaging = fallback.isPremium,
                             canSendMessage = fallback.canSend,
-                            messageQuotaLabel = fallback.quotaLabel,
-                            maxMessageLength = fallback.maxMessageLength
+                            messageQuotaLabel = fallback.quotaLabel
                         )
                     }
                 }
@@ -182,6 +180,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     fun selectMode(mode: AppMode) {
         _uiState.update { it.copy(selectedMode = mode, error = null) }
+        refreshMessageQuota()
     }
 
     fun selectFreeModel(variant: FreeModelVariant) {
@@ -278,15 +277,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         if (!state.canSendMessage && !state.isPremiumMessaging) {
             _uiState.update {
                 it.copy(
-                    error = "Daily message limit reached. Upgrade to Pro for unlimited chat messages."
-                )
-            }
-            return
-        }
-        if (trimmed.length > state.maxMessageLength) {
-            _uiState.update {
-                it.copy(
-                    error = "Message is too long (${state.maxMessageLength} characters max on Standard)."
+                    error = "Daily message limit reached for ${MessageQuotaPolicy.modeLabel(state.selectedMode)}. Upgrade for more messages."
                 )
             }
             return

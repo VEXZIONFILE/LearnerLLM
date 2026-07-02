@@ -182,7 +182,12 @@ fun ChatScreen(
                                 fontWeight = FontWeight.SemiBold
                             )
                             Text(
-                                text = "Standard includes 25 chat messages per day. Upgrade for unlimited messaging.",
+                                text = when {
+                                    uiState.subscriptionTier == SubscriptionTier.BASIC.name ->
+                                        "Daily limit reached for this mode (500/day). Upgrade to Premium for unlimited messages."
+                                    else ->
+                                        "Daily limit reached for this mode (60/day). Upgrade to Pro for 500 messages per mode."
+                                },
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -199,14 +204,9 @@ fun ChatScreen(
 
                 ChatComposer(
                     value = input,
-                    onValueChange = { value ->
-                        if (value.length <= uiState.maxMessageLength) {
-                            input = value
-                        }
-                    },
+                    onValueChange = { input = it },
                     placeholder = inputPlaceholder(behaviorMode),
                     enabled = !uiState.isLoading && uiState.canSendMessage,
-                    characterCount = if (!isPremium) "${input.length}/${uiState.maxMessageLength}" else null,
                     onSend = {
                         viewModel.sendMessage(input)
                         input = ""
@@ -550,7 +550,6 @@ private fun ChatComposer(
     onValueChange: (String) -> Unit,
     placeholder: String,
     enabled: Boolean,
-    characterCount: String? = null,
     onSend: () -> Unit
 ) {
     val canSend = value.isNotBlank() && enabled
@@ -620,8 +619,7 @@ private fun ChatComposer(
                 }
             }
             Text(
-                text = characterCount?.let { "$it · LearnerLM can make mistakes. Verify important answers with your teacher." }
-                    ?: "LearnerLM can make mistakes. Verify important answers with your teacher.",
+                text = "LearnerLM can make mistakes. Verify important answers with your teacher.",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
