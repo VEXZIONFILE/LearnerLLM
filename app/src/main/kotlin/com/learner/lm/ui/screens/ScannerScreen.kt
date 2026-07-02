@@ -33,6 +33,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -69,6 +70,9 @@ fun ScannerScreen(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
         viewModel.setCameraPermission(granted)
+        if (granted) {
+            viewModel.openCamera()
+        }
     }
 
     LaunchedEffect(userId, subscriptionTier) {
@@ -81,9 +85,10 @@ fun ScannerScreen(
             Manifest.permission.CAMERA
         ) == PackageManager.PERMISSION_GRANTED
         viewModel.setCameraPermission(granted)
-        if (!granted) {
-            permissionLauncher.launch(Manifest.permission.CAMERA)
-        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose { viewModel.closeCamera() }
     }
 
     LaunchedEffect(uiState.scanSucceeded, uiState.extractedText) {
@@ -108,7 +113,7 @@ fun ScannerScreen(
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Point your camera at a worksheet. We'll extract the text and send it to your tutor.",
+                text = "Open the camera when you're ready to scan. Your daily limit only applies when you capture a worksheet.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -147,6 +152,18 @@ fun ScannerScreen(
             shadowElevation = 4.dp
         ) {
             when {
+                !uiState.isCameraActive -> {
+                    ScannerIdlePrompt(
+                        canScan = uiState.canScan || uiState.isPremium,
+                        onOpenCamera = {
+                            if (uiState.hasCameraPermission) {
+                                viewModel.openCamera()
+                            } else {
+                                permissionLauncher.launch(Manifest.permission.CAMERA)
+                            }
+                        }
+                    )
+                }
                 !uiState.hasCameraPermission -> {
                     CameraPermissionPrompt(
                         onRequestPermission = { permissionLauncher.launch(Manifest.permission.CAMERA) }
@@ -207,26 +224,55 @@ fun ScannerScreen(
                     }
                 }
             }
+        } else if (uiState.isCameraActive) {
+            Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
+                Button(
+                    onClick = viewModel::captureAndScan,
+                    enabled = uiState.hasCameraPermission && !uiState.isProcessing && uiState.canScan,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(AppRadii.md),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    if (uiState.isProcessing) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(22.dp),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
+                        Text("Capture & scan", fontWeight = FontWeight.SemiBold)
+                    }
+                }
+                OutlinedButton(
+                    onClick = viewModel::closeCamera,
+                    enabled = !uiState.isProcessing,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(AppRadii.md)
+                ) {
+                    Text("Close camera")
+                }
+            }
         } else {
             Button(
-                onClick = viewModel::captureAndScan,
-                enabled = uiState.hasCameraPermission && !uiState.isProcessing && uiState.canScan,
+                onClick = {
+                    if (uiState.hasCameraPermission) {
+                        viewModel.openCamera()
+                    } else {
+                        permissionLauncher.launch(Manifest.permission.CAMERA)
+                    }
+                },
+                enabled = uiState.canScan,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
                 shape = RoundedCornerShape(AppRadii.md),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                if (uiState.isProcessing) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(22.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
-                    Text("Capture & scan", fontWeight = FontWeight.SemiBold)
-                }
+                Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
+                Text("Open camera", fontWeight = FontWeight.SemiBold)
             }
         }
 
@@ -255,6 +301,47 @@ fun ScannerScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ScannerIdlePrompt(
+    canScan: Boolean,
+    onOpenCamera: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(AppSpacing.lg),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            Icons.Default.CameraAlt,
+            contentDescription = null,
+            modifier = Modifier.size(48.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.height(AppSpacing.md))
+        Text(
+            text = "Ready to scan?",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            text = "Open the camera to photograph a worksheet. Browsing this screen does not use your daily scans.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 4.dp, bottom = AppSpacing.md)
+        )
+        Button(
+            onClick = onOpenCamera,
+            enabled = canScan,
+            shape = RoundedCornerShape(AppRadii.md)
+        ) {
+            Text("Open camera")
         }
     }
 }
