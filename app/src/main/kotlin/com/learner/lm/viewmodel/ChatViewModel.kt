@@ -129,6 +129,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         val state = _uiState.value
         val tier = state.subscriptionTier
         val appMode = state.selectedMode
+        val freeModelVariant = state.selectedFreeModel
 
         if (tier == SubscriptionTier.PRO.name) {
             _uiState.update {
@@ -136,7 +137,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     isQuotaLoading = false,
                     isPremiumMessaging = true,
                     canSendMessage = true,
-                    messageQuotaLabel = MessageQuotaPolicy.quotaLabel(0, tier, appMode)
+                    messageQuotaLabel = MessageQuotaPolicy.quotaLabel(0, tier, appMode, freeModelVariant)
                 )
             }
             return
@@ -144,7 +145,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             _uiState.update { it.copy(isQuotaLoading = true) }
-            messageQuotaRepository.fetchStatus(appMode)
+            messageQuotaRepository.fetchStatus(appMode, freeModelVariant)
                 .onSuccess { status ->
                     _uiState.update {
                         it.copy(
@@ -156,7 +157,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     }
                 }
                 .onFailure {
-                    val fallback = MessageQuotaStatus.forTier(0, tier, appMode)
+                    val fallback = MessageQuotaStatus.forTier(0, tier, appMode, freeModelVariant)
                     _uiState.update {
                         it.copy(
                             isQuotaLoading = false,
@@ -185,6 +186,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     fun selectFreeModel(variant: FreeModelVariant) {
         _uiState.update { it.copy(selectedFreeModel = variant, error = null) }
+        refreshMessageQuota()
     }
 
     fun selectSubject(subject: StudySubject) {
@@ -275,9 +277,14 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
         val state = _uiState.value
         if (!state.canSendMessage && !state.isPremiumMessaging) {
+            val bucketLabel = MessageQuotaPolicy.bucketLabel(
+                state.subscriptionTier,
+                state.selectedMode,
+                state.selectedFreeModel
+            )
             _uiState.update {
                 it.copy(
-                    error = "Daily message limit reached for ${MessageQuotaPolicy.modeLabel(state.selectedMode)}. Upgrade for more messages."
+                    error = "Daily message limit reached for $bucketLabel. Upgrade for more messages."
                 )
             }
             return

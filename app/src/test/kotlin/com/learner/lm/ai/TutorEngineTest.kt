@@ -32,54 +32,50 @@ class AiConfigTest {
 
 class ModelRegistryTest {
     @Test
-    fun `tutor mode routes to gpt-oss-120b`() {
-        val route = ModelRegistry.resolve(AppMode.TUTOR, SubscriptionTier.FREE.name)
-        assertEquals(ModelRegistry.TUTOR_MODEL, route.modelId)
+    fun `free tier tutor mode routes to selected free model`() {
+        val route = ModelRegistry.resolve(AppMode.TUTOR, SubscriptionTier.FREE.name, FreeModelVariant.TUTOR)
+        assertEquals(ModelRegistry.FREE_TUTOR_MODEL, route.modelId)
+        assertEquals("GPT-OSS", route.displayName)
     }
 
     @Test
-    fun `study mode routes to nemotron`() {
-        val route = ModelRegistry.resolve(AppMode.STUDY, SubscriptionTier.FREE.name)
-        assertEquals(ModelRegistry.STUDY_MODEL, route.modelId)
+    fun `free tier study mode can use any free model variant`() {
+        val route = ModelRegistry.resolve(AppMode.STUDY, SubscriptionTier.FREE.name, FreeModelVariant.CODE)
+        assertEquals(ModelRegistry.FREE_CODE_MODEL, route.modelId)
+        assertEquals("Laguna", route.displayName)
     }
 
     @Test
-    fun `code mode routes to laguna`() {
-        val route = ModelRegistry.resolve(AppMode.CODE, SubscriptionTier.FREE.name)
-        assertEquals(ModelRegistry.CODE_MODEL, route.modelId)
+    fun `free tier code mode defaults to laguna free model`() {
+        val route = ModelRegistry.resolve(AppMode.CODE, SubscriptionTier.FREE.name, FreeModelVariant.CODE)
+        assertEquals(ModelRegistry.FREE_CODE_MODEL, route.modelId)
     }
 
     @Test
     fun `premium tier increases token limits`() {
-        val free = ModelRegistry.resolve(AppMode.STUDY, SubscriptionTier.FREE.name)
+        val free = ModelRegistry.resolve(AppMode.STUDY, SubscriptionTier.FREE.name, FreeModelVariant.STUDY)
         val premium = ModelRegistry.resolve(AppMode.STUDY, SubscriptionTier.BASIC.name)
         assertTrue(premium.maxTokens > free.maxTokens)
     }
 
     @Test
-    fun `display label uses branded model names without tier suffix`() {
-        assertEquals("Learner Tutor", ModelRegistry.displayLabel(AppMode.TUTOR, SubscriptionTier.FREE.name))
-        assertEquals("Learner Study", ModelRegistry.displayLabel(AppMode.STUDY, SubscriptionTier.FREE.name))
-        assertEquals("Learner Code", ModelRegistry.displayLabel(AppMode.CODE, SubscriptionTier.BASIC.name))
+    fun `display label uses model name for free tier`() {
         assertEquals(
-            "Learner Free Study",
-            ModelRegistry.displayLabel(
-                AppMode.FREE,
-                SubscriptionTier.FREE.name,
-                FreeModelVariant.STUDY
-            )
+            "GPT-OSS",
+            ModelRegistry.displayLabel(AppMode.TUTOR, SubscriptionTier.FREE.name, FreeModelVariant.TUTOR)
         )
+        assertEquals(
+            "Nemotron",
+            ModelRegistry.displayLabel(AppMode.STUDY, SubscriptionTier.FREE.name, FreeModelVariant.STUDY)
+        )
+        assertEquals("Learner Code", ModelRegistry.displayLabel(AppMode.CODE, SubscriptionTier.BASIC.name))
     }
 
     @Test
-    fun `free mode routes to openrouter free models`() {
+    fun `paid tier still routes by mode`() {
         assertEquals(
-            ModelRegistry.FREE_TUTOR_MODEL,
-            ModelRegistry.resolve(AppMode.FREE, SubscriptionTier.FREE.name, FreeModelVariant.TUTOR).modelId
-        )
-        assertEquals(
-            ModelRegistry.FREE_CODE_MODEL,
-            ModelRegistry.resolve(AppMode.FREE, SubscriptionTier.BASIC.name, FreeModelVariant.CODE).modelId
+            ModelRegistry.TUTOR_MODEL,
+            ModelRegistry.resolve(AppMode.TUTOR, SubscriptionTier.BASIC.name, FreeModelVariant.CODE).modelId
         )
     }
 }

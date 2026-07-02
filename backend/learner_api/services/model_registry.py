@@ -30,36 +30,49 @@ def is_pro_tier(tier: str) -> bool:
     return tier == "PRO"
 
 
+def default_variant_for_mode(mode: AppMode) -> FreeModelVariant:
+    if mode == AppMode.STUDY:
+        return FreeModelVariant.STUDY
+    if mode == AppMode.CODE:
+        return FreeModelVariant.CODE
+    return FreeModelVariant.TUTOR
+
+
+def resolve_free_variant(variant: FreeModelVariant) -> ModelRoute:
+    if variant == FreeModelVariant.STUDY:
+        return ModelRoute(
+            model_id=FREE_STUDY_MODEL,
+            display_name="Nemotron",
+            temperature=0.45,
+            max_tokens=1536,
+        )
+    if variant == FreeModelVariant.CODE:
+        return ModelRoute(
+            model_id=FREE_CODE_MODEL,
+            display_name="Laguna",
+            temperature=0.35,
+            max_tokens=1024,
+        )
+    return ModelRoute(
+        model_id=FREE_TUTOR_MODEL,
+        display_name="GPT-OSS",
+        temperature=0.65,
+        max_tokens=1024,
+    )
+
+
 def resolve_model(
     mode: AppMode,
     subscription_tier: str,
     free_model_variant: FreeModelVariant | None = None,
 ) -> ModelRoute:
+    if subscription_tier == "FREE":
+        variant = free_model_variant or default_variant_for_mode(mode)
+        return resolve_free_variant(variant)
+
     pro = is_pro_tier(subscription_tier)
     premium = is_premium_tier(subscription_tier)
-    if mode == AppMode.FREE:
-        variant = free_model_variant or FreeModelVariant.TUTOR
-        if variant == FreeModelVariant.STUDY:
-            return ModelRoute(
-                model_id=FREE_STUDY_MODEL,
-                display_name="Learner Free Study",
-                temperature=0.45,
-                max_tokens=1536,
-            )
-        if variant == FreeModelVariant.CODE:
-            return ModelRoute(
-                model_id=FREE_CODE_MODEL,
-                display_name="Learner Free Code",
-                temperature=0.35,
-                max_tokens=1024,
-            )
-        return ModelRoute(
-            model_id=FREE_TUTOR_MODEL,
-            display_name="Learner Free Tutor",
-            temperature=0.65,
-            max_tokens=1024,
-        )
-    if mode == AppMode.TUTOR:
+    if mode == AppMode.TUTOR or mode == AppMode.FREE:
         return ModelRoute(
             model_id=TUTOR_MODEL,
             display_name="Learner Tutor",

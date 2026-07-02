@@ -73,7 +73,8 @@ data class MessageQuotaResponseDto(
     val is_premium: Boolean,
     val can_send: Boolean,
     val quota_label: String,
-    val app_mode: String
+    val app_mode: String,
+    val free_model_variant: String? = null
 )
 
 data class BillingVerifyRequestDto(
@@ -147,7 +148,10 @@ interface LearnerApiService {
     suspend fun sendChatMessage(@Body body: ChatRequestDto): ChatResponseDto
 
     @GET("v1/chat/quota")
-    suspend fun getMessageQuota(@Query("app_mode") appMode: String): MessageQuotaResponseDto
+    suspend fun getMessageQuota(
+        @Query("app_mode") appMode: String,
+        @Query("free_model_variant") freeModelVariant: String? = null
+    ): MessageQuotaResponseDto
 
     @GET("v1/scans/quota")
     suspend fun getScanQuota(): ScanQuotaResponseDto

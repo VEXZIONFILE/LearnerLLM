@@ -1,6 +1,7 @@
 package com.learner.lm.repository
 
 import com.learner.lm.billing.MessageQuotaExceededException
+import com.learner.lm.billing.SubscriptionTier
 import com.learner.lm.ai.AiReportReason
 import com.learner.lm.ai.AppMode
 import com.learner.lm.ai.HintLevel
@@ -37,7 +38,7 @@ class LearnerChatRepository(
                     session_id = sessionId,
                     grade_level = context.gradeLevel,
                     app_mode = context.appMode.name,
-                    free_model_variant = if (context.appMode == AppMode.FREE) {
+                    free_model_variant = if (context.subscriptionTier == SubscriptionTier.FREE.name) {
                         context.freeModelVariant.name
                     } else {
                         null

@@ -1,6 +1,7 @@
 package com.learner.lm.billing
 
 import com.learner.lm.ai.AppMode
+import com.learner.lm.ai.FreeModelVariant
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -9,7 +10,7 @@ import org.junit.Test
 
 class MessageQuotaPolicyTest {
     @Test
-    fun `free users get 60 messages per mode`() {
+    fun `free users get 60 messages per model`() {
         assertTrue(MessageQuotaPolicy.canSend(0, SubscriptionTier.FREE.name))
         assertTrue(MessageQuotaPolicy.canSend(59, SubscriptionTier.FREE.name))
         assertFalse(MessageQuotaPolicy.canSend(60, SubscriptionTier.FREE.name))
@@ -28,10 +29,28 @@ class MessageQuotaPolicyTest {
     }
 
     @Test
-    fun `quota label includes mode name`() {
+    fun `quota label includes model name for free tier`() {
         assertEquals(
-            "1 of 60 Tutor messages left today",
-            MessageQuotaPolicy.quotaLabel(59, SubscriptionTier.FREE.name, AppMode.TUTOR)
+            "1 of 60 GPT-OSS messages left today",
+            MessageQuotaPolicy.quotaLabel(
+                59,
+                SubscriptionTier.FREE.name,
+                AppMode.STUDY,
+                FreeModelVariant.TUTOR
+            )
+        )
+    }
+
+    @Test
+    fun `quota label includes mode name for pro tier`() {
+        assertEquals(
+            "1 of 500 Tutor mode messages left today",
+            MessageQuotaPolicy.quotaLabel(
+                499,
+                SubscriptionTier.BASIC.name,
+                AppMode.TUTOR,
+                FreeModelVariant.TUTOR
+            )
         )
     }
 }

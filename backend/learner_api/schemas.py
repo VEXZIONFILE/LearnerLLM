@@ -140,6 +140,7 @@ class MessageQuotaResponse(BaseModel):
     can_send: bool
     quota_label: str
     app_mode: AppMode
+    free_model_variant: FreeModelVariant | None = None
 
 
 class RecordScanRequest(BaseModel):

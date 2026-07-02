@@ -99,6 +99,7 @@ fun ChatScreen(
     val scope = rememberCoroutineScope()
     val isPremium = subscriptionTier == SubscriptionTier.BASIC.name ||
         subscriptionTier == SubscriptionTier.PRO.name
+    val isFreeTier = subscriptionTier == SubscriptionTier.FREE.name
     val behaviorMode = uiState.selectedMode.learningBehavior(uiState.selectedFreeModel)
     val density = LocalDensity.current
     val imeBottom = WindowInsets.ime.getBottom(density)
@@ -187,7 +188,7 @@ fun ChatScreen(
                                     uiState.subscriptionTier == SubscriptionTier.BASIC.name ->
                                         "Daily limit reached for this mode (500/day). Upgrade to Premium for unlimited messages."
                                     else ->
-                                        "Daily limit reached for this mode (60/day). Upgrade to Pro for 500 messages per mode."
+                                        "Daily limit reached for ${uiState.selectedFreeModel.quotaLabel} (60/day across all modes). Switch models or upgrade to Pro."
                                 },
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -256,7 +257,7 @@ fun ChatScreen(
             onModeSelected = viewModel::selectMode
         )
 
-        if (uiState.selectedMode == AppMode.FREE) {
+        if (isFreeTier) {
             FreeModelPicker(
                 selectedVariant = uiState.selectedFreeModel,
                 onVariantSelected = viewModel::selectFreeModel

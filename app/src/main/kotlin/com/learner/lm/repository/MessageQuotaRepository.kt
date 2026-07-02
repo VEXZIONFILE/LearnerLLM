@@ -2,6 +2,7 @@ package com.learner.lm.repository
 
 import android.content.Context
 import com.learner.lm.ai.AppMode
+import com.learner.lm.ai.FreeModelVariant
 import com.learner.lm.billing.MessageQuotaExceededException
 import com.learner.lm.billing.MessageQuotaStatus
 import retrofit2.HttpException
@@ -17,7 +18,10 @@ class MessageQuotaRepository(@Suppress("UNUSED_PARAMETER") context: Context) {
         }
     }
 
-    suspend fun fetchStatus(appMode: AppMode): Result<MessageQuotaStatus> {
+    suspend fun fetchStatus(
+        appMode: AppMode,
+        freeModelVariant: FreeModelVariant
+    ): Result<MessageQuotaStatus> {
         val service = apiService
             ?: return Result.failure(
                 IllegalStateException(
@@ -26,7 +30,10 @@ class MessageQuotaRepository(@Suppress("UNUSED_PARAMETER") context: Context) {
             )
 
         return try {
-            val dto = service.getMessageQuota(appMode.name)
+            val dto = service.getMessageQuota(
+                appMode = appMode.name,
+                freeModelVariant = freeModelVariant.name
+            )
             Result.success(dto.toStatus())
         } catch (error: Exception) {
             Result.failure(
@@ -40,19 +47,25 @@ class MessageQuotaRepository(@Suppress("UNUSED_PARAMETER") context: Context) {
 
     fun mapHttpError(error: HttpException): Exception = when (error.code()) {
         429 -> MessageQuotaExceededException(
-            error.message() ?: "Daily message limit reached for this mode. Upgrade for more messages."
+            error.message() ?: "Daily message limit reached. Upgrade for more messages."
         )
         else -> IllegalStateException(
             error.message() ?: "Could not send message. Check your connection and try again."
         )
     }
 
-    private fun MessageQuotaResponseDto.toStatus(): MessageQuotaStatus = MessageQuotaStatus(
-        usedToday = used_today,
-        isPremium = is_premium,
-        canSend = can_send,
-        remainingMessages = remaining,
-        quotaLabel = quota_label,
-        appMode = AppMode.entries.firstOrNull { it.name == app_mode } ?: AppMode.TUTOR
-    )
+    private fun MessageQuotaResponseDto.toStatus(): MessageQuotaStatus {
+        val variant = free_model_variant
+            ?.let { name -> FreeModelVariant.entries.firstOrNull { it.name == name } }
+            ?: FreeModelVariant.TUTOR
+        return MessageQuotaStatus(
+            usedToday = used_today,
+            isPremium = is_premium,
+            canSend = can_send,
+            remainingMessages = remaining,
+            quotaLabel = quota_label,
+            appMode = AppMode.entries.firstOrNull { it.name == app_mode } ?: AppMode.TUTOR,
+            freeModelVariant = variant
+        )
+    }
 }
