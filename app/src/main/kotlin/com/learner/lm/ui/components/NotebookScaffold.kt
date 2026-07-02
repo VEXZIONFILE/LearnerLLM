@@ -1,5 +1,6 @@
 package com.learner.lm.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -52,66 +52,65 @@ fun NotebookScaffold(
     onBack: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
+    val isChat = currentDestination == AppDestination.Chat && !showBack
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             Surface(color = MaterialTheme.colorScheme.background) {
                 Column {
-                    TopAppBar(
-                        title = {
-                            when {
-                                showBack -> Text(
+                    if (!isChat) {
+                        TopAppBar(
+                            title = {
+                                Text(
                                     text = currentDestination.title,
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.SemiBold
                                 )
-                                else -> BrandMark(
-                                    iconSize = 28.dp,
-                                    showWordmark = true
-                                )
-                            }
-                        },
-                        navigationIcon = {
-                            if (showBack && onBack != null) {
-                                IconButton(onClick = onBack) {
-                                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                            },
+                            navigationIcon = {
+                                if (showBack && onBack != null) {
+                                    IconButton(onClick = onBack) {
+                                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                                    }
                                 }
-                            }
-                        },
-                        actions = {
-                            if (!showBack && userProfile != null && isPremiumTier(userProfile.subscriptionTier)) {
-                                Text(
-                                    text = AccountDisplay.planLabel(userProfile.subscriptionTier),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(end = AppSpacing.md)
-                                )
-                            }
-                            if (currentDestination == AppDestination.Profile && userProfile != null) {
-                                ProfileAvatar(
-                                    name = userProfile.displayName,
-                                    photoUrl = userProfile.photoUrl,
-                                    size = 32.dp,
-                                    modifier = Modifier.padding(end = AppSpacing.md)
-                                )
-                            }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.background,
-                            scrolledContainerColor = MaterialTheme.colorScheme.background
+                            },
+                            actions = {
+                                if (!showBack && userProfile != null && isPremiumTier(userProfile.subscriptionTier)) {
+                                    Text(
+                                        text = AccountDisplay.planLabel(userProfile.subscriptionTier),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(end = AppSpacing.md)
+                                    )
+                                }
+                                if (currentDestination == AppDestination.Profile && userProfile != null) {
+                                    ProfileAvatar(
+                                        name = userProfile.displayName,
+                                        photoUrl = userProfile.photoUrl,
+                                        size = 32.dp,
+                                        modifier = Modifier.padding(end = AppSpacing.md)
+                                    )
+                                }
+                            },
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.background
+                            )
                         )
-                    )
+                    }
                     if (!showBack && currentDestination.showsBottomNav) {
                         LearnerTopNav(
                             currentDestination = currentDestination,
                             onNavigate = onNavigate
                         )
                     }
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f),
-                        thickness = 0.5.dp
-                    )
+                    if (!isChat) {
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                            thickness = 0.5.dp
+                        )
+                    }
                 }
             }
         }
@@ -144,7 +143,7 @@ private fun LearnerTopNav(
                 onClick = { onNavigate(destination) },
                 modifier = Modifier
                     .weight(1f)
-                    .height(40.dp),
+                    .height(38.dp),
                 shape = RoundedCornerShape(AppRadii.md),
                 color = if (selected) {
                     MaterialTheme.colorScheme.surfaceVariant
@@ -153,11 +152,7 @@ private fun LearnerTopNav(
                 },
                 border = BorderStroke(
                     1.dp,
-                    if (selected) {
-                        MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)
-                    } else {
-                        MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
-                    }
+                    MaterialTheme.colorScheme.outline.copy(alpha = if (selected) 0.3f else 0.12f)
                 )
             ) {
                 Row(
@@ -168,7 +163,7 @@ private fun LearnerTopNav(
                     Icon(
                         destination.icon(),
                         contentDescription = destination.shortLabel,
-                        modifier = Modifier.size(18.dp),
+                        modifier = Modifier.size(17.dp),
                         tint = if (selected) {
                             MaterialTheme.colorScheme.onSurface
                         } else {
@@ -177,7 +172,7 @@ private fun LearnerTopNav(
                     )
                     Text(
                         text = destination.shortLabel,
-                        modifier = Modifier.padding(start = 6.dp),
+                        modifier = Modifier.padding(start = 5.dp),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
                         color = if (selected) {
@@ -214,10 +209,7 @@ fun NotebookCard(
         shape = RoundedCornerShape(AppRadii.lg),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.outline.copy(alpha = 0.22f)
-        )
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.22f))
     ) {
         Box(modifier = Modifier.padding(AppSpacing.lg)) {
             content()
@@ -235,10 +227,7 @@ fun NotebookBadge(
         modifier = modifier,
         shape = RoundedCornerShape(AppRadii.pill),
         color = MaterialTheme.colorScheme.surfaceVariant,
-        border = BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-        )
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
     ) {
         Text(
             text = text,
