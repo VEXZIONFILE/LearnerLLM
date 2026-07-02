@@ -10,7 +10,7 @@ class FirebaseAuthInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val token = runBlocking {
             try {
-                FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.await()?.token
+                FirebaseAuth.getInstance().currentUser?.getIdToken(true)?.await()?.token
             } catch (_: Exception) {
                 null
             }

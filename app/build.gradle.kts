@@ -40,7 +40,7 @@ android {
             useSupportLibrary = true
         }
 
-        buildConfigField("String", "LEARNER_API_BASE_URL", "\"${localProperty("LEARNER_API_BASE_URL", "http://10.0.2.2:8080/")}\"")
+        buildConfigField("String", "LEARNER_API_BASE_URL", "\"${localProperty("LEARNER_API_BASE_URL", "https://learnerllm-2.onrender.com/")}\"")
         buildConfigField("String", "APP_REFERER", "\"https://github.com/VEXZIONFILE/LearnerLLM\"")
     }
 

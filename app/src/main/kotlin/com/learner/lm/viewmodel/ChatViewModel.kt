@@ -21,6 +21,9 @@ import com.learner.lm.billing.MessageQuotaStatus
 import com.learner.lm.billing.SubscriptionTier
 import com.learner.lm.database.ChatMessageEntity
 import com.learner.lm.repository.ChatMessage
+import com.learner.lm.ai.TutorEngine
+import com.learner.lm.repository.AiRepository
+import com.learner.lm.repository.NetworkErrors
 import com.learner.lm.repository.LearnerApiConfig
 import com.learner.lm.repository.LearnerChatRepository
 import com.learner.lm.repository.MessageQuotaRepository
@@ -35,6 +38,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.IOException
 
 data class ReportTarget(
     val messageId: Long,
@@ -62,7 +66,8 @@ data class ChatUiState(
     val isQuotaLoading: Boolean = false,
     val messageQuotaLabel: String = "",
     val canSendMessage: Boolean = true,
-    val isPremiumMessaging: Boolean = false
+    val isPremiumMessaging: Boolean = false,
+    val isOfflineMode: Boolean = false
 ) {
     val activeModelLabel: String
         get() = ModelRegistry.displayLabel(selectedMode, subscriptionTier, selectedFreeModel)
@@ -86,15 +91,14 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     )
 
     private val messageQuotaRepository = MessageQuotaRepository(application)
+    private val offlineTutorEngine = TutorEngine(AiRepository())
 
     private val learnerChatRepository: LearnerChatRepository? by lazy {
-        if (LearnerApiConfig.isConfigured) {
-            try {
-                LearnerChatRepository()
-            } catch (_: Exception) {
-                null
-            }
-        } else {
+        if (!LearnerApiConfig.isConfigured) return@lazy null
+        try {
+            LearnerChatRepository()
+        } catch (error: Exception) {
+            android.util.Log.w("ChatViewModel", "API client init failed: ${error.message}")
             null
         }
     }
@@ -206,6 +210,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                 scannedText = null,
                 error = null,
                 isLoading = false,
+                isOfflineMode = false,
                 sessionLabel = "Chat $sessionCounter"
             )
         }
@@ -320,11 +325,21 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     conversationHistory = history,
                     scannedText = current.scannedText
                 )
-                val chatRepository = learnerChatRepository
-                    ?: throw IllegalStateException(
-                        "Learner API not configured. Set LEARNER_API_BASE_URL in local.properties."
-                    )
-                val response = chatRepository.sendMessage(_sessionId.value, context)
+
+                var usedOffline = false
+                val response = try {
+                    val chatRepository = learnerChatRepository
+                        ?: throw IOException("API unavailable")
+                    chatRepository.sendMessage(_sessionId.value, context)
+                } catch (error: Exception) {
+                    if (error is MessageQuotaExceededException) throw error
+                    if (NetworkErrors.isNetworkFailure(error) || learnerChatRepository == null) {
+                        usedOffline = true
+                        offlineTutorEngine.respond(context)
+                    } else {
+                        throw IllegalStateException(NetworkErrors.friendlyMessage(error), error)
+                    }
+                }
 
                 tutorRepository.saveMessage(
                     _sessionId.value,
@@ -339,12 +354,14 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
+                        isOfflineMode = usedOffline,
                         hintLevel = if (current.selectedMode.learningBehavior(current.selectedFreeModel) == AppMode.TUTOR) {
                             response.hintLevel
                         } else {
                             HintLevel.GENTLE_NUDGE
                         },
-                        selectedSubject = response.subject
+                        selectedSubject = response.subject,
+                        error = null
                     )
                 }
                 refreshMessageQuota()
@@ -352,7 +369,12 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                 if (e is MessageQuotaExceededException) {
                     tutorRepository.clearSession(_sessionId.value)
                 }
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = NetworkErrors.friendlyMessage(e)
+                    )
+                }
                 refreshMessageQuota()
             }
         }

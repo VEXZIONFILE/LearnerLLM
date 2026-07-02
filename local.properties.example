@@ -2,7 +2,10 @@
 sdk.dir=/path/to/Android/Sdk
 
 # LearnerLM backend API (emulator → host machine)
-LEARNER_API_BASE_URL=http://10.0.2.2:8080/
+LEARNER_API_BASE_URL=https://learnerllm-2.onrender.com/
+
+# Emulator local backend (uncomment for local dev):
+# LEARNER_API_BASE_URL=http://10.0.2.2:8080/
 
 # Must match package_name in app/google-services.json (default: com.learnerlm)
 # APP_APPLICATION_ID=com.learnerlm

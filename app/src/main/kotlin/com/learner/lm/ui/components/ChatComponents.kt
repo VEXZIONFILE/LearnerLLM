@@ -45,81 +45,57 @@ fun ChatBubble(
     onCopy: (() -> Unit)? = null
 ) {
     val dark = isSystemInDarkTheme()
-    if (isStudent) {
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            horizontalArrangement = Arrangement.End
-        ) {
-            Surface(
-                modifier = Modifier.widthIn(max = 320.dp),
-                shape = RoundedCornerShape(
-                    topStart = AppRadii.lg,
-                    topEnd = AppRadii.lg,
-                    bottomStart = AppRadii.lg,
-                    bottomEnd = AppRadii.sm
-                ),
-                color = if (dark) AppColors.DarkUserBubble else AppColors.UserBubble,
-                shadowElevation = 0.dp
-            ) {
-                Text(
-                    text = message,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-        }
-    } else {
-        val stripeColor = if (dark) AppColors.DarkMessageStripe else AppColors.MessageStripe
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .background(stripeColor)
-                .padding(horizontal = AppSpacing.md, vertical = 16.dp)
-        ) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = AppSpacing.md, vertical = 6.dp),
+        horizontalArrangement = if (isStudent) Arrangement.End else Arrangement.Start
+    ) {
+        if (!isStudent) {
             LearnerLogo(
                 showWordmark = false,
                 modifier = Modifier
-                    .padding(top = 2.dp, end = AppSpacing.sm)
-                    .size(30.dp)
+                    .padding(top = 4.dp, end = 12.dp)
+                    .size(28.dp)
             )
-            Column(modifier = Modifier.fillMaxWidth(0.88f)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+        }
+
+        Column(
+            modifier = Modifier.widthIn(max = AppSpacing.chatMaxWidth - 48.dp),
+            horizontalAlignment = if (isStudent) Alignment.End else Alignment.Start
+        ) {
+            if (isStudent) {
+                Surface(
+                    shape = RoundedCornerShape(
+                        topStart = 20.dp,
+                        topEnd = 20.dp,
+                        bottomStart = 20.dp,
+                        bottomEnd = 6.dp
+                    ),
+                    color = if (dark) AppColors.DarkUserBubble else AppColors.UserBubble
                 ) {
                     Text(
-                        text = "L",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontWeight = FontWeight.Bold
+                        text = message,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
-            }
-            Column(
-                modifier = Modifier
-                    .padding(start = 14.dp)
-                    .weight(1f)
-            ) {
+            } else {
                 Text(
                     text = message,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
-                    lineHeight = MaterialTheme.typography.bodyLarge.lineHeight
+                    lineHeight = MaterialTheme.typography.bodyLarge.lineHeight,
+                    modifier = Modifier.padding(top = 4.dp, end = 8.dp)
                 )
                 if (onCopy != null || onReport != null) {
                     Row(
-                        modifier = Modifier.padding(top = 8.dp),
+                        modifier = Modifier.padding(top = 4.dp),
                         horizontalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         if (onCopy != null) {
-                            IconButton(
-                                onClick = onCopy,
-                                modifier = Modifier.size(32.dp)
-                            ) {
+                            IconButton(onClick = onCopy, modifier = Modifier.size(32.dp)) {
                                 Icon(
                                     Icons.Outlined.ContentCopy,
                                     contentDescription = "Copy",
@@ -129,10 +105,7 @@ fun ChatBubble(
                             }
                         }
                         if (onReport != null) {
-                            IconButton(
-                                onClick = onReport,
-                                modifier = Modifier.size(32.dp)
-                            ) {
+                            IconButton(onClick = onReport, modifier = Modifier.size(32.dp)) {
                                 Icon(
                                     Icons.Outlined.Flag,
                                     contentDescription = "Report",
@@ -150,26 +123,19 @@ fun ChatBubble(
 
 @Composable
 fun TypingIndicator(modifier: Modifier = Modifier) {
-    val dark = isSystemInDarkTheme()
-    val stripeColor = if (dark) AppColors.DarkMessageStripe else AppColors.MessageStripe
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(stripeColor)
-            .padding(horizontal = AppSpacing.md, vertical = 16.dp),
+            .padding(horizontal = AppSpacing.md, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         LearnerLogo(
             showWordmark = false,
             modifier = Modifier
-                .padding(end = AppSpacing.sm)
-                .size(30.dp)
+                .padding(end = 12.dp)
+                .size(28.dp)
         )
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(start = 14.dp)
-        ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             repeat(3) { index ->
                 TypingDot(delayMillis = index * 150)
             }
@@ -191,7 +157,7 @@ private fun TypingDot(delayMillis: Int) {
     )
     Box(
         modifier = Modifier
-            .size(8.dp)
+            .size(7.dp)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha))
     )
