@@ -6,6 +6,7 @@ import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 data class UserProfileDto(
     val uid: String,
@@ -37,6 +38,7 @@ data class ChatRequestDto(
     val session_id: String? = null,
     val grade_level: Int,
     val app_mode: String,
+    val free_model_variant: String? = null,
     val hint_level: Int,
     val subject: StudySubjectInputDto? = null,
     val student_message: String,
@@ -62,6 +64,16 @@ data class ScanQuotaResponseDto(
     val is_premium: Boolean,
     val can_scan: Boolean,
     val quota_label: String
+)
+
+data class MessageQuotaResponseDto(
+    val used_today: Int,
+    val daily_limit: Int? = null,
+    val remaining: Int? = null,
+    val is_premium: Boolean,
+    val can_send: Boolean,
+    val quota_label: String,
+    val app_mode: String
 )
 
 data class BillingVerifyRequestDto(
@@ -133,6 +145,9 @@ interface LearnerApiService {
 
     @POST("v1/chat/messages")
     suspend fun sendChatMessage(@Body body: ChatRequestDto): ChatResponseDto
+
+    @GET("v1/chat/quota")
+    suspend fun getMessageQuota(@Query("app_mode") appMode: String): MessageQuotaResponseDto
 
     @GET("v1/scans/quota")
     suspend fun getScanQuota(): ScanQuotaResponseDto

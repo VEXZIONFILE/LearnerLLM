@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.learner.lm.LearnerLMApplication
 import com.learner.lm.ai.AiReportReason
 import com.learner.lm.ai.AppMode
+import com.learner.lm.ai.FreeModelVariant
 import com.learner.lm.ai.HintLevel
 import com.learner.lm.ai.ModelRegistry
 import com.learner.lm.ai.StudySubject
@@ -13,11 +14,16 @@ import com.learner.lm.ai.Subject
 import com.learner.lm.ai.SubjectCategory
 import com.learner.lm.ai.SubscriptionCapabilities
 import com.learner.lm.ai.TutorContext
+import com.learner.lm.ai.learningBehavior
+import com.learner.lm.billing.MessageQuotaExceededException
+import com.learner.lm.billing.MessageQuotaPolicy
+import com.learner.lm.billing.MessageQuotaStatus
 import com.learner.lm.billing.SubscriptionTier
 import com.learner.lm.database.ChatMessageEntity
 import com.learner.lm.repository.ChatMessage
 import com.learner.lm.repository.LearnerApiConfig
 import com.learner.lm.repository.LearnerChatRepository
+import com.learner.lm.repository.MessageQuotaRepository
 import com.learner.lm.repository.SubjectRepository
 import com.learner.lm.repository.TutorRepository
 import com.learner.lm.utils.GradeLevelValidator
@@ -40,6 +46,7 @@ data class ChatUiState(
     val isLoading: Boolean = false,
     val gradeLevel: Int = 8,
     val selectedMode: AppMode = AppMode.TUTOR,
+    val selectedFreeModel: FreeModelVariant = FreeModelVariant.TUTOR,
     val subscriptionTier: String = SubscriptionTier.FREE.name,
     val selectedSubject: StudySubject = StudySubject.Builtin(Subject.GENERAL),
     val customSubjects: List<StudySubject.Custom> = emptyList(),
@@ -51,10 +58,14 @@ data class ChatUiState(
     val isSubmittingReport: Boolean = false,
     val reportConfirmation: String? = null,
     val reportError: String? = null,
-    val sessionLabel: String = "New chat"
+    val sessionLabel: String = "New chat",
+    val isQuotaLoading: Boolean = false,
+    val messageQuotaLabel: String = "",
+    val canSendMessage: Boolean = true,
+    val isPremiumMessaging: Boolean = false
 ) {
     val activeModelLabel: String
-        get() = ModelRegistry.displayLabel(selectedMode, subscriptionTier)
+        get() = ModelRegistry.displayLabel(selectedMode, subscriptionTier, selectedFreeModel)
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -73,6 +84,8 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val subjectRepository = SubjectRepository(
         customSubjectDao = database.customSubjectDao()
     )
+
+    private val messageQuotaRepository = MessageQuotaRepository(application)
 
     private val learnerChatRepository: LearnerChatRepository? by lazy {
         if (LearnerApiConfig.isConfigured) {
@@ -109,6 +122,51 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         }
+        refreshMessageQuota()
+    }
+
+    fun refreshMessageQuota() {
+        val state = _uiState.value
+        val tier = state.subscriptionTier
+        val appMode = state.selectedMode
+
+        if (tier == SubscriptionTier.PRO.name) {
+            _uiState.update {
+                it.copy(
+                    isQuotaLoading = false,
+                    isPremiumMessaging = true,
+                    canSendMessage = true,
+                    messageQuotaLabel = MessageQuotaPolicy.quotaLabel(0, tier, appMode)
+                )
+            }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isQuotaLoading = true) }
+            messageQuotaRepository.fetchStatus(appMode)
+                .onSuccess { status ->
+                    _uiState.update {
+                        it.copy(
+                            isQuotaLoading = false,
+                            isPremiumMessaging = status.isPremium,
+                            canSendMessage = status.canSend,
+                            messageQuotaLabel = status.quotaLabel
+                        )
+                    }
+                }
+                .onFailure {
+                    val fallback = MessageQuotaStatus.forTier(0, tier, appMode)
+                    _uiState.update {
+                        it.copy(
+                            isQuotaLoading = false,
+                            isPremiumMessaging = fallback.isPremium,
+                            canSendMessage = fallback.canSend,
+                            messageQuotaLabel = fallback.quotaLabel
+                        )
+                    }
+                }
+        }
     }
 
     fun setGradeLevel(grade: Int) {
@@ -117,10 +175,16 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setSubscriptionTier(tier: String) {
         _uiState.update { it.copy(subscriptionTier = tier) }
+        refreshMessageQuota()
     }
 
     fun selectMode(mode: AppMode) {
         _uiState.update { it.copy(selectedMode = mode, error = null) }
+        refreshMessageQuota()
+    }
+
+    fun selectFreeModel(variant: FreeModelVariant) {
+        _uiState.update { it.copy(selectedFreeModel = variant, error = null) }
     }
 
     fun selectSubject(subject: StudySubject) {
@@ -206,36 +270,48 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun sendMessage(content: String) {
-        if (content.isBlank() || _uiState.value.isLoading) return
+        val trimmed = content.trim()
+        if (trimmed.isBlank() || _uiState.value.isLoading) return
+
+        val state = _uiState.value
+        if (!state.canSendMessage && !state.isPremiumMessaging) {
+            _uiState.update {
+                it.copy(
+                    error = "Daily message limit reached for ${MessageQuotaPolicy.modeLabel(state.selectedMode)}. Upgrade for more messages."
+                )
+            }
+            return
+        }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
-            val state = _uiState.value
+            val current = _uiState.value
             tutorRepository.saveMessage(
                 _sessionId.value,
                 ChatMessage(
                     role = "student",
-                    content = content,
-                    subject = state.selectedSubject,
-                    hintLevel = state.hintLevel
+                    content = trimmed,
+                    subject = current.selectedSubject,
+                    hintLevel = current.hintLevel
                 )
             )
 
             try {
-                val capabilities = SubscriptionCapabilities.forTier(state.subscriptionTier)
-                val history = state.messages
+                val capabilities = SubscriptionCapabilities.forTier(current.subscriptionTier)
+                val history = current.messages
                     .takeLast(capabilities.conversationHistoryLimit)
                     .map { entity -> entity.role to entity.content }
                 val context = TutorContext(
-                    gradeLevel = state.gradeLevel,
-                    subject = state.selectedSubject,
-                    appMode = state.selectedMode,
-                    subscriptionTier = state.subscriptionTier,
-                    hintLevel = state.hintLevel,
-                    studentMessage = content,
+                    gradeLevel = current.gradeLevel,
+                    subject = current.selectedSubject,
+                    appMode = current.selectedMode,
+                    freeModelVariant = current.selectedFreeModel,
+                    subscriptionTier = current.subscriptionTier,
+                    hintLevel = current.hintLevel,
+                    studentMessage = trimmed,
                     conversationHistory = history,
-                    scannedText = state.scannedText
+                    scannedText = current.scannedText
                 )
                 val chatRepository = learnerChatRepository
                     ?: throw IllegalStateException(
@@ -256,7 +332,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        hintLevel = if (state.selectedMode == AppMode.TUTOR) {
+                        hintLevel = if (current.selectedMode.learningBehavior(current.selectedFreeModel) == AppMode.TUTOR) {
                             response.hintLevel
                         } else {
                             HintLevel.GENTLE_NUDGE
@@ -264,8 +340,13 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                         selectedSubject = response.subject
                     )
                 }
+                refreshMessageQuota()
             } catch (e: Exception) {
+                if (e is MessageQuotaExceededException) {
+                    tutorRepository.clearSession(_sessionId.value)
+                }
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
+                refreshMessageQuota()
             }
         }
     }
@@ -290,6 +371,10 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     fun clearReportError() {
         _uiState.update { it.copy(reportError = null) }
+    }
+
+    fun clearError() {
+        _uiState.update { it.copy(error = null) }
     }
 
     fun submitReport(reason: AiReportReason, details: String?) {

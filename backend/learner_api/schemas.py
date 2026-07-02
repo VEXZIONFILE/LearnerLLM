@@ -8,6 +8,13 @@ class AppMode(str, Enum):
     TUTOR = "TUTOR"
     STUDY = "STUDY"
     CODE = "CODE"
+    FREE = "FREE"
+
+
+class FreeModelVariant(str, Enum):
+    TUTOR = "TUTOR"
+    STUDY = "STUDY"
+    CODE = "CODE"
 
 
 class SubjectCategory(str, Enum):
@@ -81,6 +88,7 @@ class ChatRequest(BaseModel):
     session_id: str | None = None
     grade_level: int = Field(ge=6, le=12, default=8)
     app_mode: AppMode = AppMode.TUTOR
+    free_model_variant: FreeModelVariant | None = None
     hint_level: HintLevel = HintLevel.GENTLE_NUDGE
     subject: StudySubjectInput | None = None
     student_message: str = Field(min_length=1)
@@ -122,6 +130,16 @@ class ScanQuotaResponse(BaseModel):
     is_premium: bool
     can_scan: bool
     quota_label: str
+
+
+class MessageQuotaResponse(BaseModel):
+    used_today: int
+    daily_limit: int | None
+    remaining: int | None
+    is_premium: bool
+    can_send: bool
+    quota_label: str
+    app_mode: AppMode
 
 
 class RecordScanRequest(BaseModel):

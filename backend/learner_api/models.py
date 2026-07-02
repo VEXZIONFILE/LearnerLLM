@@ -28,6 +28,7 @@ class User(Base):
     chat_sessions: Mapped[list["ChatSession"]] = relationship(back_populates="user")
     study_topics: Mapped[list["StudyTopic"]] = relationship(back_populates="user")
     scan_usages: Mapped[list["ScanUsage"]] = relationship(back_populates="user")
+    message_usages: Mapped[list["MessageUsage"]] = relationship(back_populates="user")
     subscriptions: Mapped[list["SubscriptionRecord"]] = relationship(back_populates="user")
 
 
@@ -105,6 +106,27 @@ class ScanUsage(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
     user: Mapped[User] = relationship(back_populates="scan_usages")
+
+
+class MessageUsage(Base):
+    __tablename__ = "message_usage"
+    __table_args__ = (
+        UniqueConstraint(
+            "user_uid",
+            "usage_date",
+            "app_mode",
+            name="uq_user_message_mode_date",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_uid: Mapped[str] = mapped_column(ForeignKey("users.uid"), index=True)
+    usage_date: Mapped[str] = mapped_column(String(10))
+    app_mode: Mapped[str] = mapped_column(String(16), default="TUTOR")
+    count: Mapped[int] = mapped_column(Integer, default=0)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+    user: Mapped[User] = relationship(back_populates="message_usages")
 
 
 class SubscriptionRecord(Base):

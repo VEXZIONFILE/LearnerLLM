@@ -16,6 +16,12 @@ object SubscriptionFeatures {
             premiumHighlight = true
         ),
         PlanComparisonRow(
+            feature = "Chat messages",
+            standard = "60 per mode / day",
+            premium = "500 per mode (Pro) · Unlimited (Premium & Mega)",
+            premiumHighlight = true
+        ),
+        PlanComparisonRow(
             feature = "AI models",
             standard = "Tutor, Study & Code",
             premium = "Frontier models + deeper reasoning"

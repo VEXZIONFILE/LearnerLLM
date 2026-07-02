@@ -14,6 +14,8 @@ PRODUCT_TIER_MAP = {
     "learnerlm_pro_monthly": "PRO",
 }
 
+MEGA_PRODUCT_ID = "learnerlm_pro_yearly"
+
 
 class BillingService:
     def __init__(self, settings: Settings) -> None:
@@ -81,3 +83,22 @@ class BillingService:
         user.subscription_tier = record.tier
         await db.commit()
         return record.tier
+
+    async def get_active_product_id(self, db: AsyncSession, user: User) -> str | None:
+        result = await db.execute(
+            select(SubscriptionRecord)
+            .where(SubscriptionRecord.user_uid == user.uid, SubscriptionRecord.verified.is_(True))
+            .order_by(SubscriptionRecord.updated_at.desc())
+        )
+        record = result.scalars().first()
+        if record is None:
+            return None
+
+        if record.expires_at:
+            expires = record.expires_at
+            if expires.tzinfo is None:
+                expires = expires.replace(tzinfo=timezone.utc)
+            if expires < datetime.now(timezone.utc):
+                return None
+
+        return record.product_id

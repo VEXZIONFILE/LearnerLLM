@@ -4,15 +4,19 @@ class PromptBuilder {
 
     fun buildSystemPrompt(context: TutorContext): String {
         val capabilities = SubscriptionCapabilities.forTier(context.subscriptionTier)
-        return when (context.appMode) {
-            AppMode.TUTOR -> buildTutorSystemPrompt(context, capabilities)
-            AppMode.STUDY -> buildStudySystemPrompt(context, capabilities)
-            AppMode.CODE -> buildCodeSystemPrompt(context, capabilities)
+        val learningMode = context.appMode.learningBehavior(context.freeModelVariant)
+        val freeMode = context.appMode == AppMode.FREE
+        return when (learningMode) {
+            AppMode.TUTOR -> buildTutorSystemPrompt(context, capabilities, freeMode)
+            AppMode.STUDY -> buildStudySystemPrompt(context, capabilities, freeMode)
+            AppMode.CODE -> buildCodeSystemPrompt(context, capabilities, freeMode)
+            AppMode.FREE -> buildTutorSystemPrompt(context, capabilities, freeMode = true)
         }
     }
 
     fun buildUserPrompt(context: TutorContext): String {
         val capabilities = SubscriptionCapabilities.forTier(context.subscriptionTier)
+        val learningMode = context.appMode.learningBehavior(context.freeModelVariant)
         val history = context.conversationHistory
             .takeLast(capabilities.conversationHistoryLimit)
             .joinToString("\n") { (role, content) -> "$role: $content" }
@@ -23,11 +27,17 @@ class PromptBuilder {
             capabilities.isPremium -> "Subscription: Pro — provide richer examples and more detail."
             else -> "Subscription: Standard — keep responses concise but correct."
         }
+        val freeNote = if (context.appMode == AppMode.FREE) {
+            "Mode: Free Models (OpenRouter free tier — concise but helpful).\n"
+        } else {
+            ""
+        }
 
-        return when (context.appMode) {
+        return when (learningMode) {
             AppMode.TUTOR -> """
                 Grade level: ${context.gradeLevel}
                 $subjectLine
+                $freeNote
                 Mode: Tutor (Socratic, step-by-step)
                 Hint level: ${context.hintLevel.level}
                 $tierNote
@@ -44,6 +54,7 @@ class PromptBuilder {
             AppMode.STUDY -> """
                 Grade level: ${context.gradeLevel}
                 $subjectLine
+                $freeNote
                 Mode: Study pack generator
                 $tierNote
                 $scanned
@@ -56,6 +67,7 @@ class PromptBuilder {
             AppMode.CODE -> """
                 Grade level: ${context.gradeLevel}
                 $subjectLine
+                $freeNote
                 Mode: Code help (debug & teach only)
                 $tierNote
                 $scanned
@@ -67,12 +79,24 @@ class PromptBuilder {
 
                 Explain and debug in small teachable pieces. Max ~${capabilities.codeMaxSuggestedLines} lines of suggested code.
             """.trimIndent()
+
+            AppMode.FREE -> """
+                Grade level: ${context.gradeLevel}
+                $subjectLine
+                $freeNote
+                Mode: Free Models
+                $tierNote
+                $scanned
+
+                Student message: ${context.studentMessage}
+            """.trimIndent()
         }
     }
 
     private fun buildTutorSystemPrompt(
         context: TutorContext,
-        capabilities: SubscriptionCapabilities
+        capabilities: SubscriptionCapabilities,
+        freeMode: Boolean = false
     ): String {
         val gradeGuidance = tutorGradeGuidance(context.gradeLevel)
         val subjectGuidance = subjectGuidanceFor(context.subject)
@@ -82,8 +106,14 @@ class PromptBuilder {
             "Provide at most ${capabilities.tutorExampleCount} brief reasoning example."
         }
 
+        val modelIntro = if (freeMode) {
+            "You are Learner LM Free Tutor — powered by gpt-oss-120b (free) for grades 6–12."
+        } else {
+            "You are Learner LM Tutor Mode — powered by gpt-oss-120b for grades 6–12."
+        }
+
         return """
-            You are Learner LM Tutor Mode — powered by gpt-oss-120b for grades 6–12.
+            $modelIntro
 
             ROLE: Primary Socratic tutor. Guide learning step-by-step. Never be a homework solver.
 
@@ -112,7 +142,8 @@ class PromptBuilder {
 
     private fun buildStudySystemPrompt(
         context: TutorContext,
-        capabilities: SubscriptionCapabilities
+        capabilities: SubscriptionCapabilities,
+        freeMode: Boolean = false
     ): String {
         val sections = when (capabilities.studySections) {
             SubscriptionCapabilities.StudySectionDepth.PRO -> """
@@ -144,8 +175,14 @@ class PromptBuilder {
             """.trimIndent()
         }
 
+        val modelIntro = if (freeMode) {
+            "You are Learner LM Free Study Mode — powered by NVIDIA Nemotron 3 Super (free)."
+        } else {
+            "You are Learner LM Study Mode — powered by NVIDIA Nemotron 3 Super."
+        }
+
         return """
-            You are Learner LM Study Mode — powered by NVIDIA Nemotron 3 Super.
+            $modelIntro
             Behave like a NotebookLM-style study generator for grade ${context.gradeLevel} students.
 
             ROLE: Convert topics into structured, study-ready materials.
@@ -163,7 +200,8 @@ class PromptBuilder {
 
     private fun buildCodeSystemPrompt(
         context: TutorContext,
-        capabilities: SubscriptionCapabilities
+        capabilities: SubscriptionCapabilities,
+        freeMode: Boolean = false
     ): String {
         val lineLimit = capabilities.codeMaxSuggestedLines
         val depth = when {
@@ -174,8 +212,14 @@ class PromptBuilder {
             else -> "Give concise explanations focused on the immediate bug or concept."
         }
 
+        val modelIntro = if (freeMode) {
+            "You are Learner LM Free Code Help — powered by Poolside Laguna M.1 (free)."
+        } else {
+            "You are Learner LM Code Help Mode — powered by Poolside Laguna M.1."
+        }
+
         return """
-            You are Learner LM Code Help Mode — powered by Poolside Laguna M.1.
+            $modelIntro
             Programming tutor for grade ${context.gradeLevel} students learning to code.
 
             ROLE: Debug and explain code step-by-step. Teach programming — do not build projects for students.

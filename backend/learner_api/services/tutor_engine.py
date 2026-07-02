@@ -4,7 +4,7 @@ import re
 from learner_api.schemas import AppMode, HintLevel
 from learner_api.services.model_registry import ModelRoute, resolve_model
 from learner_api.services.openrouter import OpenRouterClient
-from learner_api.services.prompt_builder import PromptBuilder, TutorContext
+from learner_api.services.prompt_builder import PromptBuilder, TutorContext, effective_learning_mode
 from learner_api.services.subject_classifier import SubjectClassifier
 
 
@@ -43,8 +43,13 @@ class TutorEngine:
             student_message=context.student_message,
             conversation_history=context.conversation_history,
             scanned_text=context.scanned_text,
+            free_model_variant=context.free_model_variant,
         )
-        route = resolve_model(enriched.app_mode, subscription_tier)
+        route = resolve_model(
+            enriched.app_mode,
+            subscription_tier,
+            enriched.free_model_variant,
+        )
         system_prompt = self.prompt_builder.build_system_prompt(enriched)
         user_prompt = self.prompt_builder.build_user_prompt(enriched)
 
@@ -53,10 +58,14 @@ class TutorEngine:
             user_prompt=user_prompt,
             route=route,
         )
-        sanitized = self._sanitize_response(raw_message, enriched.app_mode)
+        sanitized = self._sanitize_response(
+            raw_message,
+            effective_learning_mode(enriched.app_mode, enriched.free_model_variant),
+        )
+        learning_mode = effective_learning_mode(enriched.app_mode, enriched.free_model_variant)
         next_hint = (
             self._determine_next_hint_level(enriched, sanitized)
-            if enriched.app_mode == AppMode.TUTOR
+            if learning_mode == AppMode.TUTOR
             else enriched.hint_level
         )
 
@@ -74,7 +83,8 @@ class TutorEngine:
         if context.subject_key.startswith("custom:"):
             return context.subject_key, context.subject_display_name, context.subject_category
         builtin = context.subject_key.removeprefix("builtin:")
-        if builtin != "GENERAL" or context.app_mode == AppMode.CODE:
+        learning_mode = effective_learning_mode(context.app_mode, context.free_model_variant)
+        if builtin != "GENERAL" or learning_mode == AppMode.CODE:
             return context.subject_key, context.subject_display_name, None
         text = " ".join(filter(None, [context.student_message, context.scanned_text]))
         classified = self.subject_classifier.classify(text)
@@ -106,9 +116,10 @@ class TutorEngine:
     def _detect_mistake_seeking(self, context: TutorContext) -> str | None:
         if not self._is_answer_seeking(context.student_message):
             return None
-        if context.app_mode == AppMode.TUTOR:
+        learning_mode = effective_learning_mode(context.app_mode, context.free_model_variant)
+        if learning_mode == AppMode.TUTOR:
             return "It looks like you're asking for a direct answer. Let's work through this step by step instead."
-        if context.app_mode == AppMode.CODE:
+        if learning_mode == AppMode.CODE:
             return "I can't build full apps or projects — let's focus on one function or bug at a time."
         return None
 

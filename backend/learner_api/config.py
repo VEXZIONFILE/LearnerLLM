@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     billing_verification_disabled: bool = True
 
     free_daily_scan_limit: int = 3
+    free_daily_message_limit: int = 60
+    pro_daily_message_limit: int = 500
 
     report_notification_email: str = "elijahjmaxwell43@gmail.com"
     report_email_from: str = ""
