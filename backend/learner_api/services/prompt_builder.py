@@ -23,13 +23,9 @@ def effective_learning_mode(
     mode: AppMode,
     free_model_variant: FreeModelVariant | None = None,
 ) -> AppMode:
-    if mode != AppMode.FREE:
-        return mode
-    if free_model_variant == FreeModelVariant.STUDY:
-        return AppMode.STUDY
-    if free_model_variant == FreeModelVariant.CODE:
-        return AppMode.CODE
-    return AppMode.TUTOR
+    if mode == AppMode.FREE:
+        return AppMode.TUTOR
+    return mode
 
 
 BUILTIN_LABELS = {

@@ -13,6 +13,7 @@ from learner_api.schemas import (
     ChatRequest,
     ChatResponse,
     ChatSessionResponse,
+    FreeModelVariant,
     MessageQuotaResponse,
 )
 from learner_api.services.billing import BillingService
@@ -34,6 +35,7 @@ def _get_engine() -> TutorEngine:
 @router.get("/quota", response_model=MessageQuotaResponse)
 async def get_message_quota(
     app_mode: AppMode = AppMode.TUTOR,
+    free_model_variant: FreeModelVariant | None = None,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> MessageQuotaResponse:
@@ -41,7 +43,7 @@ async def get_message_quota(
     billing = BillingService(settings)
     product_id = await billing.get_active_product_id(db, user)
     service = MessageQuotaService(settings)
-    return await service.get_status(db, user, app_mode, product_id)
+    return await service.get_status(db, user, app_mode, free_model_variant, product_id)
 
 
 @router.post("/messages", response_model=ChatResponse)
@@ -55,7 +57,7 @@ async def send_message(
     tier = await billing.refresh_user_tier(db, user)
     product_id = await billing.get_active_product_id(db, user)
     message_quota = MessageQuotaService(settings)
-    await message_quota.ensure_can_send(db, user, tier, body.app_mode, product_id)
+    await message_quota.ensure_can_send(db, user, tier, body.app_mode, body.free_model_variant, product_id)
 
     session_id = body.session_id or str(uuid.uuid4())
     result = await db.execute(select(ChatSession).where(ChatSession.id == session_id, ChatSession.user_uid == user.uid))
@@ -77,7 +79,7 @@ async def send_message(
     )
     db.add(student_message)
     await db.commit()
-    await message_quota.record_message(db, user, body.app_mode, product_id)
+    await message_quota.record_message(db, user, body.app_mode, body.free_model_variant, product_id)
 
     engine = _get_engine()
     context = TutorContext(

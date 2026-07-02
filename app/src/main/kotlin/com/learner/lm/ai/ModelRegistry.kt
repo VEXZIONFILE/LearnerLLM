@@ -1,5 +1,7 @@
 package com.learner.lm.ai
 
+import com.learner.lm.billing.SubscriptionTier
+
 data class ModelRoute(
     val modelId: String,
     val displayName: String,
@@ -22,29 +24,13 @@ object ModelRegistry {
         subscriptionTier: String,
         freeModelVariant: FreeModelVariant = FreeModelVariant.TUTOR
     ): ModelRoute {
+        if (subscriptionTier == SubscriptionTier.FREE.name) {
+            return resolveFreeVariant(freeModelVariant)
+        }
+
         val capabilities = SubscriptionCapabilities.forTier(subscriptionTier)
         return when (mode) {
-            AppMode.FREE -> when (freeModelVariant) {
-                FreeModelVariant.TUTOR -> ModelRoute(
-                    modelId = FREE_TUTOR_MODEL,
-                    displayName = FreeModelVariant.TUTOR.displayName,
-                    temperature = 0.65,
-                    maxTokens = capabilities.tutorMaxTokens
-                )
-                FreeModelVariant.STUDY -> ModelRoute(
-                    modelId = FREE_STUDY_MODEL,
-                    displayName = FreeModelVariant.STUDY.displayName,
-                    temperature = 0.45,
-                    maxTokens = capabilities.studyMaxTokens
-                )
-                FreeModelVariant.CODE -> ModelRoute(
-                    modelId = FREE_CODE_MODEL,
-                    displayName = FreeModelVariant.CODE.displayName,
-                    temperature = 0.35,
-                    maxTokens = capabilities.codeMaxTokens
-                )
-            }
-            AppMode.TUTOR -> ModelRoute(
+            AppMode.TUTOR, AppMode.FREE -> ModelRoute(
                 modelId = TUTOR_MODEL,
                 displayName = "Learner Tutor",
                 temperature = when {
@@ -72,6 +58,30 @@ object ModelRegistry {
                     capabilities.isPremium -> 0.4
                     else -> 0.35
                 },
+                maxTokens = capabilities.codeMaxTokens
+            )
+        }
+    }
+
+    private fun resolveFreeVariant(variant: FreeModelVariant): ModelRoute {
+        val capabilities = SubscriptionCapabilities.forTier(SubscriptionTier.FREE.name)
+        return when (variant) {
+            FreeModelVariant.TUTOR -> ModelRoute(
+                modelId = FREE_TUTOR_MODEL,
+                displayName = variant.displayName,
+                temperature = 0.65,
+                maxTokens = capabilities.tutorMaxTokens
+            )
+            FreeModelVariant.STUDY -> ModelRoute(
+                modelId = FREE_STUDY_MODEL,
+                displayName = variant.displayName,
+                temperature = 0.45,
+                maxTokens = capabilities.studyMaxTokens
+            )
+            FreeModelVariant.CODE -> ModelRoute(
+                modelId = FREE_CODE_MODEL,
+                displayName = variant.displayName,
+                temperature = 0.35,
                 maxTokens = capabilities.codeMaxTokens
             )
         }

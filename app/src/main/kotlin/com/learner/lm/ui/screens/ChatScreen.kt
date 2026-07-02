@@ -99,6 +99,7 @@ fun ChatScreen(
     val scope = rememberCoroutineScope()
     val isPremium = subscriptionTier == SubscriptionTier.BASIC.name ||
         subscriptionTier == SubscriptionTier.PRO.name
+    val isFreeTier = subscriptionTier == SubscriptionTier.FREE.name
     val behaviorMode = uiState.selectedMode.learningBehavior(uiState.selectedFreeModel)
     val density = LocalDensity.current
     val imeBottom = WindowInsets.ime.getBottom(density)
@@ -187,7 +188,7 @@ fun ChatScreen(
                                     uiState.subscriptionTier == SubscriptionTier.BASIC.name ->
                                         "Daily limit reached for this mode (500/day). Upgrade to Premium for unlimited messages."
                                     else ->
-                                        "Daily limit reached for this mode (60/day). Upgrade to Pro for 500 messages per mode."
+                                        "Daily limit reached for ${uiState.selectedFreeModel.quotaLabel} (60/day across all modes). Switch models or upgrade to Pro."
                                 },
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -223,40 +224,23 @@ fun ChatScreen(
     ) {
         ChatHeader(
             activeModelLabel = uiState.activeModelLabel,
-            selectedMode = uiState.selectedMode,
-            behaviorMode = behaviorMode,
-            hintLevel = uiState.hintLevel.level,
             sessionLabel = uiState.sessionLabel,
             messageQuotaLabel = uiState.messageQuotaLabel,
             isQuotaLoading = uiState.isQuotaLoading,
             isPremiumMessaging = uiState.isPremiumMessaging,
             hasMessages = uiState.messages.isNotEmpty(),
             onNewChat = viewModel::newChat,
-            onClearChat = viewModel::clearChat
+            onClearChat = viewModel::clearChat,
+            behaviorMode = behaviorMode,
+            hintLevel = uiState.hintLevel.level
         )
-
-        if (uiState.messages.isNotEmpty()) {
-            ChatQuickActions(
-                mode = behaviorMode,
-                onAction = viewModel::sendQuickAction
-            )
-        }
-
-        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
-
-        if (!isPremium && showUpgradeBanner) {
-            PremiumUpgradeBanner(
-                onUpgrade = onNavigateToUpgrade,
-                onDismiss = { showUpgradeBanner = false }
-            )
-        }
 
         AppModePicker(
             selectedMode = uiState.selectedMode,
             onModeSelected = viewModel::selectMode
         )
 
-        if (uiState.selectedMode == AppMode.FREE) {
+        if (isFreeTier) {
             FreeModelPicker(
                 selectedVariant = uiState.selectedFreeModel,
                 onVariantSelected = viewModel::selectFreeModel
@@ -279,10 +263,12 @@ fun ChatScreen(
 
         if (uiState.messages.isNotEmpty()) {
             ChatQuickActions(
-                mode = uiState.selectedMode,
+                mode = behaviorMode,
                 onAction = viewModel::sendQuickAction
             )
         }
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
 
         LazyColumn(
             modifier = Modifier
@@ -376,16 +362,15 @@ fun ChatScreen(
 @Composable
 private fun ChatHeader(
     activeModelLabel: String,
-    selectedMode: AppMode,
-    behaviorMode: AppMode,
-    hintLevel: Int,
     sessionLabel: String,
     messageQuotaLabel: String,
     isQuotaLoading: Boolean,
     isPremiumMessaging: Boolean,
     hasMessages: Boolean,
     onNewChat: () -> Unit,
-    onClearChat: () -> Unit
+    onClearChat: () -> Unit,
+    behaviorMode: AppMode,
+    hintLevel: Int
 ) {
     Row(
         modifier = Modifier
@@ -406,7 +391,7 @@ private fun ChatHeader(
                 fontWeight = FontWeight.SemiBold
             )
             Text(
-                text = "$sessionLabel · ${selectedMode.label}",
+                text = sessionLabel,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1
@@ -649,28 +634,18 @@ private fun ChatComposer(
     }
 }
 
-private fun emptyStateTitle(mode: AppMode, behaviorMode: AppMode): String {
-    val base = when (behaviorMode) {
-        AppMode.TUTOR -> "How can I help you learn?"
-        AppMode.STUDY -> "What do you want to study?"
-        AppMode.CODE -> "What are you working on?"
-        AppMode.FREE -> "What can I help you with?"
-    }
-    return if (mode == AppMode.FREE) "Free · $base" else base
+private fun emptyStateTitle(mode: AppMode, behaviorMode: AppMode): String = when (behaviorMode) {
+    AppMode.TUTOR -> "How can I help you learn?"
+    AppMode.STUDY -> "What do you want to study?"
+    AppMode.CODE -> "What are you working on?"
+    AppMode.FREE -> "What can I help you with?"
 }
 
-private fun emptyStateMessage(mode: AppMode, behaviorMode: AppMode): String {
-    val base = when (behaviorMode) {
-        AppMode.TUTOR -> "Ask about homework or concepts. I'll guide you with hints and questions — never just the answer."
-        AppMode.STUDY -> "Enter a topic to get a summary, key concepts, flashcards, and quiz questions."
-        AppMode.CODE -> "Paste a snippet, error, or question. I'll help you debug and understand step by step."
-        AppMode.FREE -> "Pick a free OpenRouter model above and start chatting."
-    }
-    return if (mode == AppMode.FREE) {
-        "$base No subscription required — powered by OpenRouter free models."
-    } else {
-        base
-    }
+private fun emptyStateMessage(mode: AppMode, behaviorMode: AppMode): String = when (behaviorMode) {
+    AppMode.TUTOR -> "Ask about homework or concepts. I'll guide you with hints and questions — never just the answer."
+    AppMode.STUDY -> "Enter a topic to get a summary, key concepts, flashcards, and quiz questions."
+    AppMode.CODE -> "Paste a snippet, error, or question. I'll help you debug and understand step by step."
+    AppMode.FREE -> "Pick a free model above and start chatting. No subscription required."
 }
 
 private fun inputPlaceholder(mode: AppMode): String = when (mode) {
